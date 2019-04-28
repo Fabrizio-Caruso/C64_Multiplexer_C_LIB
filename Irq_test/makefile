@@ -25,6 +25,9 @@ COMPILEDEXT = .out
 endif
 
 
+test:
+	$(CC65_PATH)$(MYCL65)$ -t c64 -Cl irq_test.c $(ASMFILES) -o irq_test.prg
+
 all:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) --static-locals irq_test.c -o irq_test.s
 	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) irq_test.s $(ASMFILES) -o irq_test.prg
