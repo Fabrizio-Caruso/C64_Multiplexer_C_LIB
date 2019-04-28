@@ -1,6 +1,7 @@
-CC65_PATH ?= /cygdrive/c/cc65-snapshot-win32/bin/
-MYCC65 ?= cc65$(EXEEXT) $(INCLUDE_OPTS) 
-MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
+
+# CC65_PATH ?= /cygdrive/c/cc65-snapshot-win32/bin/
+CC65_PATH ?= 
+
 
 CCFLAGS=-t c64 --cpu 6502X --add-source
 LDFLAGS=-l
@@ -24,6 +25,8 @@ else
 COMPILEDEXT = .out
 endif
 
+MYCC65 ?= cc65$(EXEEXT) $(INCLUDE_OPTS) 
+MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
 
 test:
 	$(CC65_PATH)$(MYCL65)$ -t c64 -Cl irq_test.c $(ASMFILES) -o irq_test.prg
