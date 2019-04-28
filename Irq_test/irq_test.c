@@ -1,8 +1,7 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <c64.h>
-
-#define PEEK(addr)         (*(unsigned char*) (addr))
+#include <peekpoke.h>
 
 /*******************
 ** Prototypes
@@ -17,4 +16,6 @@ int main(void)
 {
     startirq();
     while(1){};
+	
+	return 0;
 }
