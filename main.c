@@ -44,4 +44,5 @@ int main()
             }
         conta = conta +1;
     }
+	return 0;
 }
