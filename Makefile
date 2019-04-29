@@ -1,5 +1,7 @@
 # Makefile 
-CC65_PATH ?= /cygdrive/c/cc65-snapshot-win32/bin/
+CC65_PATH ?=
+CCFLAGS=-t c64 --cpu 6502X --add-source
+ASMFILES=multi_ca65_split.s
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1
@@ -22,8 +24,9 @@ endif
 SOURCE_PATH := chase
 
 
-MYCC65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
+MYCC65 ?= cc65$(EXEEXT) $(INCLUDE_OPTS) 
+MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
 
-test:
-	$(CC65_PATH)$(MYCC65) -O -t c64 main.c -o main.prg
-	rm main.o
+all:
+	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) --static-locals main.c -o main.s
+	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) main.s $(ASMFILES) -o multiplexer.prg

@@ -1,5 +1,9 @@
-                .res 64,255             ;Our sprite. Really complex design :-)
-
+;---------------------------------------
+; C64 sprites multiplexer
+;-------------------
+    .export _start
+    .export _muovi_sprites_esempio
+;-------------------
 IRQ1LINE        = $fc           ;This is the place on screen where the sorting
                                 ;IRQ happens
 IRQ2LINE        = $2a           ;This is where sprite displaying begins...
@@ -21,13 +25,13 @@ sortorderlast   = $2f           ;as there are sprites.
 
         ;Main program
 
-start:          jsr initsprites             ;Init the multiplexing-system
-                jsr initraster
+_start:          jsr _initsprites             ;Init the multiplexing-system
+                jsr _initraster
                 ldx #MAXSPR                 ;Use all sprites
                 stx numsprites
 
 ;------------------------------
-creasprites:
+_creasprites:
                 ldx #MAXSPR
                 dex
 initloop:       lda $e000,x                     ;Init sprites with some random
@@ -56,8 +60,9 @@ waitloop:       lda sprupdateflag               ;Wait until the flag turns back
 
 ;------------------------
 
-muovi_sprites_esempio:
+_muovi_sprites_esempio:
                 ldx #MAXSPR-1
+                stx numsprites
 moveloop:       lda $e040,x                     ;Move the sprites with some
                 and #$03                        ;random speeds
                 sec
@@ -76,7 +81,7 @@ moveloop:       lda $e040,x                     ;Move the sprites with some
 
         ;Routine to init the raster interrupt system
 
-initraster:     sei
+_initraster:     sei
                 lda #<irq1
                 sta $0314
                 lda #>irq1
@@ -95,7 +100,7 @@ initraster:     sei
 
         ;Routine to init the sprite multiplexing system
 
-initsprites:    lda #$00
+_initsprites:    lda #$00
                 sta sortedsprites
                 sta sprupdateflag
                 ldx #MAXSPR-1                   ;Init the order table with a
@@ -103,6 +108,16 @@ is_orderlist:   txa                             ;0,1,2,3,4,5... order
                 sta sortorder,x
                 dex
                 bpl is_orderlist
+                ldx #MAXSPR                 ;Use all sprites
+                stx numsprites
+                lda #$35
+                ldx #$07
+spr_ptrs_loop:
+                sta $07f8,x
+                dex
+                bpl spr_ptrs_loop
+                lda #$01
+                sta sprupdateflag
                 rts
 
         ;Raster interrupt 1. This is where sorting happens.
@@ -246,6 +261,7 @@ irq2_lastspr:   lda #<irq1                      ;Was the last sprite,
                 sta $0315
                 lda #IRQ1LINE
                 sta $d012
+                inc sprupdateflag
                 jmp $ea81
 
 sprx:           .res MAXSPR,0                   ;Unsorted sprite table
@@ -304,4 +320,8 @@ ortbl:          .byte 1
                 .byte 64
                 .byte 255-128
                 .byte 128
+;---------------------------------------
+    .align $40
+sprite_gfx:
+                .res 64,255             ;Our sprite. Really complex design :-)
 
