@@ -4,17 +4,17 @@
 /*******************
 ** Prototypes
 *******************/
-void start(void);
-void muovi_sprites_esempio(void);
+void START(void);
+void MUOVI_SPRITES_ESEMPIO(void);
 /******************/
 int conta;
 int main()
 {
-    start();
+    START();
     while(1) {
     conta=conta+1;
         if (conta==50) {
-            muovi_sprites_esempio();
+            MUOVI_SPRITES_ESEMPIO();
             conta = 0;
         };
     };

@@ -11,8 +11,8 @@
 	.importzp	tmp1, tmp2, tmp3, tmp4, ptr1, ptr2, ptr3, ptr4
 	.macpack	longbranch
 	.forceimport	__STARTUP__
-	.import		_start
-	.import		_muovi_sprites_esempio
+	.import		_START
+	.import		_MUOVI_SPRITES_ESEMPIO
 	.export		_conta
 	.export		_main
 
@@ -32,9 +32,9 @@ _conta:
 .segment	"CODE"
 
 ;
-; start();
+; START();
 ;
-	jsr     _start
+	jsr     _START
 ;
 ; while(1) {
 ;
@@ -58,9 +58,9 @@ L0008:	lda     _conta
 L0010:	jsr     booleq
 	jeq     L000E
 ;
-; muovi_sprites_esempio();
+; MUOVI_SPRITES_ESEMPIO();
 ;
-	jsr     _muovi_sprites_esempio
+	jsr     _MUOVI_SPRITES_ESEMPIO
 ;
 ; conta = 0;
 ;
