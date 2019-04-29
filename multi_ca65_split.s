@@ -343,5 +343,5 @@ ORTBL:
 ;--------------------------------------
     .ALIGN $40
 SPRITE_GFX:
-    .RES 64,255             ;Our sprite. Really complex design :-)
+    .RES 64,255                         ; Our sprite. Really complex design :-)
 ;-------------------------------------------------------------------------------
