@@ -16,33 +16,26 @@ extern char NUMSPRITES;
 extern char SPRUPDATEFLAG;
 extern char SPRIRQCOUNTER;
 
-unsigned char XX = 0;
-int conta;
+
+
 /******************/
 int main()
-{
+{	
+	unsigned char XX = 0;
+	unsigned char i;
     START();
-    while(1) {
-            if (conta == 100) {
-                SPRX[0] = XX;
-                SPRY[0] = 50;
-                SPRX[1] = XX*2;
-                SPRY[1] = 70;
-                SPRX[2] = XX*3;
-                SPRY[2] = 90;
-                SPRX[3] = XX*4;
-                SPRY[3] = 110;
-                SPRX[4] = XX*5;
-                SPRY[4] = 130;
-                SPRX[5] = XX*6;
-                SPRY[5] = 150;
-                SPRX[6] = XX*7;
-                SPRY[6] = 170;
-                XX = XX+1;
-                NUMSPRITES = 7;
-                conta = 0;
-            }
-        conta = conta +1;
+	NUMSPRITES = 24;	
+    
+	while(1) 
+	{
+		{
+			for(i=0;i<24;++i)
+			{
+				SPRX[i] = XX+5*i;
+				SPRY[i] = 80 + (i & 7)*20;					
+				XX = XX+1;
+			}
+		}
     }
 	return 0;
 }
