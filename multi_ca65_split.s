@@ -4,6 +4,9 @@
    .EXPORT _START
    .EXPORT _MUOVI_SPRITES_ESEMPIO
    .EXPORT _WAIT_FOR_SORT
+   .EXPORT _SPRUPDATEFLAG
+   .EXPORT _NUMSPRITES
+   .EXPORT _SPRIRQCOUNTER
    .EXPORT _SPRX
    .EXPORT _SPRY
    .EXPORT _SPRC
@@ -12,13 +15,13 @@
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
 MAXSPR = 32                             ; Maximum number of sprites
-NUMSPRITES = $02                        ; Number of sprites that the main program wants to pass to the sprite sorter
-SPRUPDATEFLAG = $03                     ; Main program must write a nonzero value here when it wants new sprites to be displayed
-SORTEDSPRITES = $04                     ; Number of sorted sprites for the raster interrupt
-TEMPVARIABLE = $05                      ; Just a temp variable used by the raster interrupt
-SPRIRQCOUNTER = $06                     ; Sprite counter used by the interrupt
-SORTORDER = $10                         ; Order-table for sorting. Needs as many bytes
-SORTORDERLAST = $2F                     ; as there are sprites.
+_NUMSPRITES = $FB                        ; Number of sprites that the main program wants to pass to the sprite sorter
+_SPRUPDATEFLAG = $FC                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
+SORTEDSPRITES = $FD                     ; Number of sorted sprites for the raster interrupt
+TEMPVARIABLE = $FE                     ; Just a temp variable used by the raster interrupt
+_SPRIRQCOUNTER = $FF                     ; Sprite counter used by the interrupt
+SORTORDER = $50                         ; Order-table for sorting. Needs as many bytes
+SORTORDERLAST = $6F                     ; as there are sprites.
 ;--------------------------------------
 ; Main program
 ;-------------------
@@ -26,7 +29,8 @@ _START:
     JSR _INITSPRITES                    ; Init the multiplexing-system
     JSR _INITRASTER
     LDX #MAXSPR                         ; Use all sprites
-    STX NUMSPRITES
+    STX _NUMSPRITES
+    RTS
 ;-------------------
 _CREASPRITES:
     LDX #MAXSPR
@@ -50,15 +54,15 @@ COLOROK:
 ;-------------------
 _WAIT_FOR_SORT:
 MAINLOOP:
-    INC SPRUPDATEFLAG                   ; Signal to IRQ: sort sprites
+    INC _SPRUPDATEFLAG                  ; Signal to IRQ: sort sprites
 WAITLOOP:
-    LDA SPRUPDATEFLAG                   ; Wait until the flag turns back
+    LDA _SPRUPDATEFLAG                  ; Wait until the flag turns back
     BNE WAITLOOP                        ; to zero
     RTS
 ;-------------------
 _MUOVI_SPRITES_ESEMPIO:
     LDX #MAXSPR-1
-    STX NUMSPRITES
+    STX _NUMSPRITES
 MOVELOOP:
     LDA $E040,X                         ; Move the sprites with some
     AND #$03                            ; Random speeds
@@ -101,7 +105,7 @@ _INITRASTER:
 _INITSPRITES:
     LDA #$00
     STA SORTEDSPRITES
-    STA SPRUPDATEFLAG
+    STA _SPRUPDATEFLAG
     LDX #MAXSPR-$01                     ; Init the order table with a
 IS_ORDERLIST:
     TXA                                 ; 0, 1, 2, 3, 4, 5... order
@@ -109,7 +113,7 @@ IS_ORDERLIST:
     DEX
     BPL IS_ORDERLIST
     LDX #MAXSPR                         ; Use all sprites
-    STX NUMSPRITES
+    STX _NUMSPRITES
     LDA #$35
     LDX #$07
 SPR_PTRS_LOOP:
@@ -117,7 +121,7 @@ SPR_PTRS_LOOP:
     DEX
     BPL SPR_PTRS_LOOP
     LDA #$01
-    STA SPRUPDATEFLAG
+    STA _SPRUPDATEFLAG
     RTS
 ;---------------------------------------
 ; Raster interrupt 1.
@@ -134,11 +138,11 @@ IRQ1:
     STA $D00B
     STA $D00D
     STA $D00F
-    LDA SPRUPDATEFLAG                   ; New sprites to be sorted?
+    LDA _SPRUPDATEFLAG                  ; New sprites to be sorted?
     BEQ IRQ1_NONEWSPRITES
     LDA #$00
-    STA SPRUPDATEFLAG
-    LDA NUMSPRITES                      ; Take number of sprites given by the main program
+    STA _SPRUPDATEFLAG
+    LDA _NUMSPRITES                      ; Take number of sprites given by the main program
     STA SORTEDSPRITES                   ; If it's zero, don't need to
     BNE IRQ1_BEGINSORT                  ; sort
 IRQ1_NONEWSPRITES:
@@ -151,7 +155,7 @@ IRQ1_NOTMORETHAN8:
     STA $D015                           ; $d015, based on number of
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
-    STA SPRIRQCOUNTER                   ; routine
+    STA _SPRIRQCOUNTER                   ; routine
     LDA #<IRQ2                          ; Set up the sprite display IRQ
     STA $0314
     LDA #>IRQ2
@@ -225,7 +229,7 @@ IRQ1_SORTLOOP3:
 IRQ2:
     DEC $D019                           ; Acknowledge raster interrupt
 IRQ2_DIRECT:
-    LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
+    LDY _SPRIRQCOUNTER                   ; Take next sorted sprite number
     LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
     CLC
     ADC #$10                            ; 16 lines down from there is
@@ -262,7 +266,7 @@ IRQ2_MSBOK:
 IRQ2_ENDSPR:
     CMP #$FF                            ; Was it the endmark?
     BEQ IRQ2_LASTSPR
-    STY SPRIRQCOUNTER
+    STY _SPRIRQCOUNTER
     SEC                                 ; THAT COORDINATE - $10 IS THE
     SBC #$10                            ; position for next interrupt
     CMP $D012                           ; Already late from that?
@@ -276,7 +280,7 @@ IRQ2_LASTSPR:
     STA $0315
     LDA #IRQ1LINE
     STA $D012
-    INC SPRUPDATEFLAG
+    INC _SPRUPDATEFLAG
     JMP $EA81
 ;---------------------------------------
 _SPRX:
