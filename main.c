@@ -24,18 +24,16 @@ int main()
 	unsigned char XX = 0;
 	unsigned char i;
     START();
-	NUMSPRITES = 24;	
+	NUMSPRITES = 32;	
     
 	while(1) 
 	{
+		for(i=0;i<32;++i)
 		{
-			for(i=0;i<24;++i)
-			{
-				SPRX[i] = XX+5*i;
-				SPRY[i] = 80 + (i & 7)*20;					
-				XX = XX+1;
-			}
+			SPRX[i] = XX+4*i;
+			SPRY[i] = 60 + (i & 7)*22;					
 		}
+		++XX;
     }
 	return 0;
 }
