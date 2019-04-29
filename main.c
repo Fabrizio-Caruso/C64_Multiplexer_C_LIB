@@ -24,13 +24,14 @@ int main()
     //conta=conta+1;
     //    if (conta==50) {            
             WAIT_FOR_SORT();
-            SPRX[0] = XX;
-            SPRY[0] = 50;
-            SPRX[1] = XX*2;
-            SPRY[1] = 80;
-            XX++;
-            //MUOVI_SPRITES_ESEMPIO();
+            // SPRX[0] = XX;
+            // SPRY[0] = 50;
+            // SPRX[1] = XX*2;
+            // SPRY[1] = 80;
+            // XX++;
+            MUOVI_SPRITES_ESEMPIO();
             conta = 0;
     //    };
     };
+	return 0;
 }
