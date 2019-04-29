@@ -1,8 +1,13 @@
 ;--------------------------------------
 ; C64 sprites multiplexer
 ;-------------------
-    .EXPORT _START
-    .EXPORT _MUOVI_SPRITES_ESEMPIO
+   .EXPORT _START
+   .EXPORT _MUOVI_SPRITES_ESEMPIO
+   .EXPORT _WAIT_FOR_SORT
+   .EXPORT _SPRX
+   .EXPORT _SPRY
+   .EXPORT _SPRC
+   .EXPORT _SPRF
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
@@ -43,7 +48,7 @@ COLOROK:
     BPL INITLOOP
     RTS
 ;-------------------
-WAIT_FOR_SORT:
+_WAIT_FOR_SORT:
 MAINLOOP:
     INC SPRUPDATEFLAG                   ; Signal to IRQ: sort sprites
 WAITLOOP:
@@ -274,12 +279,16 @@ IRQ2_LASTSPR:
     INC SPRUPDATEFLAG
     JMP $EA81
 ;---------------------------------------
+_SPRX:
 SPRX:
     .RES MAXSPR,0                       ; Unsorted sprite table
+_SPRY:
 SPRY:
     .RES MAXSPR,0
+_SPRC:
 SPRC:
     .RES MAXSPR,0
+_SPRF:
 SPRF:
     .RES MAXSPR,0
 ;-------------------
