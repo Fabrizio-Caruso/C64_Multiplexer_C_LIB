@@ -1,2 +1,0 @@
-; sprite multiplexer
-
