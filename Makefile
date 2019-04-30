@@ -34,6 +34,12 @@ multiplexer:
 	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) main.c $(ASMFILES) -o multiplexer.prg
 
 
-all:
+debug:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) --static-locals main.c -o main.s
 	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG)  main.s $(ASMFILES) -o multiplexer.prg
+
+all: multiplexer
+
+clean:
+	rm multiplexer.prg
+	rm *.o
