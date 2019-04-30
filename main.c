@@ -4,34 +4,35 @@
 /*******************
 ** Prototypes
 *******************/
-void START(void);
-void MUOVI_SPRITES_ESEMPIO(void);
-void WAIT_FOR_SORT(void);
-
+void INITSPRITES(void);
+void INITRASTER(void);
+/******************/
 extern unsigned char SPRX[];
 extern unsigned char SPRY[];
 extern unsigned char SPRC[];
 extern unsigned char SPRF[];
 extern unsigned char NUMSPRITES;
 extern unsigned char SPRUPDATEFLAG;
-#pragma zpsym ("NUMSPRITES")
-#pragma zpsym ("SPRUPDATEFLAG")
 extern unsigned char SPRIRQCOUNTER;
 extern unsigned short SPRITE_GFX;
-
-
+#pragma zpsym ("NUMSPRITES")
+#pragma zpsym ("SPRUPDATEFLAG")
 /******************/
 int main()
 {    
     unsigned char XX = 0;
     unsigned char i;
-    START();
+    
+    INITSPRITES();
+    INITRASTER();
+    NUMSPRITES = 32;
+    
     for(i=0;i<32;++i)
     {
         SPRF[i] = (SPRITE_GFX&0x3fff)>>6;        
     }
-    SPRX[30]=30;
-    SPRX[31]=130;
+    SPRX[30]=120;
+    SPRX[31]=40;
     clrscr();
     while(1) 
     {
@@ -41,11 +42,11 @@ int main()
         SPRY[31]=255-XX;
         for(i=0;i<30;++i)
         {
-            SPRC[i] = i;
-            SPRX[i] = XX+4*i;
-            SPRY[i] = 55+(i & 7)*24;
+            SPRC[i] = i&0xfd;
+            SPRX[i] = XX+(i/7)*42;
+            SPRY[i] = 50+(i&7)*24;
         }
-        ++XX;
+        XX = XX + 2;
         SPRUPDATEFLAG = 1;
     }
     return 0;

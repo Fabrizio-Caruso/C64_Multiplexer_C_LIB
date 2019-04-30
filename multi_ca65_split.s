@@ -4,12 +4,15 @@
    .EXPORTZP _SPRUPDATEFLAG
    .EXPORTZP _NUMSPRITES
 ;-------------------
-   .EXPORT _START
+   .EXPORT _INITSPRITES
+   .EXPORT _INITRASTER
    .EXPORT _SPRX
    .EXPORT _SPRY
    .EXPORT _SPRC
    .EXPORT _SPRF
    .EXPORT _SPRITE_GFX
+;-------------------
+DEBUB = $00                             ; Set to != $00 to show rastertime usage.
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
@@ -22,15 +25,6 @@ TEMPVARIABLE = $FE                      ; Just a temp variable used by the raste
 SPRIRQCOUNTER = $FF                     ; Sprite counter used by the interrupt
 SORTORDER = $50                         ; Order-table for sorting. Needs as many bytes
 SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
-;--------------------------------------
-; Main program
-;-------------------
-_START:
-    JSR _INITSPRITES                    ; Init the multiplexing-system
-    JSR _INITRASTER
-    LDX #MAXSPR                         ; Use all sprites
-    STX _NUMSPRITES
-    RTS
 ;---------------------------------------
 ; Routine to init the
 ; raster interrupt system
@@ -66,8 +60,6 @@ IS_ORDERLIST:
     STA SORTORDER,X
     DEX
     BPL IS_ORDERLIST
-    LDX #MAXSPR                         ; Use all sprites
-    STX _NUMSPRITES
     RTS
 ;---------------------------------------
 ; Raster interrupt 1.
@@ -111,7 +103,9 @@ IRQ1_NOSPRITESATALL:
     JMP $EA81
 ;-------------------
 IRQ1_BEGINSORT:
+    .IFDEF DEBUG 
     INC $D020
+    .ENDIF
     LDX #MAXSPR
     DEX
     CPX SORTEDSPRITES
@@ -166,7 +160,9 @@ IRQ1_SORTLOOP3:
     INX
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
+    .IFDEF DEBUG
     DEC $D020
+    .ENDIF
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
 ; Raster interrupt 2.
@@ -226,7 +222,6 @@ IRQ2_LASTSPR:
     STA $0315
     LDA #IRQ1LINE
     STA $D012
-;    INC _SPRUPDATEFLAG
     JMP $EA81
 ;---------------------------------------
 _SPRX:
