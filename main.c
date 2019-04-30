@@ -14,6 +14,8 @@ extern unsigned char SPRC[];
 extern unsigned char SPRF[];
 extern unsigned char NUMSPRITES;
 extern unsigned char SPRUPDATEFLAG;
+#pragma zpsym ("NUMSPRITES")
+#pragma zpsym ("SPRUPDATEFLAG")
 extern unsigned char SPRIRQCOUNTER;
 extern unsigned short SPRITE_GFX;
 
