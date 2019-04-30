@@ -15,7 +15,7 @@ extern char SPRF[];
 // extern char NUMSPRITES;
 extern char SPRUPDATEFLAG;
 extern char SPRIRQCOUNTER;
-
+extern unsigned short SPRITE_GFX;
 
 
 /******************/
@@ -24,7 +24,8 @@ int main()
 	unsigned char XX = 0;
 	unsigned char i;
     START();
-    
+    SPRF[30]=(SPRITE_GFX&0x3fff)>>6;
+    SPRF[31]=(SPRITE_GFX&0x3fff)>>6;
 	SPRX[30]=30;
 	SPRX[31]=130;
 	clrscr();
@@ -36,10 +37,13 @@ int main()
 		SPRY[31]=255-XX;
 		for(i=0;i<30;++i)
 		{
+            SPRC[i] = i;
+            SPRF[i] = (SPRITE_GFX&0x3fff)>>6;
 			SPRX[i] = XX+4*i;
-			SPRY[i] = 60 + (i & 7)*22;					
+			SPRY[i] = 55+(i & 7)*24;
 		}
 		++XX;
+        SPRUPDATEFLAG = 1;
     }
 	return 0;
 }
