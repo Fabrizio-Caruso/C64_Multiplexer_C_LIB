@@ -26,9 +26,14 @@ int main()
     START();
 	NUMSPRITES = 32;	
     
+	SPRX[30]=30;
+	SPRX[31]=130;
 	while(1) 
 	{
-		for(i=0;i<32;++i)
+		
+		SPRY[30]=XX;
+		SPRY[31]=255-XX;
+		for(i=0;i<30;++i)
 		{
 			SPRX[i] = XX+4*i;
 			SPRY[i] = 60 + (i & 7)*22;					
