@@ -12,7 +12,7 @@ extern char SPRX[];
 extern char SPRY[];
 extern char SPRC[];
 extern char SPRF[];
-extern char NUMSPRITES;
+// extern char NUMSPRITES;
 extern char SPRUPDATEFLAG;
 extern char SPRIRQCOUNTER;
 
@@ -24,13 +24,14 @@ int main()
 	unsigned char XX = 0;
 	unsigned char i;
     START();
-	NUMSPRITES = 32;	
     
 	SPRX[30]=30;
 	SPRX[31]=130;
+	clrscr();
 	while(1) 
 	{
-		
+		gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
+	
 		SPRY[30]=XX;
 		SPRY[31]=255-XX;
 		for(i=0;i<30;++i)
