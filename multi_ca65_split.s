@@ -1,11 +1,13 @@
 ;--------------------------------------
 ; C64 sprites multiplexer
+; Based on 32 sprites multiplexer
+; by Lasse Oorni (Cadaver)
 ;-------------------
-   .EXPORTZP _SPRUPDATEFLAG
+   .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
    .EXPORTZP _NUMSPRITES
    .EXPORTZP _MULTIPLEX_DONE
 ;-------------------
-   .EXPORT _INITSPRITES
+   .EXPORT _INITSPRITES                 ; Export program variables
    .EXPORT _INITRASTER
    .EXPORT _SPRX
    .EXPORT _SPRY
@@ -14,6 +16,7 @@
    .EXPORT _SPRITE_GFX
 ;-------------------
 DEBUB = $00                             ; Set to != $00 to show rastertime usage.
+USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
@@ -33,18 +36,34 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;-------------------
 _INITRASTER:
     SEI
-    LDA #$35
+    .IFDEF USE_KERNAL
+    LDA #$36                            ; Switch kernal ON
+    .ELSE
+    LDA #$35                            ; Switch kernal OFF
+    .ENDIF
     STA $01
-    LDA #<IRQ1
-;    STA $0314
-    STA $FFFE
+    LDA #<IRQ1                          ; Setup IRQ vector
+    .IFDEF USE_KERNAL
+    STA $0314                           ; Kernal ON vector
+    .ELSE
+    STA $FFFE                           ; Kernal OFF vector
+    .ENDIF
     LDA #>IRQ1
-;    STA $0315
-    STA $FFFF
-    LDA #$7F                            ; CIA interrupt off
-    STA $DC0D
-    LDA #$01                            ; Raster interrupt on
-    STA $D01A
+    .IFDEF USE_KERNAL
+    STA $0315                           ; Kernal ON vector
+    .ELSE
+    STA $FFFF                           ; Kernal OFF vector
+    .ENDIF
+    LDA #<IRQ_RTI                       ; Avoid problems if user
+    STA $0318                           ; press RESTORE key during
+    STA $FFFA                           ; program execution...
+    LDA #>IRQ_RTI                       ; ... which mean:
+    STA $0319                           ; disable "RESTORE"
+    STA $FFFB                           ; key.
+    LDA #$7F
+    STA $DC0D                           ; CIA interrupt off
+    LDA #$01
+    STA $D01A                           ; Raster interrupt on
     LDA #27                             ; High bit of interrupt position = 0
     STA $D011
     LDA #IRQ1LINE                       ; Line where next IRQ happens
@@ -58,10 +77,10 @@ _INITRASTER:
 ;-------------------
 _INITSPRITES:
     LDX #$00
-    STX SORTEDSPRITES
-    STX _SPRUPDATEFLAG
-    INX
-    STX _MULTIPLEX_DONE
+    STX SORTEDSPRITES                   ; Reset...
+    STX _SPRUPDATEFLAG                  ; three...
+    INX                                 ; internal ...
+    STX _MULTIPLEX_DONE                 ; flags.
     LDX #MAXSPR-$01                     ; Init the order table with a
 IS_ORDERLIST:
     TXA                                 ; 0, 1, 2, 3, 4, 5... order
@@ -74,10 +93,11 @@ IS_ORDERLIST:
 ; This is where sorting happens.
 ;-------------------
 IRQ1:
-;    DEC $D019                           ; Acknowledge raster interrupt
-    STA STORE_A
-    STX STORE_X
-    STY STORE_Y
+    .IFNDEF USE_KERNAL
+    STA STORE_A                         ; Fast way to store/restore
+    STX STORE_X                         ; CPU regs after an IRQ
+    STY STORE_Y                         ; for kernal OFF only
+    .ENDIF
     LDA #$FF                            ; Move all sprites
     STA $D001                           ; to the bottom to prevent
     STA $D003                           ; weird effects when sprite
@@ -91,7 +111,7 @@ IRQ1:
     BEQ IRQ1_NONEWSPRITES
     LDA #$00
     STA _SPRUPDATEFLAG
-    LDA _NUMSPRITES                      ; Take number of sprites given by the main program
+    LDA _NUMSPRITES                     ; Take number of sprites given by the main program
     STA SORTEDSPRITES                   ; If it's zero, don't need to
     BNE IRQ1_BEGINSORT                  ; sort
 IRQ1_NONEWSPRITES:
@@ -105,26 +125,31 @@ IRQ1_NOTMORETHAN8:
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
-    LDA #<IRQ2                          ; Set up the sprite display IRQ
-;    STA $0314
-    STA $FFFE
+    LDA #<IRQ2                          ; Set up the sprite display
+    .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ2).
+    STA $0314                           ; Vector for kernal ON
+    .ELSE
+    STA $FFFE                           ; Vector for kernal OFF
+    .ENDIF
     LDA #>IRQ2
-;    STA $0315
+    .IFDEF USE_KERNAL
+    STA $0315
+    .ELSE
     STA $FFFF
+    .ENDIF
     JMP IRQ2_DIRECT                     ; Go directly; we might be late
 IRQ1_NOSPRITESATALL:
-;    JMP $EA81
     JMP EXIT_IRQ
 ;-------------------
 IRQ1_BEGINSORT:
     .IFDEF DEBUG 
-    INC $D020
+    INC $D020                           ; Show rastertime usage for debug.
     .ENDIF
-    LDX #MAXSPR
-    DEX
+    LDX #MAXSPR                         ; We needo to sort
+    DEX                                 ; this sprite?
     CPX SORTEDSPRITES
-    BCC IRQ1_CLEARDONE
-    LDA #$FF                            ; Mark unused sprites with the
+    BCC IRQ1_CLEARDONE                  ; Yes -> go sorting.
+    LDA #$FF                            ; No -> mark unused sprites with the
 IRQ1_CLEARLOOP:
     STA SPRY,X                          ; lowest Y-coordinate ($ff)
     DEX                                 ; these will "fall" to the
@@ -175,7 +200,7 @@ IRQ1_SORTLOOP3:
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
     .IFDEF DEBUG
-    DEC $D020
+    DEC $D020                           ; Show rastertime usage for debug.
     .ENDIF
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
@@ -183,10 +208,11 @@ IRQ1_SORTLOOP3:
 ; This is where sprite displaying happens
 ;-------------------
 IRQ2:
-;    DEC $D019                           ; Acknowledge raster interrupt
-    STA STORE_A
-    STX STORE_X
-    STY STORE_Y
+    .IFNDEF USE_KERNAL
+    STA STORE_A                         ; Fast way to store/restore
+    STX STORE_X                         ; CPU regs after an IRQ
+    STY STORE_Y                         ; for kernal OFF only
+    .ENDIF
 IRQ2_DIRECT:
     LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
     LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
@@ -202,58 +228,67 @@ IRQ2_SPRITELOOP:
     BCS IRQ2_ENDSPR
     LDX PHYSICALSPRTBL2,Y               ; Physical sprite number x 2
     STA $D001,X                         ; for X & Y coordinate
-    LDA SORTSPRX,Y
-    ASL
-    STA $D000,X
-    BCC IRQ2_LOWMSB
-    LDA $D010
-    ORA ORTBL,X
+    LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
+    ASL                                 ; multiply by 2
+    STA $D000,X                         ; store into sprite X coord register
+    BCC IRQ2_LOWMSB                     ; if < 255 clear sprite MSB in $D010
+    LDA $D010                           ; Otherwise set the MSB...
+    ORA ORTBL,X                         ; ( set )
     STA $D010
     JMP IRQ2_MSBOK
 IRQ2_LOWMSB:
     LDA $D010
-    AND ANDTBL,X
+    AND ANDTBL,X                        ; ( clear )
     STA $D010
 IRQ2_MSBOK:
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
-    STA $07F8,X                         ; for color & frame
+    STA $07F8,X                         ; frame
     LDA SORTSPRC,Y
-    STA $D027,X
+    STA $D027,X                         ; color
     INY
     BNE IRQ2_SPRITELOOP
 IRQ2_ENDSPR:
     CMP #$FF                            ; Was it the endmark?
     BEQ IRQ2_LASTSPR
     STY SPRIRQCOUNTER
-    SEC                                 ; THAT COORDINATE - $10 IS THE
+    SEC                                 ; That coordinate - $07 is the
     SBC #$07                            ; position for next interrupt
     CMP $D012                           ; Already late from that?
     BCC IRQ2_DIRECT                     ; Then go directly to next IRQ
     STA $D012
-;    JMP $EA81
     JMP EXIT_IRQ
 IRQ2_LASTSPR:
     INC _MULTIPLEX_DONE
     LDA #<IRQ1                          ; Was the last sprite,
-;    STA $0314                           ; go back to irq1
-    STA $FFFE
-    LDA #>IRQ1                          ; (sorting interrupt)
-;    STA $0315
-    STA $FFFF
+    .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+    STA $0314                           ; vector for kernal ON
+    .ELSE
+    STA $FFFE                           ; vector for kernal OFF
+    .ENDIF
+    LDA #>IRQ1
+    .IFDEF USE_KERNAL
+    STA $0315                           ; vector for kernal ON
+    .ELSE
+    STA $FFFF                           ; vector for kernal OFF
+    .ENDIF
     LDA #IRQ1LINE
     STA $D012
-;    JMP $EA81
 ;-------------------
-EXIT_IRQ:
-STORE_A = *+$0001
+EXIT_IRQ:                               ; Exit IRQ code.
+    LSR $D019                           ; Acknowledge raster IRQ
+    .IFNDEF USE_KERNAL
+STORE_A = *+$0001                       ; Restore original registers value
     LDA #$00
-STORE_X = *+$0001
+STORE_X = *+$0001                       ; at the original values they have before
     LDX #$00
-STORE_Y = *+$0001
+STORE_Y = *+$0001                       ; IRQ call
     LDY #$00
-    LSR $D019
-    RTI
+    .ELSE
+    JMP $EA81
+    .ENDIF
+IRQ_RTI:
+    RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
 _SPRX:
 SPRX:

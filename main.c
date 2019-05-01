@@ -72,10 +72,10 @@ int main()
     }
     SPRX[NUMSPRITES-2]=120;
     SPRX[NUMSPRITES-1]=40;
-//    clrscr();
+    clrscr();
     while(1) 
     {
-//        gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
+        gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
         if (MULTIPLEX_DONE==1) {
             SPRY[NUMSPRITES-2]=XX;
             SPRY[NUMSPRITES-1]=255-XX;
