@@ -32,14 +32,17 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 
 multiplexer: 
 	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) main.c $(ASMFILES) -o multiplexer.prg
-
+	rm main.o
+	rm multi_ca65_split.o
 
 debug:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) main.c -o main.s
-	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define DEBUG=1 main.s $(ASMFILES) -o multiplexer.prg
-
-all: multiplexer
+	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define DEBUG=1 main.s $(ASMFILES) -o multiplexer_debug.prg
+	rm main.o
+	rm multi_ca65_split.o
+    
+all: multiplexer debug
 
 clean:
-	rm multiplexer.prg
-	rm *.o
+	rm -rf *.prg
+	rm -rf *.o
