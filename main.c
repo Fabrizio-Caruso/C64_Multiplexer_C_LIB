@@ -29,7 +29,8 @@ int main()
     
     for(i=0;i<32;++i)
     {
-        SPRF[i] = (SPRITE_GFX&0x3fff)>>6;        
+        SPRF[i] = (SPRITE_GFX&0x3fff)>>6; 
+        SPRC[i] = i&0xfd;        
     }
     SPRX[30]=120;
     SPRX[31]=40;
@@ -42,7 +43,6 @@ int main()
         SPRY[31]=255-XX;
         for(i=0;i<30;++i)
         {
-            SPRC[i] = i&0xfd;
             SPRX[i] = XX+(i/7)*42;
             SPRY[i] = 50+(i&7)*24;
         }
