@@ -3,6 +3,7 @@
 ;-------------------
    .EXPORTZP _SPRUPDATEFLAG
    .EXPORTZP _NUMSPRITES
+   .EXPORTZP _MULTIPLEX_DONE
 ;-------------------
    .EXPORT _INITSPRITES
    .EXPORT _INITRASTER
@@ -16,8 +17,9 @@ DEBUB = $00                             ; Set to != $00 to show rastertime usage
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
-MAXSPR = 32                             ; Maximum number of sprites
+MAXSPR = 34                             ; Maximum number of sprites
 ;-------------------
+_MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
 _SPRUPDATEFLAG = $FC                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
 SORTEDSPRITES = $FD                     ; Number of sorted sprites for the raster interrupt
@@ -31,10 +33,14 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;-------------------
 _INITRASTER:
     SEI
+    LDA #$35
+    STA $01
     LDA #<IRQ1
-    STA $0314
+;    STA $0314
+    STA $FFFE
     LDA #>IRQ1
-    STA $0315
+;    STA $0315
+    STA $FFFF
     LDA #$7F                            ; CIA interrupt off
     STA $DC0D
     LDA #$01                            ; Raster interrupt on
@@ -51,9 +57,11 @@ _INITRASTER:
 ; sprite multiplexing system
 ;-------------------
 _INITSPRITES:
-    LDA #$00
-    STA SORTEDSPRITES
-    STA _SPRUPDATEFLAG
+    LDX #$00
+    STX SORTEDSPRITES
+    STX _SPRUPDATEFLAG
+    INX
+    STX _MULTIPLEX_DONE
     LDX #MAXSPR-$01                     ; Init the order table with a
 IS_ORDERLIST:
     TXA                                 ; 0, 1, 2, 3, 4, 5... order
@@ -66,7 +74,10 @@ IS_ORDERLIST:
 ; This is where sorting happens.
 ;-------------------
 IRQ1:
-    DEC $D019                           ; Acknowledge raster interrupt
+;    DEC $D019                           ; Acknowledge raster interrupt
+    STA STORE_A
+    STX STORE_X
+    STY STORE_Y
     LDA #$FF                            ; Move all sprites
     STA $D001                           ; to the bottom to prevent
     STA $D003                           ; weird effects when sprite
@@ -95,12 +106,15 @@ IRQ1_NOTMORETHAN8:
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
     LDA #<IRQ2                          ; Set up the sprite display IRQ
-    STA $0314
+;    STA $0314
+    STA $FFFE
     LDA #>IRQ2
-    STA $0315
+;    STA $0315
+    STA $FFFF
     JMP IRQ2_DIRECT                     ; Go directly; we might be late
 IRQ1_NOSPRITESATALL:
-    JMP $EA81
+;    JMP $EA81
+    JMP EXIT_IRQ
 ;-------------------
 IRQ1_BEGINSORT:
     .IFDEF DEBUG 
@@ -169,12 +183,15 @@ IRQ1_SORTLOOP3:
 ; This is where sprite displaying happens
 ;-------------------
 IRQ2:
-    DEC $D019                           ; Acknowledge raster interrupt
+;    DEC $D019                           ; Acknowledge raster interrupt
+    STA STORE_A
+    STX STORE_X
+    STY STORE_Y
 IRQ2_DIRECT:
     LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
     LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
     CLC
-    ADC #$16                            ; 16 lines down from there is
+    ADC #$18                            ; 16 lines down from there is
     BCC IRQ2_NOTOVER                    ; the endpoint for this IRQ
     LDA #$FF                            ; Endpoint can't be more than $ff
 IRQ2_NOTOVER:
@@ -210,19 +227,33 @@ IRQ2_ENDSPR:
     BEQ IRQ2_LASTSPR
     STY SPRIRQCOUNTER
     SEC                                 ; THAT COORDINATE - $10 IS THE
-    SBC #$08                            ; position for next interrupt
+    SBC #$07                            ; position for next interrupt
     CMP $D012                           ; Already late from that?
     BCC IRQ2_DIRECT                     ; Then go directly to next IRQ
     STA $D012
-    JMP $EA81
+;    JMP $EA81
+    JMP EXIT_IRQ
 IRQ2_LASTSPR:
+    INC _MULTIPLEX_DONE
     LDA #<IRQ1                          ; Was the last sprite,
-    STA $0314                           ; go back to irq1
+;    STA $0314                           ; go back to irq1
+    STA $FFFE
     LDA #>IRQ1                          ; (sorting interrupt)
-    STA $0315
+;    STA $0315
+    STA $FFFF
     LDA #IRQ1LINE
     STA $D012
-    JMP $EA81
+;    JMP $EA81
+;-------------------
+EXIT_IRQ:
+STORE_A = *+$0001
+    LDA #$00
+STORE_X = *+$0001
+    LDX #$00
+STORE_Y = *+$0001
+    LDY #$00
+    LSR $D019
+    RTI
 ;---------------------------------------
 _SPRX:
 SPRX:
