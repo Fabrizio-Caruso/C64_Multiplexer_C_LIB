@@ -81,7 +81,7 @@ int main()
             SPRY[NUMSPRITES-1]=255-XX;
             for(i=0;i<NUMSPRITES-2;++i)
             {
-                SPRX[i] = XX+(i/7)*21;
+                SPRX[i] = XX+(i/7)*(yValues[XX]);
                 SPRY[i] = 40+(i&7)*24+(yValues[XX]/2);
             }
             ++XX;
