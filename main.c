@@ -76,7 +76,7 @@ int main()
     while(1) 
     {
         gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
-        if (MULTIPLEX_DONE==1) {
+        if (MULTIPLEX_DONE) {
             SPRY[NUMSPRITES-2]=XX;
             SPRY[NUMSPRITES-1]=255-XX;
             for(i=0;i<NUMSPRITES-2;++i)
