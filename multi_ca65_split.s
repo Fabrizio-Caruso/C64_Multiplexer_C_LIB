@@ -15,7 +15,7 @@
    .EXPORT _SPRF
    .EXPORT _SPRITE_GFX
 ;-------------------
-DEBUB = $00                             ; Set to != $00 to show rastertime usage.
+DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
