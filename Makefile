@@ -4,7 +4,7 @@ CCFLAGS=-t c64 --cpu 6502X --add-source
 ASMFILES=multi_ca65_split.s
 
 MYCCFLAGS=-t c64 -O -Cl
-MYCFG=--config ./cfg/c64_multiplexer.cfg
+MYCFG=--config ./cfg/c64_multiplexer.cfg --asm-define USE_KERNAL=1
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1
@@ -36,7 +36,7 @@ multiplexer:
 
 debug:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) main.c -o main.s
-	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG)  main.s $(ASMFILES) -o multiplexer.prg
+	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define DEBUG=1 main.s $(ASMFILES) -o multiplexer.prg
 
 all: multiplexer
 
