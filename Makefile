@@ -45,4 +45,4 @@ clean:
 	rm -rf *.prg
 	rm -rf *.o
 	rm -rf ./build/*
-	rm main.s
+	rm -rf main.s
