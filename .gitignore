@@ -1,4 +1,5 @@
 main.s
 *.o
 *.prg
+./build/*.prg
 
