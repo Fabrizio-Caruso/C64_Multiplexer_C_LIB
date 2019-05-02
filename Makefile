@@ -1,10 +1,10 @@
 # Makefile 
 CC65_PATH ?=
 CCFLAGS=-t c64 --cpu 6502X --add-source
-ASMFILES=multi_ca65_split.s
+ASMFILES=multi_ca65_split.s ./graphics/graphics.s
 
 MYCCFLAGS=-t c64 -O -Cl
-MYCFG=--config ./cfg/c64_multiplexer.cfg --asm-define USE_KERNAL=1
+MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1

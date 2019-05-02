@@ -13,7 +13,6 @@
    .EXPORT _SPRY
    .EXPORT _SPRC
    .EXPORT _SPRF
-   .EXPORT _SPRITE_GFX
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
@@ -361,7 +360,4 @@ ORTBL:
     .BYTE 255-128
     .BYTE 128
 ;--------------------------------------
-    .ALIGN $40
-_SPRITE_GFX:
-    .RES 64,255                         ; Our sprite. Really complex design :-)
-;-------------------------------------------------------------------------------
+
