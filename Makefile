@@ -37,9 +37,9 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o
 
-sync_scroller: 
-	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sync_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sync_scroller.prg
-	rm $(SOURCE_PATH)/sync_scroller.o
+sin_scroller: 
+	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+	rm $(SOURCE_PATH)/sin_scroller.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o    
     
@@ -51,7 +51,7 @@ sync_scroller:
 	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o
     
-all: 34_sprites sync_scroller
+all: 34_sprites sin_scroller
 
 clean:
 	rm -rf *.prg

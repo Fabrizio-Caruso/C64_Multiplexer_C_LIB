@@ -201,6 +201,7 @@ IRQ1_SORTLOOP3:
     .IFDEF DEBUG
     DEC $D020                           ; Show rastertime usage for debug.
     .ENDIF
+    INC _MULTIPLEX_DONE
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
 ; Raster interrupt 2.
@@ -258,7 +259,7 @@ IRQ2_ENDSPR:
     STA $D012
     JMP EXIT_IRQ
 IRQ2_LASTSPR:
-    INC _MULTIPLEX_DONE
+;    INC _MULTIPLEX_DONE
     LDA #<IRQ1                          ; Was the last sprite,
     .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
     STA $0314                           ; vector for kernal ON
