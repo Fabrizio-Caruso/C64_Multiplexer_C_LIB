@@ -75,7 +75,7 @@ const char Colors[] = {
     0x0B, 0x0C, 0x0F, 0x01, 0x0F, 0x0C, 0x0B,   // Grey
     0x09, 0x08, 0x07, 0x01, 0x07, 0x08, 0x09,   // Brown
     0x05, 0x03, 0x0D, 0x01, 0x0D, 0x03, 0x05,   // Green
-    0x09, 0x05, 0x0D, 0x01, 0x0D, 0x05, 0x09,   // Green 2
+    0x09, 0x05, 0x0D, 0x01, 0x0D, 0x05, 0x09    // Green 2
 };
 /***************************************
 * Scrolltext
@@ -135,23 +135,24 @@ int main()
 *******************/
     while(1) 
     {
+        //gotoxy(1,1); cprintf("%02u",DL);      // Value dump for debug
         // Check if we are in sync with Multiplexer
         if (MULTIPLEX_DONE) {
             // Check if we moved one sprite/char out of screen.
-            if (DL == 24) {
+            if (DL == 12) {
                 // Move all sprites/linetext 2 chars forward
-                for(i=2;i<NUMSPRITES;++i)
+                for(i=1;i<NUMSPRITES;++i)
                 {
-                    SPRF[i-2]=SPRF[i];
+                    SPRF[i-1]=SPRF[i];
                 }
-                // Insert 2 new chars from scrolltext
-                SPRF[NUMSPRITES-2]=0x80+(scrolltext[SP++]);
+                // Insert new char from scrolltext
                 SPRF[NUMSPRITES-1]=0x80+(scrolltext[SP++]);
                 // End of Scrolltext?
                 if (SP>=strlen(scrolltext)-1) { SP=0; }
                 // Reset Sinus and sprites scroll pointer
-                SX = SX-54;
+                SX = SX-59;
                 DL = 0;
+                CP++;
             }
             
             // Do sprites positioning and color change
