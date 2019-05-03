@@ -9,7 +9,10 @@ BUILD_PATH ?= ./build
 
 
 MYCCFLAGS=-t c64 -O -Cl
+MYDEBUGCCFLAGS=-t c64
+
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
+
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1
@@ -44,8 +47,8 @@ sin_scroller:
 	rm $(GRAPHICS_PATH)/*.o    
     
 34_sprites_debug:
-	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
-	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define MAXSPR=34 --asm-define DEBUG=1 $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
+	$(CC65_PATH)$(MYCC65)$ $(MYDEBUGCCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
+	$(CC65_PATH)$(MYCL65)$ $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define MAXSPR=34 --asm-define DEBUG=1 $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
 	rm $(SOURCE_PATH)/34_sprites.s
 	rm $(SOURCE_PATH)/34_sprites.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o

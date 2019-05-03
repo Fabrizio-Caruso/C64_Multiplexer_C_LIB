@@ -67,7 +67,7 @@ int main()
     
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = 0x80;
+        SPRF[i] = 0x81+i;
         SPRC[i] = i&0xfd;        
     }
     SPRX[NUMSPRITES-2]=120;
