@@ -66,9 +66,10 @@ int main()
     
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = 0x81+i;
+        SPRF[i] = 0x81+i+21*(i>=26);
         SPRC[i] = i&0xfd;        
     }
+    
     SPRX[NUMSPRITES-2]=120;
     SPRX[NUMSPRITES-1]=40;
     clrscr();
