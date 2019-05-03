@@ -8,7 +8,6 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <c64.h>
 /******************/
 #define poke(addr,val)  (*(unsigned char *)(addr)=(val))
 /*******************

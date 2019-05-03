@@ -1,6 +1,5 @@
 #include <conio.h>
 #include <stdlib.h>
-#include <c64.h>
 /*******************
 ** Prototypes
 *******************/
