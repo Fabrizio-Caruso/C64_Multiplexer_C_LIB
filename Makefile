@@ -3,8 +3,7 @@ CC65_PATH ?=
 CCFLAGS=-t c64 --cpu 6502X --add-source
 SOURCE_PATH ?= ./src
 GRAPHICS_PATH ?= ./graphics
-ASMFILES_MAX16=$(SOURCE_PATH)/multi_ca65_split_max16.s $(GRAPHICS_PATH)/graphics.s
-ASMFILES_MAX34=$(SOURCE_PATH)/multi_ca65_split_max34.s $(GRAPHICS_PATH)/graphics.s
+ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
 
 BUILD_PATH ?= ./build
 
@@ -33,20 +32,20 @@ MYCC65 ?= cc65$(EXEEXT) $(INCLUDE_OPTS)
 MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
 
 34_sprites: 
-	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) $(SOURCE_PATH)/34_sprites.c $(ASMFILES_MAX34) -o $(BUILD_PATH)/34_sprites.prg
+	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=34 $(SOURCE_PATH)/34_sprites.c $(ASMFILES) -o $(BUILD_PATH)/34_sprites.prg
 	rm $(SOURCE_PATH)/34_sprites.o
-	rm $(SOURCE_PATH)/multi_ca65_split_max34.o
+	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o
 
 sync_scroller: 
-	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) $(SOURCE_PATH)/sync_scroller.c $(ASMFILES_MAX16) -o $(BUILD_PATH)/sync_scroller.prg
+	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sync_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sync_scroller.prg
 	rm $(SOURCE_PATH)/sync_scroller.o
-	rm $(SOURCE_PATH)/multi_ca65_split_max16.o
+	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o    
     
 34_sprites_debug:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
-	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define DEBUG=1 $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
+	$(CC65_PATH)$(MYCL65)$ $(CCFLAGS) $(MYCFG) --asm-define MAXSPR=34 --asm-define DEBUG=1 $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
 	rm $(SOURCE_PATH)/34_sprites.s
 	rm $(SOURCE_PATH)/34_sprites.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o

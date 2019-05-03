@@ -19,7 +19,7 @@
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
-MAXSPR = 34                             ; Maximum number of sprites
+;MAXSPR = 16                             ; Maximum number of sprites
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
