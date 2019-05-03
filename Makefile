@@ -2,7 +2,8 @@
 CC65_PATH ?=
 CCFLAGS=-t c64 --cpu 6502X --add-source
 SOURCE_PATH ?= ./src
-ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s ./graphics/graphics.s
+GRAPHICS_PATH ?= ./graphics
+ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
 BUILD_PATH ?= ./build
 
 
@@ -33,6 +34,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) $(SOURCE_PATH)/34sprites.c $(ASMFILES) -o $(BUILD_PATH)/34sprites.prg
 	rm $(SOURCE_PATH)/34sprites.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o
+	rm $(GRAPHICS_PATH)/*.o
 
 34sprites_debug:
 	$(CC65_PATH)$(MYCC65)$ $(CCFLAGS) $(SOURCE_PATH)/34sprites.c -o $(SOURCE_PATH)/34sprites.s
@@ -40,6 +42,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 	rm $(SOURCE_PATH)/34sprites.s
 	rm $(SOURCE_PATH)/34sprites.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o
+	rm $(GRAPHICS_PATH)/*.o
     
 all: 34sprites
 
