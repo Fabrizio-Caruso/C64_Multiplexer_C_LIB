@@ -1,6 +1,5 @@
 # Makefile 
 CC65_PATH ?=
-CCFLAGS=-t c64 --cpu 6502X --add-source
 SOURCE_PATH ?= ./src
 GRAPHICS_PATH ?= ./graphics
 ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
