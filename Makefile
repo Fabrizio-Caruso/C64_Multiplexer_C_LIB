@@ -41,7 +41,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 	rm $(GRAPHICS_PATH)/*.o
 
 sin_scroller: 
-	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 --asm-define INCFILE=1 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
 	rm $(SOURCE_PATH)/sin_scroller.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o    

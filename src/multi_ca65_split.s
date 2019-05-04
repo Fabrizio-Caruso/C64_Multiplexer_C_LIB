@@ -3,6 +3,14 @@
 ; Based on 32 sprites multiplexer
 ; by Lasse Oorni (Cadaver)
 ;-------------------
+    .IF INCFILE=1                       ; Include file for multi platform compilation
+    .INCLUDE "c64.inc"
+    .ELSEIF INCFILE=2
+    .INCLUDE "c128.inc"
+    .ELSEIF INCFILE=3
+    .INCLUDE "cbm510.inc"
+    .ENDIF 
+;-------------------
    .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
    .EXPORTZP _NUMSPRITES
    .EXPORTZP _MULTIPLEX_DONE
@@ -16,6 +24,8 @@
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
+;-------------------
+SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
@@ -35,39 +45,42 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;-------------------
 _INITRASTER:
     SEI
+    .IF INCFILE=1                       ; C64 RAM setup
     .IFDEF USE_KERNAL
     LDA #$36                            ; Switch kernal ON
     .ELSE
     LDA #$35                            ; Switch kernal OFF
     .ENDIF
     STA $01
+    .ENDIF
+;-------------------
     LDA #<IRQ1                          ; Setup IRQ vector
     .IFDEF USE_KERNAL
-    STA $0314                           ; Kernal ON vector
+    STA IRQVec                          ; Kernal ON vector
     .ELSE
     STA $FFFE                           ; Kernal OFF vector
     .ENDIF
     LDA #>IRQ1
     .IFDEF USE_KERNAL
-    STA $0315                           ; Kernal ON vector
+    STA IRQVec+$0001                    ; Kernal ON vector
     .ELSE
     STA $FFFF                           ; Kernal OFF vector
     .ENDIF
     LDA #<IRQ_RTI                       ; Avoid problems if user
-    STA $0318                           ; press RESTORE key during
+    STA NMIVec                          ; press RESTORE key during
     STA $FFFA                           ; program execution...
     LDA #>IRQ_RTI                       ; ... which mean:
-    STA $0319                           ; disable "RESTORE"
+    STA NMIVec+$0001                    ; disable "RESTORE"
     STA $FFFB                           ; key.
     LDA #$7F
-    STA $DC0D                           ; CIA interrupt off
+    STA CIA1_ICR                        ; CIA interrupt off
     LDA #$01
-    STA $D01A                           ; Raster interrupt on
-    LDA #27                             ; High bit of interrupt position = 0
-    STA $D011
+    STA VIC_IMR                         ; Raster interrupt on
+    LDA #$1B                            ; High bit of interrupt position = 0
+    STA VIC_CTRL1
     LDA #IRQ1LINE                       ; Line where next IRQ happens
-    STA $D012
-    LDA $DC0D                           ; Acknowledge IRQ (to be sure)
+    STA VIC_HLINE
+    LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
     CLI
     RTS
 ;---------------------------------------
@@ -98,14 +111,14 @@ IRQ1:
     STY STORE_Y                         ; for kernal OFF only
     .ENDIF
     LDA #$FF                            ; Move all sprites
-    STA $D001                           ; to the bottom to prevent
-    STA $D003                           ; weird effects when sprite
-    STA $D005                           ; moves lower than what it
-    STA $D007                           ; previously was
-    STA $D009
-    STA $D00B
-    STA $D00D
-    STA $D00F
+    STA VIC_SPR0_Y                      ; to the bottom to prevent
+    STA VIC_SPR1_Y                      ; weird effects when sprite
+    STA VIC_SPR2_Y                      ; moves lower than what it
+    STA VIC_SPR3_Y                      ; previously was
+    STA VIC_SPR4_Y
+    STA VIC_SPR5_Y
+    STA VIC_SPR6_Y
+    STA VIC_SPR7_Y
     LDA _SPRUPDATEFLAG                  ; New sprites to be sorted?
     BEQ IRQ1_NONEWSPRITES
     LDA #$00
@@ -120,19 +133,19 @@ IRQ1_NONEWSPRITES:
     LDX #$08
 IRQ1_NOTMORETHAN8:
     LDA D015TBL,X                       ; Now put the right value to
-    STA $D015                           ; $d015, based on number of
+    STA VIC_SPR_ENA                     ; VIC_SPR_ENA, based on number of
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
     LDA #<IRQ2                          ; Set up the sprite display
     .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ2).
-    STA $0314                           ; Vector for kernal ON
+    STA IRQVec                          ; Vector for kernal ON
     .ELSE
     STA $FFFE                           ; Vector for kernal OFF
     .ENDIF
     LDA #>IRQ2
     .IFDEF USE_KERNAL
-    STA $0315
+    STA IRQVec+$0001
     .ELSE
     STA $FFFF
     .ENDIF
@@ -142,7 +155,7 @@ IRQ1_NOSPRITESATALL:
 ;-------------------
 IRQ1_BEGINSORT:
     .IFDEF DEBUG 
-    INC $D020                           ; Show rastertime usage for debug.
+    INC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
     LDX #MAXSPR                         ; We needo to sort
     DEX                                 ; this sprite?
@@ -199,7 +212,7 @@ IRQ1_SORTLOOP3:
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
     .IFDEF DEBUG
-    DEC $D020                           ; Show rastertime usage for debug.
+    DEC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
     INC _MULTIPLEX_DONE
     JMP IRQ1_NONEWSPRITES
@@ -227,25 +240,25 @@ IRQ2_SPRITELOOP:
     CMP TEMPVARIABLE                    ; End of this IRQ?
     BCS IRQ2_ENDSPR
     LDX PHYSICALSPRTBL2,Y               ; Physical sprite number x 2
-    STA $D001,X                         ; for X & Y coordinate
+    STA VIC_SPR0_Y,X                         ; for X & Y coordinate
     LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
     ASL                                 ; multiply by 2
-    STA $D000,X                         ; store into sprite X coord register
-    BCC IRQ2_LOWMSB                     ; if < 255 clear sprite MSB in $D010
-    LDA $D010                           ; Otherwise set the MSB...
+    STA VIC_SPR0_X,X                         ; store into sprite X coord register
+    BCC IRQ2_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
+    LDA VIC_SPR_HI_X                           ; Otherwise set the MSB...
     ORA ORTBL,X                         ; ( set )
-    STA $D010
+    STA VIC_SPR_HI_X
     JMP IRQ2_MSBOK
 IRQ2_LOWMSB:
-    LDA $D010
+    LDA VIC_SPR_HI_X
     AND ANDTBL,X                        ; ( clear )
-    STA $D010
+    STA VIC_SPR_HI_X
 IRQ2_MSBOK:
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
-    STA $07F8,X                         ; frame
+    STA SCREEN_RAM+$03F8,X              ; frame
     LDA SORTSPRC,Y
-    STA $D027,X                         ; color
+    STA VIC_SPR0_COLOR,X                ; color
     INY
     BNE IRQ2_SPRITELOOP
 IRQ2_ENDSPR:
@@ -254,29 +267,29 @@ IRQ2_ENDSPR:
     STY SPRIRQCOUNTER
     SEC                                 ; That coordinate - $07 is the
     SBC #$07                            ; position for next interrupt
-    CMP $D012                           ; Already late from that?
+    CMP VIC_HLINE                           ; Already late from that?
     BCC IRQ2_DIRECT                     ; Then go directly to next IRQ
-    STA $D012
+    STA VIC_HLINE
     JMP EXIT_IRQ
 IRQ2_LASTSPR:
-;    INC _MULTIPLEX_DONE
     LDA #<IRQ1                          ; Was the last sprite,
     .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-    STA $0314                           ; vector for kernal ON
+    STA IRQVec                          ; vector for kernal ON
     .ELSE
     STA $FFFE                           ; vector for kernal OFF
     .ENDIF
     LDA #>IRQ1
     .IFDEF USE_KERNAL
-    STA $0315                           ; vector for kernal ON
+    STA IRQVec+$0001                    ; vector for kernal ON
     .ELSE
     STA $FFFF                           ; vector for kernal OFF
     .ENDIF
     LDA #IRQ1LINE
-    STA $D012
+    STA VIC_HLINE
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
-    LSR $D019                           ; Acknowledge raster IRQ
+    LSR VIC_IRR                         ; Acknowledge raster IRQ
+    .IF INCFILE=1
     .IFNDEF USE_KERNAL
 STORE_A = *+$0001                       ; Restore original registers value
     LDA #$00
@@ -287,34 +300,37 @@ STORE_Y = *+$0001                       ; IRQ call
     .ELSE
     JMP $EA81
     .ENDIF
+    .ELSEIF INCFILE=2
+    JMP $FA65
+    .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
 _SPRX:
 SPRX:
-    .RES MAXSPR,0                       ; Unsorted sprite table
+    .RES MAXSPR, $00                    ; Unsorted sprite table
 _SPRY:
 SPRY:
-    .RES MAXSPR,0
+    .RES MAXSPR, $00
 _SPRC:
 SPRC:
-    .RES MAXSPR,0
+    .RES MAXSPR, $00
 _SPRF:
 SPRF:
-    .RES MAXSPR,0
+    .RES MAXSPR, $00
 ;-------------------
 SORTSPRX:
-    .RES MAXSPR,0                       ; Sorted sprite table
+    .RES MAXSPR, $00                    ; Sorted sprite table
 SORTSPRY:
-    .RES MAXSPR+1,0                     ; Must be one byte extra for the $ff endmark
+    .RES MAXSPR+$01, $00                ; Must be one byte extra for the $ff endmark
 SORTSPRC:
-    .RES MAXSPR,0
+    .RES MAXSPR, $00
 SORTSPRF:
-    .RES MAXSPR,0
+    .RES MAXSPR, $00
 ;-------------------
 D015TBL:
     .BYTE %00000000                     ; Table of sprites that are "on"
-    .BYTE %00000001                     ; for $d015
+    .BYTE %00000001                     ; for VIC_SPR_ENA
     .BYTE %00000011
     .BYTE %00000111
     .BYTE %00001111
@@ -324,41 +340,40 @@ D015TBL:
     .BYTE %11111111
 ;-------------------
 PHYSICALSPRTBL1:
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7        ; Indexes to frame & color
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7        ; registers
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
-    .BYTE 0, 1, 2, 3, 4, 5, 6, 7
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07        ; Indexes to frame & color
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07        ; registers
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
 PHYSICALSPRTBL2:
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
-    .BYTE 0, 2, 4, 6, 8, 10, 12, 14
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
 ;-------------------
 ANDTBL:
-    .BYTE 255-1
+    .BYTE $FF-$01
 ORTBL:
-    .BYTE 1
-    .BYTE 255-2
-    .BYTE 2
-    .BYTE 255-4
-    .BYTE 4
-    .BYTE 255-8
-    .BYTE 8
-    .BYTE 255-16
-    .BYTE 16
-    .BYTE 255-32
-    .BYTE 32
-    .BYTE 255-64
-    .BYTE 64
-    .BYTE 255-128
-    .BYTE 128
-;--------------------------------------
-
+    .BYTE $01
+    .BYTE $FF-$02
+    .BYTE $02
+    .BYTE $FF-$04
+    .BYTE $04
+    .BYTE $FF-$08
+    .BYTE $08
+    .BYTE $FF-$10
+    .BYTE $10
+    .BYTE $FF-$20
+    .BYTE $20
+    .BYTE $FF-$40
+    .BYTE $40
+    .BYTE $FF-$80
+    .BYTE $80
+;-------------------------------------------------------------------------------
