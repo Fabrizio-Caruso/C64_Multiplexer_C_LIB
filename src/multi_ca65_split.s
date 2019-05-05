@@ -3,13 +3,13 @@
 ; Based on 32 sprites multiplexer
 ; by Lasse Oorni (Cadaver)
 ;-------------------
-;    .IF INCFILE=1                       ; Include file for multi platform compilation
+    .IF INCFILE=1                       ; Include file for multi platform compilation
     .INCLUDE "c64.inc"
-;    .ELSEIF INCFILE=2
-;    .INCLUDE "c128.inc"
-;    .ELSEIF INCFILE=3
-;    .INCLUDE "cbm510.inc"
-;    .ENDIF 
+    .ELSEIF INCFILE=2
+    .INCLUDE "c128.inc"
+    .ELSEIF INCFILE=3
+    .INCLUDE "cbm510.inc"
+    .ENDIF 
 ;-------------------
    .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
    .EXPORTZP _NUMSPRITES
@@ -49,14 +49,14 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;-------------------
 _INITRASTER:
     SEI
-;    .IF INCFILE=1                       ; C64 RAM setup
+    .IF INCFILE=1                       ; C64 RAM setup
     .IFDEF USE_KERNAL
     LDA #$36                            ; Switch kernal ON
     .ELSE
     LDA #$35                            ; Switch kernal OFF
     .ENDIF
     STA $01
-;    .ENDIF
+    .ENDIF
 ;-------------------
     LDA #<IRQ1                          ; Setup IRQ vector
     .IFDEF USE_KERNAL
@@ -72,10 +72,10 @@ _INITRASTER:
     .ENDIF
     LDA #<IRQ_RTI                       ; Avoid problems if user
     STA NMIVec                          ; press RESTORE key during
-    STA $FFFA                           ; program execution...
+;    STA $FFFA                           ; program execution...
     LDA #>IRQ_RTI                       ; ... which mean:
     STA NMIVec+$0001                    ; disable "RESTORE"
-    STA $FFFB                           ; key.
+;    STA $FFFB                           ; key.
     LDA #$7F
     STA CIA1_ICR                        ; CIA interrupt off
     LDA #$01
@@ -310,7 +310,7 @@ IRQ2_LASTSPR:
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
-;    .IF INCFILE=1
+    .IF INCFILE=1
     .IFNDEF USE_KERNAL
 STORE_A = *+$0001                       ; Restore original registers value
     LDA #$00
@@ -321,9 +321,9 @@ STORE_Y = *+$0001                       ; IRQ call
     .ELSE
     JMP $EA81
     .ENDIF
-;    .ELSEIF INCFILE=2
-;    JMP $FA65
-;    .ENDIF
+    .ELSEIF INCFILE=2
+    JMP $FA65
+    .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
