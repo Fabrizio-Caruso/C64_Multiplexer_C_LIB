@@ -67,7 +67,7 @@ hello_c128:
 	rm $(GRAPHICS_PATH)/*.o
 
 sin_scroller_c128:
-	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) --asm-define MAXSPR=16 --asm-define INCFILE=2 $(SOURCE_PATH)/sin_scroller.c $(GRAPHICS_PATH)/graphics.s $(ASMFILES) -o $(BUILD_PATH)/sin_scroller_c128.prg
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) --asm-define MAXSPR=16 --asm-define INCFILE=2 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller_c128.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
     
