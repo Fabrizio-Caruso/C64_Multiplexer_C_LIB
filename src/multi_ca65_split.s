@@ -21,9 +21,13 @@
    .EXPORT _SPRY
    .EXPORT _SPRC
    .EXPORT _SPRF
+   .IFDEF MULTICOLOR
+   .EXPORT _SPRM
+   .ENDIF
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
+;MULTICOLOR = $01                        ; Set to != $00 to enable multicolor sprites flag
 ;-------------------
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
@@ -208,6 +212,10 @@ IRQ1_SORTLOOP3:
     STA SORTSPRF,X
     LDA SPRC,Y
     STA SORTSPRC,X
+    .IFDEF MULTICOLOR
+    LDA SPRM,Y
+    STA SORTSPRM,X
+    .ENDIF
     INX
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
@@ -243,9 +251,9 @@ IRQ2_SPRITELOOP:
     STA VIC_SPR0_Y,X                         ; for X & Y coordinate
     LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
     ASL                                 ; multiply by 2
-    STA VIC_SPR0_X,X                         ; store into sprite X coord register
+    STA VIC_SPR0_X,X                    ; store into sprite X coord register
     BCC IRQ2_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                           ; Otherwise set the MSB...
+    LDA VIC_SPR_HI_X                    ; Otherwise set the MSB...
     ORA ORTBL,X                         ; ( set )
     STA VIC_SPR_HI_X
     JMP IRQ2_MSBOK
@@ -254,6 +262,19 @@ IRQ2_LOWMSB:
     AND ANDTBL,X                        ; ( clear )
     STA VIC_SPR_HI_X
 IRQ2_MSBOK:
+    .IFDEF MULTICOLOR
+    LDA SORTSPRM,Y                      ; Multicolor setup
+    BEQ IRQ2_NO_MULTI
+    LDA VIC_SPR_MCOLOR
+    ORA ORTBL,X
+    STA VIC_SPR_MCOLOR
+    JMP IRQ2_MULTI
+IRQ2_NO_MULTI:
+    LDA VIC_SPR_MCOLOR
+    AND ANDTBL,X
+    STA VIC_SPR_MCOLOR
+IRQ2_MULTI:
+    .ENDIF
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
     STA SCREEN_RAM+$03F8,X              ; frame
@@ -318,6 +339,11 @@ SPRC:
 _SPRF:
 SPRF:
     .RES MAXSPR, $00
+    .IFDEF MULTICOLOR
+_SPRM:
+SPRM:
+    .RES MAXSPR, $00
+    .ENDIF
 ;-------------------
 SORTSPRX:
     .RES MAXSPR, $00                    ; Sorted sprite table
@@ -327,6 +353,10 @@ SORTSPRC:
     .RES MAXSPR, $00
 SORTSPRF:
     .RES MAXSPR, $00
+    .IFDEF MULTICOLOR
+SORTSPRM:
+    .RES MAXSPR, $00
+    .ENDIF
 ;-------------------
 D015TBL:
     .BYTE %00000000                     ; Table of sprites that are "on"

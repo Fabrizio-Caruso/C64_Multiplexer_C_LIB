@@ -1,4 +1,3 @@
 .segment "GFX"
-;.include  "./sprites.s"
- .incbin "./alpha.bin", $02
+.include  "./alpha.s"
 .code

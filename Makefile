@@ -43,7 +43,13 @@ sin_scroller:
 	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
 	rm $(SOURCE_PATH)/sin_scroller.o
 	rm $(SOURCE_PATH)/multi_ca65_split.o
-	rm $(GRAPHICS_PATH)/*.o    
+	rm $(GRAPHICS_PATH)/*.o
+
+sin_scroller_multicolor: 
+	$(CC65_PATH)$(MYCL65)$ $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 --asm-define MULTICOLOR=1 $(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller_multicolor.prg
+	rm $(SOURCE_PATH)/sin_scroller_multicolor.o
+	rm $(SOURCE_PATH)/multi_ca65_split.o
+	rm $(GRAPHICS_PATH)/*.o 
     
 34_sprites_debug:
 	$(CC65_PATH)$(MYCC65)$ $(MYDEBUGCCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
@@ -53,7 +59,7 @@ sin_scroller:
 	rm $(SOURCE_PATH)/multi_ca65_split.o
 	rm $(GRAPHICS_PATH)/*.o
     
-all: 34_sprites sin_scroller
+all: 34_sprites sin_scroller sin_scroller_multicolor
 
 clean:
 	rm -rf *.prg
