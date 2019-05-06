@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 /******************/
-#define poke(addr,val)  (*(unsigned char *)(addr)=(val))
+#include <peekpoke.h>
 /*******************
 * Prototypes
 *******************/
@@ -112,8 +112,8 @@ int main()
     unsigned char CP = 0;
     unsigned char i;
 /******************/
-    poke (0xd020, 0x00);
-    poke (0xd021, 0x00);
+    POKE(0xd020, 0x00);
+    POKE(0xd021, 0x00);
     clrscr();
     
     INITSPRITES();
