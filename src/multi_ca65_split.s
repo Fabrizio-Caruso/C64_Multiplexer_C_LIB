@@ -3,12 +3,12 @@
 ; Based on 32 sprites multiplexer
 ; by Lasse Oorni (Cadaver)
 ;-------------------
-    .IF INCFILE=1                       ; Include file for multi platform compilation
-    .INCLUDE "c64.inc"
-    .ELSEIF INCFILE=2
-    .INCLUDE "c128.inc"
-    .ELSEIF INCFILE=3
-    .INCLUDE "cbm510.inc"
+    .IF .DEFINED(__C64__)                       ; Include file for multi platform compilation
+        .INCLUDE "c64.inc"
+    .ELSEIF .DEFINED(__C128__)
+        .INCLUDE "c128.inc"
+    .ELSEIF .DEFINED(__CBM510__)
+        .INCLUDE "cbm510.inc"
     .ENDIF 
 ;-------------------
    .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
@@ -22,7 +22,7 @@
    .EXPORT _SPRC
    .EXPORT _SPRF
    .IFDEF MULTICOLOR
-   .EXPORT _SPRM
+        .EXPORT _SPRM
    .ENDIF
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
@@ -49,26 +49,26 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;-------------------
 _INITRASTER:
     SEI
-    .IF INCFILE=1                       ; C64 RAM setup
-    .IFDEF USE_KERNAL
-    LDA #$36                            ; Switch kernal ON
-    .ELSE
-    LDA #$35                            ; Switch kernal OFF
-    .ENDIF
-    STA $01
+    .IFDEF __C64__                       ; C64 RAM setup
+        .IFDEF USE_KERNAL
+            LDA #$36                            ; Switch kernal ON
+        .ELSE
+            LDA #$35                            ; Switch kernal OFF
+        .ENDIF
+        STA $01
     .ENDIF
 ;-------------------
     LDA #<IRQ1                          ; Setup IRQ vector
     .IFDEF USE_KERNAL
-    STA IRQVec                          ; Kernal ON vector
+        STA IRQVec                          ; Kernal ON vector
     .ELSE
-    STA $FFFE                           ; Kernal OFF vector
+        STA $FFFE                           ; Kernal OFF vector
     .ENDIF
     LDA #>IRQ1
     .IFDEF USE_KERNAL
-    STA IRQVec+$0001                    ; Kernal ON vector
+        STA IRQVec+$0001                    ; Kernal ON vector
     .ELSE
-    STA $FFFF                           ; Kernal OFF vector
+        STA $FFFF                           ; Kernal OFF vector
     .ENDIF
     LDA #<IRQ_RTI                       ; Avoid problems if user
     STA NMIVec                          ; press RESTORE key during
@@ -110,9 +110,9 @@ IS_ORDERLIST:
 ;-------------------
 IRQ1:
     .IFNDEF USE_KERNAL
-    STA STORE_A                         ; Fast way to store/restore
-    STX STORE_X                         ; CPU regs after an IRQ
-    STY STORE_Y                         ; for kernal OFF only
+        STA STORE_A                         ; Fast way to store/restore
+        STX STORE_X                         ; CPU regs after an IRQ
+        STY STORE_Y                         ; for kernal OFF only
     .ENDIF
     LDA #$FF                            ; Move all sprites
     STA VIC_SPR0_Y                      ; to the bottom to prevent
@@ -143,15 +143,15 @@ IRQ1_NOTMORETHAN8:
     STA SPRIRQCOUNTER                   ; routine
     LDA #<IRQ2                          ; Set up the sprite display
     .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ2).
-    STA IRQVec                          ; Vector for kernal ON
+        STA IRQVec                          ; Vector for kernal ON
     .ELSE
-    STA $FFFE                           ; Vector for kernal OFF
+        STA $FFFE                           ; Vector for kernal OFF
     .ENDIF
     LDA #>IRQ2
     .IFDEF USE_KERNAL
-    STA IRQVec+$0001
+        STA IRQVec+$0001
     .ELSE
-    STA $FFFF
+        STA $FFFF
     .ENDIF
     JMP IRQ2_DIRECT                     ; Go directly; we might be late
 IRQ1_NOSPRITESATALL:
@@ -159,7 +159,7 @@ IRQ1_NOSPRITESATALL:
 ;-------------------
 IRQ1_BEGINSORT:
     .IFDEF DEBUG 
-    INC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
+        INC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
     LDX #MAXSPR                         ; We needo to sort
     DEX                                 ; this sprite?
@@ -213,14 +213,14 @@ IRQ1_SORTLOOP3:
     LDA SPRC,Y
     STA SORTSPRC,X
     .IFDEF MULTICOLOR
-    LDA SPRM,Y
-    STA SORTSPRM,X
+        LDA SPRM,Y
+        STA SORTSPRM,X
     .ENDIF
     INX
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
     .IFDEF DEBUG
-    DEC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
+        DEC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
     INC _MULTIPLEX_DONE
     JMP IRQ1_NONEWSPRITES
@@ -230,9 +230,9 @@ IRQ1_SORTLOOP3:
 ;-------------------
 IRQ2:
     .IFNDEF USE_KERNAL
-    STA STORE_A                         ; Fast way to store/restore
-    STX STORE_X                         ; CPU regs after an IRQ
-    STY STORE_Y                         ; for kernal OFF only
+        STA STORE_A                         ; Fast way to store/restore
+        STX STORE_X                         ; CPU regs after an IRQ
+        STY STORE_Y                         ; for kernal OFF only
     .ENDIF
 IRQ2_DIRECT:
     LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
@@ -263,17 +263,17 @@ IRQ2_LOWMSB:
     STA VIC_SPR_HI_X
 IRQ2_MSBOK:
     .IFDEF MULTICOLOR
-    LDA SORTSPRM,Y                      ; Multicolor setup
-    BEQ IRQ2_NO_MULTI
-    LDA VIC_SPR_MCOLOR
-    ORA ORTBL,X
-    STA VIC_SPR_MCOLOR
-    JMP IRQ2_MULTI
-IRQ2_NO_MULTI:
-    LDA VIC_SPR_MCOLOR
-    AND ANDTBL,X
-    STA VIC_SPR_MCOLOR
-IRQ2_MULTI:
+        LDA SORTSPRM,Y                      ; Multicolor setup
+        BEQ IRQ2_NO_MULTI
+        LDA VIC_SPR_MCOLOR
+        ORA ORTBL,X
+        STA VIC_SPR_MCOLOR
+        JMP IRQ2_MULTI
+    IRQ2_NO_MULTI:
+        LDA VIC_SPR_MCOLOR
+        AND ANDTBL,X
+        STA VIC_SPR_MCOLOR
+    IRQ2_MULTI:
     .ENDIF
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
@@ -295,34 +295,34 @@ IRQ2_ENDSPR:
 IRQ2_LASTSPR:
     LDA #<IRQ1                          ; Was the last sprite,
     .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-    STA IRQVec                          ; vector for kernal ON
+        STA IRQVec                          ; vector for kernal ON
     .ELSE
-    STA $FFFE                           ; vector for kernal OFF
+        STA $FFFE                           ; vector for kernal OFF
     .ENDIF
     LDA #>IRQ1
     .IFDEF USE_KERNAL
-    STA IRQVec+$0001                    ; vector for kernal ON
+        STA IRQVec+$0001                    ; vector for kernal ON
     .ELSE
-    STA $FFFF                           ; vector for kernal OFF
+        STA $FFFF                           ; vector for kernal OFF
     .ENDIF
     LDA #IRQ1LINE
     STA VIC_HLINE
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
-    .IF INCFILE=1
-    .IFNDEF USE_KERNAL
-STORE_A = *+$0001                       ; Restore original registers value
-    LDA #$00
-STORE_X = *+$0001                       ; at the original values they have before
-    LDX #$00
-STORE_Y = *+$0001                       ; IRQ call
-    LDY #$00
-    .ELSE
-    JMP $EA81
-    .ENDIF
-    .ELSEIF INCFILE=2
-    JMP $FA65
+    .IF .DEFINED(__C64__)
+        .IF .NOT .DEFINED(USE_KERNAL)
+            STORE_A = *+$0001                       ; Restore original registers value
+            LDA #$00
+            STORE_X = *+$0001                       ; at the original values they have before
+            LDX #$00
+            STORE_Y = *+$0001                       ; IRQ call
+            LDY #$00         
+        .ELSE
+            JMP $EA81
+        .ENDIF
+    .ELSEIF .DEFINED(__C128__) 
+        JMP $FA65
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
@@ -340,9 +340,9 @@ _SPRF:
 SPRF:
     .RES MAXSPR, $00
     .IFDEF MULTICOLOR
-_SPRM:
-SPRM:
-    .RES MAXSPR, $00
+    _SPRM:
+    SPRM:
+        .RES MAXSPR, $00
     .ENDIF
 ;-------------------
 SORTSPRX:
@@ -354,8 +354,8 @@ SORTSPRC:
 SORTSPRF:
     .RES MAXSPR, $00
     .IFDEF MULTICOLOR
-SORTSPRM:
-    .RES MAXSPR, $00
+    SORTSPRM:
+        .RES MAXSPR, $00
     .ENDIF
 ;-------------------
 D015TBL:
