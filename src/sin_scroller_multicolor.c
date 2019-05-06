@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 /******************/
-#define poke(addr,val)  (*(unsigned char *)(addr)=(val))
+#include <peekpoke.h>
 /*******************
 * Prototypes
 *******************/
@@ -85,8 +85,11 @@ const char Colors[] = {
 /******************/
 const char scrolltext[] =
 //   0123456789ABCD
+    "abcdefghilmnop"
+    "qrstuvz0123456"
+    "789           "    
     "ciao a tutti !"
-    " questo e' un "
+    " questo e' un "    
     "esempio di sin"
     " scroller basa"
     "to su sprites."
@@ -114,8 +117,8 @@ int main()
     unsigned char i;
     unsigned char buf;
 /******************/
-    poke (0xd020, 0x00);
-    poke (0xd021, 0x00);
+    POKE(0xd020, 0x00);
+    POKE(0xd021, 0x00);
     clrscr();
     
     INITSPRITES();
@@ -131,6 +134,10 @@ int main()
         SPRC[i] = Colors[CP+i];
         SPRM[i] = i&1;
     }
+
+    POKE (0xd025,2);
+    POKE (0xd026,4);
+  
 /***************************************
 * Main loop
 *******************/
