@@ -27,6 +27,14 @@ extern unsigned char MULTIPLEX_DONE;
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
 #pragma zpsym ("MULTIPLEX_DONE")
+
+#if defined(__C64__)
+    #define GFX_START 0x2000
+#else
+    #define GFX_START 0x3000
+#endif
+#define GFX_START_INDEX (GFX_START/0x40)
+
 /***************************************
 * Pre-calculated
 * sinus values
@@ -83,7 +91,6 @@ const char Colors[] = {
 #include <cbm_screen_charmap.h>
 /******************/
 const char scrolltext[] =
-//   0123456789ABCD
     "ciao a tutti !"
     " questo e' un "
     "esempio di sin"
@@ -104,8 +111,7 @@ const char scrolltext[] =
 #include <cbm_petscii_charmap.h>
 /******************/
 int main()
-{
-    unsigned char MS = 0x3000/0x40;
+{    
     unsigned char XX = 0;
     unsigned char SX = 0;
     unsigned short SP = 0;
@@ -126,7 +132,7 @@ int main()
 *******************/
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = MS+0x20; 
+        SPRF[i] = GFX_START_INDEX+' '; 
         SPRC[i] = Colors[CP+i];        
     }
 /***************************************
@@ -145,7 +151,7 @@ int main()
                     SPRF[i-1]=SPRF[i];
                 }
                 // Insert new char from scrolltext
-                SPRF[NUMSPRITES-1]=MS+(scrolltext[SP++]);
+                SPRF[NUMSPRITES-1]=GFX_START_INDEX+(scrolltext[SP++]);
                 // End of Scrolltext?
                 if (SP>=strlen(scrolltext)-1) { SP=0; }
                 // Reset Sinus and sprites scroll pointer
