@@ -120,7 +120,9 @@ int main()
     unsigned char DL = 0;
     unsigned char CP = 0;
     unsigned char i;
+    #if defined(MULTI_COLOR)
     unsigned char buf;
+    #endif
 /******************/
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);
