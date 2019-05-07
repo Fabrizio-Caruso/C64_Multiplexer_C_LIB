@@ -68,6 +68,7 @@ sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) \
 	$(MYC128CFG) \
 	--asm-define MAXSPR=16 \
+	--asm-define FAST_MODE=1 \
 	--code-name CODE2 \
 	$(SOURCE_PATH)/sin_scroller_multicolor.c $(GRAPHICS_PATH)/graphics.s \
 	--code-name CODE \

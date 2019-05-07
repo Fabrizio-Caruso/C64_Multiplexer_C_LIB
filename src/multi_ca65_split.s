@@ -164,6 +164,10 @@ IRQ1_BEGINSORT:
     .IFDEF DEBUG 
         INC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
+    .IFDEF FAST_MODE 
+        LDA #$01
+        STA VIC_CLK_128     
+    .ENDIF    
     LDX #MAXSPR                         ; We needo to sort
     DEX                                 ; this sprite?
     CPX SORTEDSPRITES
@@ -225,6 +229,10 @@ IRQ1_SORTLOOP3:
     .IFDEF DEBUG
         DEC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
     .ENDIF
+    .IFDEF FAST_MODE
+        LDA #$00
+        STA VIC_CLK_128
+    .ENDIF    
     INC _MULTIPLEX_DONE
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
