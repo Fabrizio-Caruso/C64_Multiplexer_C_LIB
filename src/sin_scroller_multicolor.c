@@ -28,6 +28,14 @@ extern unsigned char MULTIPLEX_DONE;
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
 #pragma zpsym ("MULTIPLEX_DONE")
+
+#if defined(__C64__)
+    #define GFX_START 0x2000
+#else
+    #define GFX_START 0x3000
+#endif
+#define GFX_START_INDEX (GFX_START/0x40)
+
 /***************************************
 * Pre-calculated
 * sinus values
@@ -127,14 +135,17 @@ int main()
 *******************/
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = 0xA0; 
+        SPRF[i] = GFX_START_INDEX+' '; 
         SPRC[i] = Colors[CP+i];
+        #if defined(MULTI_COLOR)
         SPRM[i] = i&1;
+        #endif
     }
 
+    #if defined(MULTI_COLOR)
     POKE (0xd025,2);
     POKE (0xd026,4);
-  
+    #endif
 /***************************************
 * Main loop
 *******************/
@@ -145,16 +156,22 @@ int main()
         if (MULTIPLEX_DONE) {
             // Check if we moved one sprite/char out of screen.
             if (DL == 12) {
+                #if defined(MULTI_COLOR)
                 buf = SPRM[0];
+                #endif
                 // Move all sprites/linetext 1 chars forward
                 for(i=1;i<NUMSPRITES;++i)
                 {
                     SPRF[i-1]=SPRF[i];
+                    #if defined(MULTI_COLOR)
                     SPRM[i-1]=SPRM[i];
+                    #endif
                 }
                 // Insert new char from scrolltext
-                SPRF[NUMSPRITES-1]=0x80+(scrolltext[SP++]);
+                SPRF[NUMSPRITES-1]=GFX_START_INDEX+(scrolltext[SP++]);
+                #if defined(MULTI_COLOR)
                 SPRM[NUMSPRITES-1]=buf;
+                #endif
                 // End of Scrolltext?
                 if (SP>=strlen(scrolltext)-1) { SP=0; }
                 // Reset Sinus and sprites scroll pointer
