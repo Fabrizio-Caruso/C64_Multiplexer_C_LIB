@@ -104,7 +104,8 @@ const char scrolltext[] =
 #include <cbm_petscii_charmap.h>
 /******************/
 int main()
-{    
+{
+    unsigned char MS = 0x3000/0x40;
     unsigned char XX = 0;
     unsigned char SX = 0;
     unsigned short SP = 0;
@@ -125,7 +126,7 @@ int main()
 *******************/
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = 0xA0; 
+        SPRF[i] = MS+0x20; 
         SPRC[i] = Colors[CP+i];        
     }
 /***************************************
@@ -144,7 +145,7 @@ int main()
                     SPRF[i-1]=SPRF[i];
                 }
                 // Insert new char from scrolltext
-                SPRF[NUMSPRITES-1]=0x80+(scrolltext[SP++]);
+                SPRF[NUMSPRITES-1]=MS+(scrolltext[SP++]);
                 // End of Scrolltext?
                 if (SP>=strlen(scrolltext)-1) { SP=0; }
                 // Reset Sinus and sprites scroll pointer

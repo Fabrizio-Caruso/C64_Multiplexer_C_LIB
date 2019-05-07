@@ -4,6 +4,8 @@ SOURCE_PATH ?= ./src
 GRAPHICS_PATH ?= ./graphics
 ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
 
+ASMTEST=$(SOURCE_PATH)/irq_test.s $(GRAPHICS_PATH)/graphics.s
+
 BUILD_PATH ?= ./build
 
 
@@ -70,7 +72,12 @@ sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller_c128.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
-    
+
+irq_test_case:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) $(SOURCE_PATH)/irq_test_case.c $(ASMTEST) -o $(BUILD_PATH)/irq_test_case.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o
+
 all: 34_sprites sin_scroller sin_scroller_multicolor
 
 clean:

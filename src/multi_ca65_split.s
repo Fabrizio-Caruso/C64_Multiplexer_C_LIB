@@ -3,6 +3,7 @@
 ; Based on 32 sprites multiplexer
 ; by Lasse Oorni (Cadaver)
 ;-------------------
+    .INCLUDE "zeropage.inc"
     .IF .DEFINED(__C64__)                       ; Include file for multi platform compilation
         .INCLUDE "c64.inc"
     .ELSEIF .DEFINED(__C128__)
@@ -48,6 +49,8 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ; raster interrupt system
 ;-------------------
 _INITRASTER:
+    LDA #$7F
+    STA CIA1_ICR                        ; CIA interrupt off
     SEI
     .IFDEF __C64__                       ; C64 RAM setup
         .IFDEF USE_KERNAL
@@ -76,8 +79,6 @@ _INITRASTER:
     LDA #>IRQ_RTI                       ; ... which mean:
     STA NMIVec+$0001                    ; disable "RESTORE"
 ;    STA $FFFB                           ; key.
-    LDA #$7F
-    STA CIA1_ICR                        ; CIA interrupt off
     LDA #$01
     STA VIC_IMR                         ; Raster interrupt on
     LDA #$1B                            ; High bit of interrupt position = 0
@@ -85,6 +86,8 @@ _INITRASTER:
     LDA #IRQ1LINE                       ; Line where next IRQ happens
     STA VIC_HLINE
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
+    LDA #$0E
+    STA $FF00
     CLI
     RTS
 ;---------------------------------------
@@ -322,7 +325,14 @@ EXIT_IRQ:                               ; Exit IRQ code.
             JMP $EA81
         .ENDIF
     .ELSEIF .DEFINED(__C128__) 
-        JMP $FA65
+        ;JMP $FA65
+        PLA
+        STA $FF00
+        PLA
+        TAY
+        PLA
+        TAX
+        PLA
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
