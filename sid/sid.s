@@ -1,3 +1,3 @@
 .segment "SID"
-.incbin "./empty.bin"
+.incbin "./SHAKE-AND-BAKE.PRG", $02
 .code

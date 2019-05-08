@@ -34,6 +34,11 @@ SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
+IRQ3LINE = $CB                          ; Music play just after sprites
+;-------------------
+MUSIC_CODE = $01                        ; Set to $01 to enable music routines
+MUSIC_INIT = $1000                      ; Music init address
+MUSIC_PLAY = $1003                      ; Music play address
 ;MAXSPR = 16                             ; Maximum number of sprites
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
@@ -74,11 +79,17 @@ _INITRASTER:
         STA $FFFF                           ; Kernal OFF vector
     .ENDIF
     LDA #<IRQ_RTI                       ; Avoid problems if user
-    STA NMIVec                          ; press RESTORE key during
-;    STA $FFFA                           ; program execution...
+    .IFDEF USE_KERNAL
+        STA NMIVec                          ; press RESTORE key during
+    .ELSE
+        STA $FFFA                           ; program execution...
+    .ENDIF
     LDA #>IRQ_RTI                       ; ... which mean:
-    STA NMIVec+$0001                    ; disable "RESTORE"
-;    STA $FFFB                           ; key.
+    .IFDEF USE_KERNAL
+        STA NMIVec+$0001                    ; disable "RESTORE"
+    .ELSE
+        STA $FFFB                           ; key.
+    .ENDIF
     LDA #$01
     STA VIC_IMR                         ; Raster interrupt on
     LDA #$1B                            ; High bit of interrupt position = 0
@@ -86,8 +97,12 @@ _INITRASTER:
     LDA #IRQ1LINE                       ; Line where next IRQ happens
     STA VIC_HLINE
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
-    LDA #$0E
-    STA $FF00
+    .IF MUSIC_CODE                      ; Music init code
+        LDA #$00
+        TAX
+        TAY
+        JSR MUSIC_INIT
+    .ENDIF
     CLI
     RTS
 ;---------------------------------------
@@ -304,20 +319,63 @@ IRQ2_ENDSPR:
     STA VIC_HLINE
     JMP EXIT_IRQ
 IRQ2_LASTSPR:
-    LDA #<IRQ1                          ; Was the last sprite,
-    .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-        STA IRQVec                          ; vector for kernal ON
+    .IF MUSIC_CODE
+        LDA #<IRQ3                          ; Was the last sprite,
+        .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+            STA IRQVec                          ; vector for kernal ON
+        .ELSE
+            STA $FFFE                           ; vector for kernal OFF
+        .ENDIF
+        LDA #>IRQ3
+        .IFDEF USE_KERNAL
+            STA IRQVec+$0001                    ; vector for kernal ON
+        .ELSE
+            STA $FFFF                           ; vector for kernal OFF
+        .ENDIF
+        LDA #IRQ3LINE
+        STA VIC_HLINE
+        JMP EXIT_IRQ
     .ELSE
-        STA $FFFE                           ; vector for kernal OFF
+        LDA #<IRQ1                          ; Was the last sprite,
+        .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+            STA IRQVec                          ; vector for kernal ON
+        .ELSE
+            STA $FFFE                           ; vector for kernal OFF
+        .ENDIF
+        LDA #>IRQ1
+        .IFDEF USE_KERNAL
+            STA IRQVec+$0001                    ; vector for kernal ON
+        .ELSE
+            STA $FFFF                           ; vector for kernal OFF
+        .ENDIF
+        LDA #IRQ1LINE
+        STA VIC_HLINE
     .ENDIF
-    LDA #>IRQ1
-    .IFDEF USE_KERNAL
-        STA IRQVec+$0001                    ; vector for kernal ON
-    .ELSE
-        STA $FFFF                           ; vector for kernal OFF
+    .IF MUSIC_CODE
+;-------------------
+        IRQ3:
+            .IFNDEF USE_KERNAL
+                STA STORE_A                         ; Fast way to store/restore
+                STX STORE_X                         ; CPU regs after an IRQ
+                STY STORE_Y                         ; for kernal OFF only
+            .ENDIF
+            JSR MUSIC_PLAY
+;-------------------
+            LDA #<IRQ1                          ; Was the last sprite,
+            .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+                STA IRQVec                          ; vector for kernal ON
+            .ELSE
+                STA $FFFE                           ; vector for kernal OFF
+            .ENDIF
+            LDA #>IRQ1
+            .IFDEF USE_KERNAL
+                STA IRQVec+$0001                    ; vector for kernal ON
+            .ELSE
+                STA $FFFF                           ; vector for kernal OFF
+            .ENDIF
+            LDA #IRQ1LINE
+            STA VIC_HLINE
     .ENDIF
-    LDA #IRQ1LINE
-    STA VIC_HLINE
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
