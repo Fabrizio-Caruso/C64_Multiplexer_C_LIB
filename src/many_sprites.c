@@ -1,5 +1,6 @@
 #include <conio.h>
 #include <stdlib.h>
+#include <peekpoke.h>
 /*******************
 ** Prototypes
 *******************/
@@ -62,7 +63,11 @@ int main()
     
     INITSPRITES();
     INITRASTER();
-    NUMSPRITES = 34;
+    
+    POKE(0xd020, 0x06);
+    POKE(0xd021, 0x06);    
+    
+    NUMSPRITES = _NUMBER_OF_SPRITES_;
     
     for(i=0;i<NUMSPRITES;++i)
     {
@@ -75,14 +80,14 @@ int main()
     clrscr();
     while(1) 
     {
-        gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
+        // gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
         if (MULTIPLEX_DONE) {
             SPRY[NUMSPRITES-2]=XX;
             SPRY[NUMSPRITES-1]=255-XX;
             for(i=0;i<NUMSPRITES-2;++i)
             {
                 SPRX[i] = XX+(i/7)*(yValues[XX]);
-                SPRY[i] = 40+(i&7)*24+(yValues[XX]/2);
+                SPRY[i] = 40+_SPRITE_SEPARATION_*(i&7)+(yValues[XX]>>1);
             }
             ++XX;
             MULTIPLEX_DONE = 0;
