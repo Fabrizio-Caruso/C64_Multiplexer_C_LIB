@@ -92,7 +92,6 @@ const char Colors[] = {
 #include <cbm_screen_charmap.h>
 /******************/
 const char scrolltext[] =
-//   0123456789ABCD 
     "ciao a tutti !"
     " questo e' un "    
     "esempio di sin"

@@ -2,6 +2,7 @@
 CC65_PATH ?=
 SOURCE_PATH ?= ./src
 GRAPHICS_PATH ?= ./graphics
+SID_PATH ?= ./sid
 ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
 
 ASMTEST=$(SOURCE_PATH)/irq_test.s $(GRAPHICS_PATH)/graphics.s
@@ -16,7 +17,7 @@ MULTICFG=--asm-define MULTICOLOR=1 -DMULTI_COLOR
 
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
-
+MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1
@@ -104,4 +105,13 @@ many_sprites_debug:
 	rm $(GRAPHICS_PATH)/*.o
     
  
-
+test_sid_cfg:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) $(MULTICFG) \
+	--asm-define MAXSPR=16  \
+	--asm-define FAST_MODE=1 \
+	$(SID_PATH)/sid.s \
+	$(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) \
+	-o $(BUILD_PATH)/test_sid_cfg.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o
+	rm $(SID_PATH)/*.o
