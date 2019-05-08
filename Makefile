@@ -109,6 +109,8 @@ test_sid_cfg:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	--asm-define DEBUG=1 \
 	$(SID_PATH)/sid.s \
 	$(SOURCE_PATH)/sin_scroller_music.c $(ASMFILES) \
 	-o $(BUILD_PATH)/test_sid_cfg.prg

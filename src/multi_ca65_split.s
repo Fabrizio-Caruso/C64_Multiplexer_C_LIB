@@ -36,7 +36,7 @@ IRQ1LINE = $FC                          ; This is the place on screen where the 
 IRQ2LINE = $2A                          ; This is where sprite displaying begins...
 IRQ3LINE = $CB                          ; Music play just after sprites
 ;-------------------
-MUSIC_CODE = $01                        ; Set to $01 to enable music routines
+;MUSIC_CODE = $01                        ; Set to $01 to enable music routines
 MUSIC_INIT = $1000                      ; Music init address
 MUSIC_PLAY = $1003                      ; Music play address
 ;MAXSPR = 16                             ; Maximum number of sprites
@@ -97,7 +97,7 @@ _INITRASTER:
     LDA #IRQ1LINE                       ; Line where next IRQ happens
     STA VIC_HLINE
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
-    .IF MUSIC_CODE                      ; Music init code
+    .IF .DEFINED(MUSIC_CODE)            ; Music init code
         LDA #$00
         TAX
         TAY
@@ -319,7 +319,7 @@ IRQ2_ENDSPR:
     STA VIC_HLINE
     JMP EXIT_IRQ
 IRQ2_LASTSPR:
-    .IF MUSIC_CODE
+    .IF .DEFINED(MUSIC_CODE)
         LDA #<IRQ3                          ; Was the last sprite,
         .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
             STA IRQVec                          ; vector for kernal ON
@@ -351,7 +351,7 @@ IRQ2_LASTSPR:
         LDA #IRQ1LINE
         STA VIC_HLINE
     .ENDIF
-    .IF MUSIC_CODE
+    .IF .DEFINED(MUSIC_CODE)
 ;-------------------
         IRQ3:
             .IFNDEF USE_KERNAL
@@ -359,7 +359,14 @@ IRQ2_LASTSPR:
                 STX STORE_X                         ; CPU regs after an IRQ
                 STY STORE_Y                         ; for kernal OFF only
             .ENDIF
+            
+            .IFDEF DEBUG
+                INC VIC_BORDERCOLOR
+            .ENDIF
             JSR MUSIC_PLAY
+            .IFDEF DEBUG
+                DEC VIC_BORDERCOLOR
+            .ENDIF            
 ;-------------------
             LDA #<IRQ1                          ; Was the last sprite,
             .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
