@@ -39,28 +39,23 @@ MYCC65 ?= cc65$(EXEEXT) $(INCLUDE_OPTS)
 MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS) 
 
 34_sprites: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=34 $(SOURCE_PATH)/34_sprites.c $(ASMFILES) -o $(BUILD_PATH)/34_sprites.prg
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=34 $(SOURCE_PATH)/34_sprites.c $(ASMFILES) \
+	--asm-define FAST_MODE=1 \
+	-o $(BUILD_PATH)/34_sprites.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
-sin_scroller: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+sin_scroller:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) \
+	--asm-define FAST_MODE=1 \
+	$(MYCFG) --asm-define MAXSPR=16 $(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
-sin_scroller_multicolor: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(MULTICFG) $(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller_multicolor.prg
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-    
-34_sprites_debug:
-	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
-	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define MAXSPR=34 --asm-define DEBUG=1 $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-    
-hello_c128:
-	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) $(SOURCE_PATH)/hello_world.c $(GRAPHICS_PATH)/graphics.s -o $(BUILD_PATH)/hello_c128.prg
+sin_scroller_multicolor:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) --asm-define MAXSPR=16 $(MULTICFG) $(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) \
+	--asm-define FAST_MODE=1 \
+	-o $(BUILD_PATH)/sin_scroller_multicolor.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -77,15 +72,24 @@ sin_scroller_c128:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
-irq_test_case:
-	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) $(SOURCE_PATH)/irq_test_case.c $(ASMTEST) -o $(BUILD_PATH)/irq_test_case.prg
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
 
-all: 34_sprites sin_scroller sin_scroller_multicolor
+all: 34_sprites sin_scroller sin_scroller_multicolor sin_scroller_c128
+
 
 clean:
 	rm -rf *.prg
 	rm -rf $(SOURCE_PATH)/*.o
 	rm -rf ./build/*
 	rm -rf main.s
+
+    
+34_sprites_debug:
+	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) $(SOURCE_PATH)/34_sprites.c -o $(SOURCE_PATH)/34_sprites.s
+	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define MAXSPR=34  $(SOURCE_PATH)/34_sprites.s $(ASMFILES) -o $(BUILD_PATH)/34_sprites_debug.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o
+    
+hello_c128:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) $(SOURCE_PATH)/hello_world.c $(GRAPHICS_PATH)/graphics.s -o $(BUILD_PATH)/hello_c128.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o    
