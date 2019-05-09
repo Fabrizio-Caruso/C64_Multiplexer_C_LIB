@@ -62,7 +62,7 @@ sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define FAST_MODE=1 \
 	--asm-define MAXSPR=16 \
-	$(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -70,7 +70,7 @@ sin_scroller_multicolor:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(MULTICFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/sin_scroller_multicolor.c $(ASMFILES) \
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_multicolor.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -80,15 +80,27 @@ sin_scroller_c128:
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	--code-name CODE2 \
-	$(SOURCE_PATH)/sin_scroller_multicolor.c $(GRAPHICS_PATH)/graphics.s \
+	$(SOURCE_PATH)/sin_scroller.c $(GRAPHICS_PATH)/graphics.s \
 	--code-name CODE \
 	$(SOURCE_PATH)/multi_ca65_split.s \
 	-o $(BUILD_PATH)/sin_scroller_c128.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
+    
+sin_scroller_music:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
+	--asm-define MAXSPR=16  \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	$(SID_PATH)/sid.s \
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_music.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o
+	rm $(SID_PATH)/*.o    
 
-all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_c128
+all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_music sin_scroller_c128 
 
 
 clean:
@@ -105,15 +117,15 @@ many_sprites_debug:
 	rm $(GRAPHICS_PATH)/*.o
     
  
-test_sid_cfg:
+sid_debug:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define DEBUG=1 \
 	$(SID_PATH)/sid.s \
-	$(SOURCE_PATH)/sin_scroller_music.c $(ASMFILES) \
-	-o $(BUILD_PATH)/test_sid_cfg.prg
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_music.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
-	rm $(SID_PATH)/*.o
+	rm $(SID_PATH)/*.o    
