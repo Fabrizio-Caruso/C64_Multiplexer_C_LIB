@@ -125,7 +125,7 @@ sid_debug:
 	--asm-define DEBUG=1 \
 	$(SID_PATH)/sid.s \
 	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
-	-o $(BUILD_PATH)/sin_scroller_music.prg
+	-o $(BUILD_PATH)/sid_debug.prg
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
