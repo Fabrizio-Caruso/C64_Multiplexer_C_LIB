@@ -33,8 +33,8 @@
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
 IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
-IRQ2LINE = $2A                          ; This is where sprite displaying begins...
-IRQ3LINE = $CB                          ; Music play just after sprites
+IRQ2LINE = $00                          ; Music play irq
+IRQ3LINE = $23                          ; This is where sprite displaying begins...
 ;-------------------
 ;MUSIC_CODE = $01                        ; Set to $01 to enable music routines
 MUSIC_INIT = $1000                      ; Music init address
@@ -159,19 +159,32 @@ IRQ1_NOTMORETHAN8:
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
-    LDA #<IRQ2                          ; Set up the sprite display
-    .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ2).
+    .IF .DEFINED(MUSIC_CODE)
+        LDA #<IRQ2
+    .ELSE
+        LDA #<IRQ3
+    .ENDIF
+    .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ3).
         STA IRQVec                          ; Vector for kernal ON
     .ELSE
         STA $FFFE                           ; Vector for kernal OFF
     .ENDIF
-    LDA #>IRQ2
+    .IF .DEFINED(MUSIC_CODE)
+        LDA #>IRQ2
+    .ELSE
+        LDA #>IRQ3
+    .ENDIF
     .IFDEF USE_KERNAL
         STA IRQVec+$0001
     .ELSE
         STA $FFFF
     .ENDIF
-    JMP IRQ2_DIRECT                     ; Go directly; we might be late
+    .IF .DEFINED(MUSIC_CODE)
+        LDA #IRQ2LINE
+    .ELSE
+        LDA #IRQ3LINE
+    .ENDIF
+    STA $D012
 IRQ1_NOSPRITESATALL:
     JMP EXIT_IRQ
 ;-------------------
@@ -251,77 +264,26 @@ IRQ1_SORTLOOP3:
     INC _MULTIPLEX_DONE
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
-; Raster interrupt 2.
-; This is where sprite displaying happens
+; Music Play Irq
 ;-------------------
-IRQ2:
-    .IFNDEF USE_KERNAL
-        STA STORE_A                         ; Fast way to store/restore
-        STX STORE_X                         ; CPU regs after an IRQ
-        STY STORE_Y                         ; for kernal OFF only
-    .ENDIF
-IRQ2_DIRECT:
-    LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
-    LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
-    CLC
-    ADC #$18                            ; 16 lines down from there is
-    BCC IRQ2_NOTOVER                    ; the endpoint for this IRQ
-    LDA #$FF                            ; Endpoint can't be more than $ff
-IRQ2_NOTOVER:
-    STA TEMPVARIABLE
-IRQ2_SPRITELOOP:
-    LDA SORTSPRY,Y
-    CMP TEMPVARIABLE                    ; End of this IRQ?
-    BCS IRQ2_ENDSPR
-    LDX PHYSICALSPRTBL2,Y               ; Physical sprite number x 2
-    STA VIC_SPR0_Y,X                         ; for X & Y coordinate
-    LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
-    ASL                                 ; multiply by 2
-    STA VIC_SPR0_X,X                    ; store into sprite X coord register
-    BCC IRQ2_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Otherwise set the MSB...
-    ORA ORTBL,X                         ; ( set )
-    STA VIC_SPR_HI_X
-    JMP IRQ2_MSBOK
-IRQ2_LOWMSB:
-    LDA VIC_SPR_HI_X
-    AND ANDTBL,X                        ; ( clear )
-    STA VIC_SPR_HI_X
-IRQ2_MSBOK:
-    .IFDEF MULTICOLOR
-        LDA SORTSPRM,Y                      ; Multicolor setup
-        BEQ IRQ2_NO_MULTI
-        LDA VIC_SPR_MCOLOR
-        ORA ORTBL,X
-        STA VIC_SPR_MCOLOR
-        JMP IRQ2_MULTI
-    IRQ2_NO_MULTI:
-        LDA VIC_SPR_MCOLOR
-        AND ANDTBL,X
-        STA VIC_SPR_MCOLOR
-    IRQ2_MULTI:
-    .ENDIF
-    LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
-    LDA SORTSPRF,Y
-    STA SCREEN_RAM+$03F8,X              ; frame
-    LDA SORTSPRC,Y
-    STA VIC_SPR0_COLOR,X                ; color
-    INY
-    BNE IRQ2_SPRITELOOP
-IRQ2_ENDSPR:
-    CMP #$FF                            ; Was it the endmark?
-    BEQ IRQ2_LASTSPR
-    STY SPRIRQCOUNTER
-    SEC                                 ; That coordinate - $07 is the
-    SBC #$07                            ; position for next interrupt
-    CMP VIC_HLINE                           ; Already late from that?
-    BCC IRQ2_DIRECT                     ; Then go directly to next IRQ
-    STA VIC_HLINE
-    JMP EXIT_IRQ
-IRQ2_LASTSPR:
     .IF .DEFINED(MUSIC_CODE)
-        LDA #<IRQ3                          ; Was the last sprite,
-        .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+    IRQ2:
+        .IFNDEF USE_KERNAL
+            STA STORE_A                         ; Fast way to store/restore
+            STX STORE_X                         ; CPU regs after an IRQ
+            STY STORE_Y                         ; for kernal OFF only
+        .ENDIF
+        
+        .IFDEF DEBUG
+            INC VIC_BORDERCOLOR
+        .ENDIF
+        JSR MUSIC_PLAY
+        .IFDEF DEBUG
+            DEC VIC_BORDERCOLOR
+        .ENDIF            
+    ;-------------------
+        LDA #<IRQ3
+        .IFDEF USE_KERNAL
             STA IRQVec                          ; vector for kernal ON
         .ELSE
             STA $FFFE                           ; vector for kernal OFF
@@ -335,54 +297,90 @@ IRQ2_LASTSPR:
         LDA #IRQ3LINE
         STA VIC_HLINE
         JMP EXIT_IRQ
+    .ENDIF
+;---------------------------------------
+; Raster interrupt 2.
+; This is where sprite displaying happens
+;-------------------
+IRQ3:
+    .IFNDEF USE_KERNAL
+        STA STORE_A                         ; Fast way to store/restore
+        STX STORE_X                         ; CPU regs after an IRQ
+        STY STORE_Y                         ; for kernal OFF only
+    .ENDIF
+IRQ3_DIRECT:
+    LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
+    LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
+    CLC
+    ADC #$18                            ; 16 lines down from there is
+    BCC IRQ3_NOTOVER                    ; the endpoint for this IRQ
+    LDA #$FF                            ; Endpoint can't be more than $ff
+IRQ3_NOTOVER:
+    STA TEMPVARIABLE
+IRQ3_SPRITELOOP:
+    LDA SORTSPRY,Y
+    CMP TEMPVARIABLE                    ; End of this IRQ?
+    BCS IRQ3_ENDSPR
+    LDX PHYSICALSPRTBL2,Y               ; Physical sprite number x 2
+    STA VIC_SPR0_Y,X                         ; for X & Y coordinate
+    LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
+    ASL                                 ; multiply by 2
+    STA VIC_SPR0_X,X                    ; store into sprite X coord register
+    BCC IRQ3_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
+    LDA VIC_SPR_HI_X                    ; Otherwise set the MSB...
+    ORA ORTBL,X                         ; ( set )
+    STA VIC_SPR_HI_X
+    JMP IRQ3_MSBOK
+IRQ3_LOWMSB:
+    LDA VIC_SPR_HI_X
+    AND ANDTBL,X                        ; ( clear )
+    STA VIC_SPR_HI_X
+IRQ3_MSBOK:
+    .IFDEF MULTICOLOR
+        LDA SORTSPRM,Y                      ; Multicolor setup
+        BEQ IRQ3_NO_MULTI
+        LDA VIC_SPR_MCOLOR
+        ORA ORTBL,X
+        STA VIC_SPR_MCOLOR
+        JMP IRQ3_MULTI
+    IRQ3_NO_MULTI:
+        LDA VIC_SPR_MCOLOR
+        AND ANDTBL,X
+        STA VIC_SPR_MCOLOR
+    IRQ3_MULTI:
+    .ENDIF
+    LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
+    LDA SORTSPRF,Y
+    STA SCREEN_RAM+$03F8,X              ; frame
+    LDA SORTSPRC,Y
+    STA VIC_SPR0_COLOR,X                ; color
+    INY
+    BNE IRQ3_SPRITELOOP
+IRQ3_ENDSPR:
+    CMP #$FF                            ; Was it the endmark?
+    BEQ IRQ3_LASTSPR
+    STY SPRIRQCOUNTER
+    SEC                                 ; That coordinate - $07 is the
+    SBC #$07                            ; position for next interrupt
+    CMP VIC_HLINE                           ; Already late from that?
+    BCC IRQ3_DIRECT                     ; Then go directly to next IRQ
+    STA VIC_HLINE
+    JMP EXIT_IRQ
+IRQ3_LASTSPR:
+    LDA #<IRQ1                          ; Was the last sprite,
+    .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
+        STA IRQVec                          ; vector for kernal ON
     .ELSE
-        LDA #<IRQ1                          ; Was the last sprite,
-        .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-            STA IRQVec                          ; vector for kernal ON
-        .ELSE
-            STA $FFFE                           ; vector for kernal OFF
-        .ENDIF
-        LDA #>IRQ1
-        .IFDEF USE_KERNAL
-            STA IRQVec+$0001                    ; vector for kernal ON
-        .ELSE
-            STA $FFFF                           ; vector for kernal OFF
-        .ENDIF
-        LDA #IRQ1LINE
-        STA VIC_HLINE
+        STA $FFFE                           ; vector for kernal OFF
     .ENDIF
-    .IF .DEFINED(MUSIC_CODE)
-;-------------------
-        IRQ3:
-            .IFNDEF USE_KERNAL
-                STA STORE_A                         ; Fast way to store/restore
-                STX STORE_X                         ; CPU regs after an IRQ
-                STY STORE_Y                         ; for kernal OFF only
-            .ENDIF
-            
-            .IFDEF DEBUG
-                INC VIC_BORDERCOLOR
-            .ENDIF
-            JSR MUSIC_PLAY
-            .IFDEF DEBUG
-                DEC VIC_BORDERCOLOR
-            .ENDIF            
-;-------------------
-            LDA #<IRQ1                          ; Was the last sprite,
-            .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-                STA IRQVec                          ; vector for kernal ON
-            .ELSE
-                STA $FFFE                           ; vector for kernal OFF
-            .ENDIF
-            LDA #>IRQ1
-            .IFDEF USE_KERNAL
-                STA IRQVec+$0001                    ; vector for kernal ON
-            .ELSE
-                STA $FFFF                           ; vector for kernal OFF
-            .ENDIF
-            LDA #IRQ1LINE
-            STA VIC_HLINE
+    LDA #>IRQ1
+    .IFDEF USE_KERNAL
+        STA IRQVec+$0001                    ; vector for kernal ON
+    .ELSE
+        STA $FFFF                           ; vector for kernal OFF
     .ENDIF
+    LDA #IRQ1LINE
+    STA VIC_HLINE
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
@@ -398,7 +396,6 @@ EXIT_IRQ:                               ; Exit IRQ code.
             JMP $EA81
         .ENDIF
     .ELSEIF .DEFINED(__C128__) 
-        ;JMP $FA65
         PLA
         STA $FF00
         PLA

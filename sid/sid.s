@@ -1,3 +1,3 @@
 .segment "SID"
-.incbin "./SHAKE-AND-BAKE.PRG", $02
+.incbin "./Shake_and_Bake_fix.sid", $7e
 .code
