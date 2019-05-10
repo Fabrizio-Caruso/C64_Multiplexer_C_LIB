@@ -18,6 +18,8 @@ MULTICFG=--asm-define MULTICOLOR=1 -DMULTI_COLOR
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
 MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg --asm-define USE_KERNAL=1
+MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg --asm-define USE_KERNAL=1
+
 
 ifneq ($(COMSPEC),)
 DO_WIN:=1
@@ -75,6 +77,19 @@ sin_scroller_multicolor:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
+
+sin_scroller_music:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
+	--asm-define MAXSPR=16  \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	$(SID_PATH)/sid.s \
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_music.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o
+	rm $(SID_PATH)/*.o        
+    
 sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
@@ -87,18 +102,20 @@ sin_scroller_c128:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
-    
-sin_scroller_music:
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
-	--asm-define MAXSPR=16  \
+sin_scroller_music_c128:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYSIDC128CFG) \
+	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
-	$(SID_PATH)/sid.s \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
-	-o $(BUILD_PATH)/sin_scroller_music.prg
+	$(SID_PATH)/sid_at_2400.s \
+	--code-name CODE2 \
+	$(SOURCE_PATH)/sin_scroller.c $(GRAPHICS_PATH)/graphics.s \
+	--code-name CODE \
+	$(SOURCE_PATH)/multi_ca65_split.s \
+	-o $(BUILD_PATH)/sin_scroller_music_c128.prg
 	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-	rm $(SID_PATH)/*.o    
+	rm $(GRAPHICS_PATH)/*.o   
+
 
 all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_music sin_scroller_c128 
 

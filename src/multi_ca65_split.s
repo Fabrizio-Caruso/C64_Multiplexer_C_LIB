@@ -37,8 +37,14 @@ IRQ2LINE = $00                          ; Music play irq
 IRQ3LINE = $23                          ; This is where sprite displaying begins...
 ;-------------------
 ;MUSIC_CODE = $01                        ; Set to $01 to enable music routines
-MUSIC_INIT = $1000                      ; Music init address
-MUSIC_PLAY = $1003                      ; Music play address
+.IF .DEFINED(__C64__)
+    MUSIC_INIT = $1000                      ; Music init address
+    MUSIC_PLAY = $1003                      ; Music play address
+.ENDIF
+.IF .DEFINED(__C128__)
+    MUSIC_INIT = $2400                      ; Music init address
+    MUSIC_PLAY = $2403                      ; Music play address
+.ENDIF    
 ;MAXSPR = 16                             ; Maximum number of sprites
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
