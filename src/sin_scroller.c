@@ -20,7 +20,15 @@ extern unsigned char SPRX[];
 extern unsigned char SPRY[];
 extern unsigned char SPRC[];
 extern unsigned char SPRF[];
+#if defined(MULTI_COLOR)
 extern unsigned char SPRM[];
+#endif
+#if defined(EXPAND_X)
+extern unsigned char SPREX[];
+#endif
+#if defined(EXPAND_Y)
+extern unsigned char SPREY[];
+#endif
 extern unsigned char NUMSPRITES;
 extern unsigned char SPRUPDATEFLAG;
 extern unsigned char SPRIRQCOUNTER;
@@ -119,9 +127,15 @@ int main()
     unsigned char DL = 0;
     unsigned char CP = 0;
     unsigned char i;
-    #if defined(MULTI_COLOR)
-    unsigned char buf;
+    #if defined(MULTI_COLOR) 
+    unsigned char bufm;
     #endif
+    #if defined(EXPAND_X) 
+    unsigned char bufex;
+    #endif
+    #if defined(EXPAND_Y) 
+    unsigned char bufey;
+    #endif    
 /******************/
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);
@@ -141,6 +155,12 @@ int main()
         #if defined(MULTI_COLOR)
         SPRM[i] = i&1;
         #endif
+        #if defined(EXPAND_X)
+        SPREX[i] = i&1;
+        #endif
+        #if defined(EXPAND_Y)
+        SPREY[i] = i&1;
+        #endif        
     }
 
     #if defined(MULTI_COLOR)
@@ -158,8 +178,14 @@ int main()
             // Check if we moved one sprite/char out of screen.
             if (DL == 12) {
                 #if defined(MULTI_COLOR)
-                buf = SPRM[0];
+                bufm = SPRM[0];
                 #endif
+                #if defined(EXPAND_X)
+                bufex = SPREX[0];
+                #endif   
+                #if defined(EXPAND_Y)
+                bufey = SPREY[0];
+                #endif                 
                 // Move all sprites/linetext 1 chars forward
                 for(i=1;i<NUMSPRITES;++i)
                 {
@@ -167,12 +193,24 @@ int main()
                     #if defined(MULTI_COLOR)
                     SPRM[i-1]=SPRM[i];
                     #endif
+                    #if defined(EXPAND_X)
+                    SPREX[i-1]=SPREX[i];
+                    #endif
+                    #if defined(EXPAND_Y)
+                    SPREY[i-1]=SPREY[i];
+                    #endif                        
                 }
                 // Insert new char from scrolltext
                 SPRF[NUMSPRITES-1]=GFX_START_INDEX+(scrolltext[SP++]);
                 #if defined(MULTI_COLOR)
-                SPRM[NUMSPRITES-1]=buf;
+                SPRM[NUMSPRITES-1]=bufm;
                 #endif
+                #if defined(EXPAND_X)
+                SPREX[NUMSPRITES-1]=bufex;
+                #endif     
+                #if defined(EXPAND_Y)
+                SPREY[NUMSPRITES-1]=bufey;
+                #endif                   
                 // End of Scrolltext?
                 if (SP>=strlen(scrolltext)-1) { SP=0; }
                 // Reset Sinus and sprites scroll pointer

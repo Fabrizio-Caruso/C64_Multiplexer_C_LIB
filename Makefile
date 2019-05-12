@@ -14,6 +14,9 @@ MYCCFLAGS=-t c64 -O -Cl
 MYC128CCFLAGS=-t c128 -O -Cl
 MYDEBUGCCFLAGS=-t c64
 MULTICFG=--asm-define MULTICOLOR=1 -DMULTI_COLOR
+EXPANDXCFG=--asm-define EXPANDX=1 -DEXPAND_X
+EXPANDYCFG=--asm-define EXPANDY=1 -DEXPAND_Y
+
 
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
@@ -77,6 +80,24 @@ sin_scroller_multicolor:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
+    
+sin_scroller_expand_x:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) \
+	--asm-define MAXSPR=16  \
+	--asm-define FAST_MODE=1 \
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_expand_x.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o    
+    
+sin_scroller_expand_y:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDYCFG) \
+	--asm-define MAXSPR=16  \
+	--asm-define FAST_MODE=1 \
+	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_expand_y.prg
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o   
 
 sin_scroller_music:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
@@ -118,7 +139,7 @@ sin_scroller_music_c128:
 	rm $(GRAPHICS_PATH)/*.o   
 
 
-all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
+all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_expand_x sin_scroller_expand_y sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
 
 
 clean:
@@ -151,3 +172,6 @@ sid_debug:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
+
+    
+     

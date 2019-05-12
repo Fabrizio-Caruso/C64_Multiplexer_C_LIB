@@ -25,10 +25,18 @@
    .IFDEF MULTICOLOR                    ; If MULTICOLOR flag is set, then
         .EXPORT _SPRM                   ; export _SPRM SPRites Multicolor array of flags
    .ENDIF
+   .IFDEF EXPANDX                       ; If EXPANDX flag is set, then
+        .EXPORT _SPREX                  ; export _SPRM SPRites EXPANDX array of flags
+   .ENDIF
+   .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
+        .EXPORT _SPREY                  ; export _SPRM SPRites EXPANDY array of flags
+   .ENDIF   
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
 ;MULTICOLOR = $01                        ; Set to != $00 to enable multicolor sprites flag
+;EXPANDX= $01                            ; Set to != $00 to enable expand_x sprites flag
+;EXPANDY= $01                            ; Set to != $00 to enable expand_y sprites flag
 ;-------------------
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
@@ -45,7 +53,7 @@ IRQ3LINE = $23                          ; Sprites display IRQ at rasterline $023
     MUSIC_INIT = $2400                  ; Music init address for C128 specific compilation
     MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
 .ENDIF    
-;MAXSPR = 16                             ; Maximum number of sprites
+;MAXSPR = 16                            ; Maximum number of sprites
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
@@ -254,9 +262,17 @@ IRQ1_SORTLOOP3:
     LDA SPRC,Y
     STA SORTSPRC,X
     .IFDEF MULTICOLOR                   ; If sprites MULTICOLOR flag is on then
-        LDA SPRM,Y                      ; sort SPRites Multicolor flags array
+        LDA SPRM,Y                      ; sort sprites Multicolor flags array
         STA SORTSPRM,X
     .ENDIF
+    .IFDEF EXPANDX                      ; If sprites expand_x flag is on then
+        LDA SPREX,Y                     ; sort sprite expand_x flags array
+        STA SORTSPREX,X
+    .ENDIF
+    .IFDEF EXPANDY                      ; If sprites expand_y flag is on then
+        LDA SPREY,Y                     ; sort sprite expand_y flags array
+        STA SORTSPREY,X
+    .ENDIF    
     INX
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
@@ -356,6 +372,32 @@ IRQ3_MSBOK:
         STA VIC_SPR_MCOLOR              ; and store new value back to the VIC_SPR_MCOLOR register.
     IRQ3_MULTI:
     .ENDIF
+    .IFDEF EXPANDX                      ; If EXPANDX mode flag is ON
+        LDA SORTSPREX,Y                 ; check if actual sprite is x-expanded 
+        BEQ IRQ3_NO_EXPANDX             ; No -> clear sprite related bit into VIC_SPR_EXP_X
+        LDA VIC_SPR_EXP_X               ; Load actual VIC_SPR_EXP_X status
+        ORA ORTBL,X                     ; Do a logic OR operation to set actual sprite bit ON
+        STA VIC_SPR_EXP_X               ; and store new value back to the VIC_SPR_EXP_X register.
+        JMP IRQ3_EXPANDX
+    IRQ3_NO_EXPANDX:
+        LDA VIC_SPR_EXP_X               ; Load actual VIC_SPR_EXP_X status
+        AND ANDTBL,X                    ; Do a logic AND operation to set actual sprite bit OFF
+        STA VIC_SPR_EXP_X               ; and store new value back to the VIC_SPR_EXP_X register.
+    IRQ3_EXPANDX:
+    .ENDIF
+    .IFDEF EXPANDY                      ; If EXPANDY mode flag is ON
+        LDA SORTSPREY,Y                 ; check if actual sprite is y-expanded
+        BEQ IRQ3_NO_EXPANDY             ; No -> clear sprite related bit into VIC_SPR_EXP_Y
+        LDA VIC_SPR_EXP_Y               ; Load actual VIC_SPR_EXP_Y status
+        ORA ORTBL,X                     ; Do a logic OR operation to set actual sprite bit ON
+        STA VIC_SPR_EXP_Y               ; and store new value back to the VIC_SPR_EXP_Y register.
+        JMP IRQ3_EXPANDY
+    IRQ3_NO_EXPANDY:
+        LDA VIC_SPR_EXP_Y               ; Load actual VIC_SPR_EXP_Y status
+        AND ANDTBL,X                    ; Do a logic AND operation to set actual sprite bit OFF
+        STA VIC_SPR_EXP_Y               ; and store new value back to the VIC_SPR_EXP_Y register.
+    IRQ3_EXPANDY:
+    .ENDIF  
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
     STA SCREEN_RAM+$03F8,X              ; Set sprite frame pointer to actual sprite register
@@ -425,6 +467,16 @@ SPRF:
     SPRM:
         .RES MAXSPR, $00                ; Unsorted sprites multicolor flags array
     .ENDIF
+    .IFDEF EXPANDX
+    _SPREX:
+    SPREX:
+        .RES MAXSPR, $00                ; Unsorted sprites EXPANDX flags array
+    .ENDIF
+    .IFDEF EXPANDY
+    _SPREY:
+    SPREY:
+        .RES MAXSPR, $00                ; Unsorted sprites EXPANDY flags array
+    .ENDIF    
 ;-------------------
 SORTSPRX:
     .RES MAXSPR, $00                    ; Sorted sprites X coords array
@@ -438,6 +490,14 @@ SORTSPRF:
     SORTSPRM:
         .RES MAXSPR, $00                ; Sorted sprites multicolor flags array
     .ENDIF
+    .IFDEF EXPANDX
+    SORTSPREX:
+        .RES MAXSPR, $00                ; Sorted sprites EXPANDX flags array
+    .ENDIF
+    .IFDEF EXPANDY
+    SORTSPREY:
+        .RES MAXSPR, $00                ; Sorted sprites EXPANDY flags array
+    .ENDIF    
 ;-------------------
 D015TBL:
     .BYTE %00000000                     ; Table of sprites that are "on"
