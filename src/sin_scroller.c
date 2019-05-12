@@ -172,7 +172,7 @@ int main()
 *******************/
     while(1) 
     {
-        //gotoxy(1,1); cprintf("%02u",DL);      // Value dump for debug
+        // gotoxy(1,1); cprintf("%02u",DL);      // Value dump for debug
         // Check if we are in sync with Multiplexer
         if (MULTIPLEX_DONE) {
             // Check if we moved one sprite/char out of screen.

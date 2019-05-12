@@ -1,3 +1,6 @@
+.IF .DEFINED(__C128__)
+    .SEGMENT "CODE2"
+.ENDIF
 ;--------------------------------------
 ; C64 sprites multiplexer
 ; Based on 32 sprites multiplexer
