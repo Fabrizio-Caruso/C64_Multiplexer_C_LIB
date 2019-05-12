@@ -4,10 +4,10 @@
 ; by Lasse Oorni (Cadaver)
 ;-------------------
     .INCLUDE "zeropage.inc"
-    .IF .DEFINED(__C64__)                       ; Include file for multi platform compilation
-        .INCLUDE "c64.inc"
+    .IF .DEFINED(__C64__)
+        .INCLUDE "c64.inc"              ; Include file for C64 specific compilation
     .ELSEIF .DEFINED(__C128__)
-        .INCLUDE "c128.inc"
+        .INCLUDE "c128.inc"             ; Include file for C128 specific compilation
     .ELSEIF .DEFINED(__CBM510__)
         .INCLUDE "cbm510.inc"
     .ENDIF 
@@ -22,8 +22,8 @@
    .EXPORT _SPRY
    .EXPORT _SPRC
    .EXPORT _SPRF
-   .IFDEF MULTICOLOR
-        .EXPORT _SPRM
+   .IFDEF MULTICOLOR                    ; If MULTICOLOR flag is set, then
+        .EXPORT _SPRM                   ; export _SPRM SPRites Multicolor array of flags
    .ENDIF
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
@@ -32,18 +32,18 @@
 ;-------------------
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
-IRQ1LINE = $FC                          ; This is the place on screen where the sorting IRQ happens
-IRQ2LINE = $00                          ; Music play irq
-IRQ3LINE = $23                          ; This is where sprite displaying begins...
+IRQ1LINE = $FC                          ; Sorting code IRQ at rasterline $0FC
+IRQ2LINE = $00                          ; Music play IRQ at rasterline $000
+IRQ3LINE = $23                          ; Sprites display IRQ at rasterline $023.
 ;-------------------
-;MUSIC_CODE = $01                        ; Set to $01 to enable music routines
+;MUSIC_CODE = $01                       ; Set to $01 to enable music routines
 .IF .DEFINED(__C64__)
-    MUSIC_INIT = $1000                      ; Music init address
-    MUSIC_PLAY = $1003                      ; Music play address
+    MUSIC_INIT = $1000                  ; Music init address for C64 specific compilation
+    MUSIC_PLAY = $1003                  ; Music play address for C64 specific compilation
 .ENDIF
 .IF .DEFINED(__C128__)
-    MUSIC_INIT = $2400                      ; Music init address
-    MUSIC_PLAY = $2403                      ; Music play address
+    MUSIC_INIT = $2400                  ; Music init address for C128 specific compilation
+    MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
 .ENDIF    
 ;MAXSPR = 16                             ; Maximum number of sprites
 ;-------------------
@@ -63,54 +63,54 @@ _INITRASTER:
     LDA #$7F
     STA CIA1_ICR                        ; CIA interrupt off
     SEI
-    .IFDEF __C64__                       ; C64 RAM setup
+    .IFDEF __C64__                      ; C64 RAM setup
         .IFDEF USE_KERNAL
-            LDA #$36                            ; Switch kernal ON
+            LDA #$36                    ; Switch kernal ON
         .ELSE
-            LDA #$35                            ; Switch kernal OFF
+            LDA #$35                    ; Switch kernal OFF
         .ENDIF
         STA $01
     .ENDIF
 ;-------------------
-    LDA #<IRQ1                          ; Setup IRQ vector
+    LDA #<IRQ1                          ; Load low byte of Setup IRQ vector
     .IFDEF USE_KERNAL
-        STA IRQVec                          ; Kernal ON vector
+        STA IRQVec                      ; Store it into vector used if Kernal is ON,
     .ELSE
-        STA $FFFE                           ; Kernal OFF vector
+        STA $FFFE                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
-    LDA #>IRQ1
+    LDA #>IRQ1                          ; Load hi byte of Setup IRQ vector
     .IFDEF USE_KERNAL
-        STA IRQVec+$0001                    ; Kernal ON vector
+        STA IRQVec+$0001                ; Store it into vector used if Kernal is ON,
     .ELSE
-        STA $FFFF                           ; Kernal OFF vector
+        STA $FFFF                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
-    LDA #<IRQ_RTI                       ; Avoid problems if user
+    LDA #<IRQ_RTI                       ; Load low byte of unarmed RTI (disable RESTORE key)
     .IFDEF USE_KERNAL
-        STA NMIVec                          ; press RESTORE key during
+        STA NMIVec                      ; Store it into vector used if Kernal is ON,
     .ELSE
-        STA $FFFA                           ; program execution...
+        STA $FFFA                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
-    LDA #>IRQ_RTI                       ; ... which mean:
+    LDA #>IRQ_RTI                       ; Load hi byte of unarmed RTI (disable RESTORE key)
     .IFDEF USE_KERNAL
-        STA NMIVec+$0001                    ; disable "RESTORE"
+        STA NMIVec+$0001                ; Store it into vector used if Kernal is ON,
     .ELSE
-        STA $FFFB                           ; key.
+        STA $FFFB                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
     LDA #$01
-    STA VIC_IMR                         ; Raster interrupt on
-    LDA #$1B                            ; High bit of interrupt position = 0
-    STA VIC_CTRL1
-    LDA #IRQ1LINE                       ; Line where next IRQ happens
-    STA VIC_HLINE
+    STA VIC_IMR                         ; Enable raster IRQs.
+    LDA #$1B
+    STA VIC_CTRL1                       ; Set high bit of interrupt position = $0xx
+    LDA #IRQ1LINE
+    STA VIC_HLINE                       ; Set position where first IRQ happens.
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
     .IF .DEFINED(MUSIC_CODE)            ; Music init code
-        LDA #$00
-        TAX
-        TAY
-        JSR MUSIC_INIT
+        LDA #$00                        ; Load Accumulator with sub tune value to initialize
+        TAX                             ; then move it to X
+        TAY                             ; and move it to Y
+        JSR MUSIC_INIT                  ; Call MUSIC_INIT subroutine
     .ENDIF
-    CLI
-    RTS
+    CLI                                 ; Let IRQs happen.
+    RTS                                 ; Back to where he came from.
 ;---------------------------------------
 ; Routine to init the
 ; sprite multiplexing system
@@ -134,9 +134,9 @@ IS_ORDERLIST:
 ;-------------------
 IRQ1:
     .IFNDEF USE_KERNAL
-        STA STORE_A                         ; Fast way to store/restore
-        STX STORE_X                         ; CPU regs after an IRQ
-        STY STORE_Y                         ; for kernal OFF only
+        STA STORE_A                     ; Fast way to store/restore
+        STX STORE_X                     ; CPU regs after an IRQ
+        STY STORE_Y                     ; for kernal OFF only
     .ENDIF
     LDA #$FF                            ; Move all sprites
     STA VIC_SPR0_Y                      ; to the bottom to prevent
@@ -165,42 +165,42 @@ IRQ1_NOTMORETHAN8:
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
-    .IF .DEFINED(MUSIC_CODE)
-        LDA #<IRQ2
+    .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
+        LDA #<IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,
     .ELSE
-        LDA #<IRQ3
-    .ENDIF
-    .IFDEF USE_KERNAL                   ; preparing vector for next IRQ (IRQ3).
-        STA IRQVec                          ; Vector for kernal ON
-    .ELSE
-        STA $FFFE                           ; Vector for kernal OFF
-    .ENDIF
-    .IF .DEFINED(MUSIC_CODE)
-        LDA #>IRQ2
-    .ELSE
-        LDA #>IRQ3
+        LDA #<IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ENDIF
     .IFDEF USE_KERNAL
-        STA IRQVec+$0001
+        STA IRQVec                      ; Store low byte into vector used if Kernal is ON,
     .ELSE
-        STA $FFFF
+        STA $FFFE                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
-    .IF .DEFINED(MUSIC_CODE)
-        LDA #IRQ2LINE
+    .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
+        LDA #>IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,
     .ELSE
-        LDA #IRQ3LINE
+        LDA #>IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ENDIF
-    STA $D012
+    .IFDEF USE_KERNAL
+        STA IRQVec+$0001                ; Store hi byte into vector used if Kernal is ON,
+    .ELSE
+        STA $FFFF                       ; otherwise store it into vector used if Kernal is OFF
+    .ENDIF
+    .IF .DEFINED(MUSIC_CODE)            ; If MUSIC_CODE is defined
+        LDA #IRQ2LINE                   ; then load raster line where start play routine
+    .ELSE
+        LDA #IRQ3LINE                   ; otherwise load display routine raster position
+    .ENDIF
+    STA VIC_HLINE                       ; set new IRQ starting position
 IRQ1_NOSPRITESATALL:
     JMP EXIT_IRQ
 ;-------------------
 IRQ1_BEGINSORT:
     .IFDEF DEBUG 
-        INC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
+        INC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
     .IFDEF FAST_MODE 
-        LDA #$01
-        STA VIC_CLK_128     
+        LDA #$01                        ; Enable "2 mhz mode under the border" if this code is
+        STA VIC_CLK_128                 ; executed on C128. On other machines this store is useless.
     .ENDIF    
     LDX #MAXSPR                         ; We needo to sort
     DEX                                 ; this sprite?
@@ -253,72 +253,73 @@ IRQ1_SORTLOOP3:
     STA SORTSPRF,X
     LDA SPRC,Y
     STA SORTSPRC,X
-    .IFDEF MULTICOLOR
-        LDA SPRM,Y
+    .IFDEF MULTICOLOR                   ; If sprites MULTICOLOR flag is on then
+        LDA SPRM,Y                      ; sort SPRites Multicolor flags array
         STA SORTSPRM,X
     .ENDIF
     INX
     CPX SORTEDSPRITES
     BCC IRQ1_SORTLOOP3
     .IFDEF DEBUG
-        DEC VIC_BORDERCOLOR                 ; Show rastertime usage for debug.
+        DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
     .IFDEF FAST_MODE
-        LDA #$00
-        STA VIC_CLK_128
+        LDA #$00                        ; Disable "2 mhz mode under the border" if this code is
+        STA VIC_CLK_128                 ; executed on C128. On other machines this store is useless.
     .ENDIF    
-    INC _MULTIPLEX_DONE
+    INC _MULTIPLEX_DONE                 ; Set _MULTIPLEX_DONE flag to 1 to keep MAIN code in sync with multiplexer.
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
+; Raster Interrupt 2
 ; Music Play Irq
 ;-------------------
     .IF .DEFINED(MUSIC_CODE)
     IRQ2:
         .IFNDEF USE_KERNAL
-            STA STORE_A                         ; Fast way to store/restore
-            STX STORE_X                         ; CPU regs after an IRQ
-            STY STORE_Y                         ; for kernal OFF only
+            STA STORE_A                 ; Fast way to store/restore
+            STX STORE_X                 ; CPU regs after an IRQ
+            STY STORE_Y                 ; for kernal OFF only
         .ENDIF
         
         .IFDEF DEBUG
-            INC VIC_BORDERCOLOR
+            INC VIC_BORDERCOLOR         ; Change border color for debug
         .ENDIF
-        JSR MUSIC_PLAY
+        JSR MUSIC_PLAY                  ; Jump to MUSIC_PLAY subroutine
         .IFDEF DEBUG
-            DEC VIC_BORDERCOLOR
+            DEC VIC_BORDERCOLOR         ; Change border color for debug
         .ENDIF            
     ;-------------------
-        LDA #<IRQ3
+        LDA #<IRQ3                      ; Load low byte of sprites display IRQ vector
         .IFDEF USE_KERNAL
-            STA IRQVec                          ; vector for kernal ON
+            STA IRQVec                  ; Store it into vector used if Kernal is ON,
         .ELSE
-            STA $FFFE                           ; vector for kernal OFF
+            STA $FFFE                   ; otherwise store it into vector used if Kernal is OFF
         .ENDIF
-        LDA #>IRQ3
+        LDA #>IRQ3                      ; Load hi byte of sprites display IRQ vector
         .IFDEF USE_KERNAL
-            STA IRQVec+$0001                    ; vector for kernal ON
+            STA IRQVec+$0001            ; Store it into vector used if Kernal is ON
         .ELSE
-            STA $FFFF                           ; vector for kernal OFF
+            STA $FFFF                   ; otherwise store it into vector used if Kernal is OFF
         .ENDIF
-        LDA #IRQ3LINE
-        STA VIC_HLINE
-        JMP EXIT_IRQ
+        LDA #IRQ3LINE                   ; Load position where display IRQ happens,
+        STA VIC_HLINE                   ; and set it.
+        JMP EXIT_IRQ                    ; Exit from IRQ.
     .ENDIF
 ;---------------------------------------
-; Raster interrupt 2.
+; Raster interrupt 3.
 ; This is where sprite displaying happens
 ;-------------------
 IRQ3:
     .IFNDEF USE_KERNAL
-        STA STORE_A                         ; Fast way to store/restore
-        STX STORE_X                         ; CPU regs after an IRQ
-        STY STORE_Y                         ; for kernal OFF only
+        STA STORE_A                     ; Fast way to store/restore
+        STX STORE_X                     ; CPU regs after an IRQ
+        STY STORE_Y                     ; for kernal OFF only
     .ENDIF
 IRQ3_DIRECT:
     LDY SPRIRQCOUNTER                   ; Take next sorted sprite number
     LDA SORTSPRY,Y                      ; Take Y-coord of first new sprite
     CLC
-    ADC #$18                            ; 16 lines down from there is
+    ADC #$18                            ; $18 lines down from there is
     BCC IRQ3_NOTOVER                    ; the endpoint for this IRQ
     LDA #$FF                            ; Endpoint can't be more than $ff
 IRQ3_NOTOVER:
@@ -328,38 +329,38 @@ IRQ3_SPRITELOOP:
     CMP TEMPVARIABLE                    ; End of this IRQ?
     BCS IRQ3_ENDSPR
     LDX PHYSICALSPRTBL2,Y               ; Physical sprite number x 2
-    STA VIC_SPR0_Y,X                         ; for X & Y coordinate
+    STA VIC_SPR0_Y,X                    ; for X & Y coordinate
     LDA SORTSPRX,Y                      ; Load sorted sprite X coordinate
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X,X                    ; store into sprite X coord register
     BCC IRQ3_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Otherwise set the MSB...
-    ORA ORTBL,X                         ; ( set )
-    STA VIC_SPR_HI_X
+    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
+    ORA ORTBL,X                         ; Do a logic OR operation to set actual sprite bit ON
+    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
     JMP IRQ3_MSBOK
 IRQ3_LOWMSB:
-    LDA VIC_SPR_HI_X
-    AND ANDTBL,X                        ; ( clear )
-    STA VIC_SPR_HI_X
+    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
+    AND ANDTBL,X                        ; Do a logic AND operation to set actual sprite bit OFF
+    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
 IRQ3_MSBOK:
-    .IFDEF MULTICOLOR
-        LDA SORTSPRM,Y                      ; Multicolor setup
-        BEQ IRQ3_NO_MULTI
-        LDA VIC_SPR_MCOLOR
-        ORA ORTBL,X
-        STA VIC_SPR_MCOLOR
+    .IFDEF MULTICOLOR                   ; If multicolor mode flag is ON
+        LDA SORTSPRM,Y                  ; check if actual sprite is MULTI or SINGLE color mode
+        BEQ IRQ3_NO_MULTI               ; No -> clear sprite related bit into VIC_SPR_MCOLOR
+        LDA VIC_SPR_MCOLOR              ; Load actual VIC_SPR_MCOLOR status
+        ORA ORTBL,X                     ; Do a logic OR operation to set actual sprite bit ON
+        STA VIC_SPR_MCOLOR              ; and store new value back to the VIC_SPR_MCOLOR register.
         JMP IRQ3_MULTI
     IRQ3_NO_MULTI:
-        LDA VIC_SPR_MCOLOR
-        AND ANDTBL,X
-        STA VIC_SPR_MCOLOR
+        LDA VIC_SPR_MCOLOR              ; Load actual VIC_SPR_MCOLOR status
+        AND ANDTBL,X                    ; Do a logic AND operation to set actual sprite bit OFF
+        STA VIC_SPR_MCOLOR              ; and store new value back to the VIC_SPR_MCOLOR register.
     IRQ3_MULTI:
     .ENDIF
     LDX PHYSICALSPRTBL1,Y               ; Physical sprite number x 1
     LDA SORTSPRF,Y
-    STA SCREEN_RAM+$03F8,X              ; frame
+    STA SCREEN_RAM+$03F8,X              ; Set sprite frame pointer to actual sprite register
     LDA SORTSPRC,Y
-    STA VIC_SPR0_COLOR,X                ; color
+    STA VIC_SPR0_COLOR,X                ; Set sprite color to actual sprite color register
     INY
     BNE IRQ3_SPRITELOOP
 IRQ3_ENDSPR:
@@ -368,80 +369,74 @@ IRQ3_ENDSPR:
     STY SPRIRQCOUNTER
     SEC                                 ; That coordinate - $07 is the
     SBC #$07                            ; position for next interrupt
-    CMP VIC_HLINE                           ; Already late from that?
-    BCC IRQ3_DIRECT                     ; Then go directly to next IRQ
-    STA VIC_HLINE
-    JMP EXIT_IRQ
+    CMP VIC_HLINE                       ; Already late from that?
+    BCC IRQ3_DIRECT                     ; Then go directly to next IRQ directly
+    STA VIC_HLINE                       ; otherwise set new IRQ position
+    JMP EXIT_IRQ                        ; and normally exit this IRQ.
 IRQ3_LASTSPR:
-    LDA #<IRQ1                          ; Was the last sprite,
-    .IFDEF USE_KERNAL                   ; go back to irq1 (sorting interrupt)
-        STA IRQVec                          ; vector for kernal ON
-    .ELSE
-        STA $FFFE                           ; vector for kernal OFF
-    .ENDIF
-    LDA #>IRQ1
+    LDA #<IRQ1                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
-        STA IRQVec+$0001                    ; vector for kernal ON
+        STA IRQVec                      ; Store it into vector used if Kernal is ON,
     .ELSE
-        STA $FFFF                           ; vector for kernal OFF
+        STA $FFFE                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
-    LDA #IRQ1LINE
-    STA VIC_HLINE
+    LDA #>IRQ1                          ; Load hi byte of sort IRQ vector
+    .IFDEF USE_KERNAL
+        STA IRQVec+$0001                ; Store it into vector used if Kernal is ON
+    .ELSE
+        STA $FFFF                       ; otherwise store it into vector used if Kernal is OFF
+    .ENDIF
+    LDA #IRQ1LINE                       ; Load position where sort IRQ happens,
+    STA VIC_HLINE                       ; and set it.
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
     .IF .DEFINED(__C64__)
         .IF .NOT .DEFINED(USE_KERNAL)
-            STORE_A = *+$0001                       ; Restore original registers value
+            STORE_A = *+$0001           ; Restore original registers value
             LDA #$00
-            STORE_X = *+$0001                       ; at the original values they have before
+            STORE_X = *+$0001           ; at the original values they have before
             LDX #$00
-            STORE_Y = *+$0001                       ; IRQ call
+            STORE_Y = *+$0001           ; IRQ call
             LDY #$00         
         .ELSE
-            JMP $EA81
+            JMP $EA81                   ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
         .ENDIF
     .ELSEIF .DEFINED(__C128__) 
-        PLA
-        STA $FF00
-        PLA
-        TAY
-        PLA
-        TAX
-        PLA
+            JMP $FF33                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
 _SPRX:
 SPRX:
-    .RES MAXSPR, $00                    ; Unsorted sprite table
+    .RES MAXSPR, $00                    ; Unsorted sprites X coords array
 _SPRY:
 SPRY:
-    .RES MAXSPR, $00
+    .RES MAXSPR, $00                    ; Unsorted sprites Y coords array
 _SPRC:
 SPRC:
-    .RES MAXSPR, $00
+    .RES MAXSPR, $00                    ; Unsorted sprites colors array
 _SPRF:
 SPRF:
-    .RES MAXSPR, $00
+    .RES MAXSPR, $00                    ; Unsorted sprites frame pointer array
     .IFDEF MULTICOLOR
     _SPRM:
     SPRM:
-        .RES MAXSPR, $00
+        .RES MAXSPR, $00                ; Unsorted sprites multicolor flags array
     .ENDIF
 ;-------------------
 SORTSPRX:
-    .RES MAXSPR, $00                    ; Sorted sprite table
+    .RES MAXSPR, $00                    ; Sorted sprites X coords array
 SORTSPRY:
-    .RES MAXSPR+$01, $00                ; Must be one byte extra for the $ff endmark
+    .RES MAXSPR+$01, $00                ; Sorted sprites Y coords array, one byte extra for the $FF endmark
 SORTSPRC:
-    .RES MAXSPR, $00
+    .RES MAXSPR, $00                    ; Sorted sprites colors array
 SORTSPRF:
-    .RES MAXSPR, $00
+    .RES MAXSPR, $00                    ; Sorted sprites frame pointer array
     .IFDEF MULTICOLOR
     SORTSPRM:
-        .RES MAXSPR, $00
+        .RES MAXSPR, $00                ; Sorted sprites multicolor flags array
     .ENDIF
 ;-------------------
 D015TBL:
@@ -454,10 +449,12 @@ D015TBL:
     .BYTE %00111111
     .BYTE %01111111
     .BYTE %11111111
+;---------------------------------------
+; Indexes to frame & color registers
 ;-------------------
 PHYSICALSPRTBL1:
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07        ; Indexes to frame & color
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07        ; registers
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
+    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
     .BYTE $00, $01,$02, $03, $04, $05, $06, $07
     .BYTE $00, $01,$02, $03, $04, $05, $06, $07
     .BYTE $00, $01,$02, $03, $04, $05, $06, $07
@@ -473,23 +470,26 @@ PHYSICALSPRTBL2:
     .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
     .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
     .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
+;---------------------------------------
+; AND/OR tables for various register
+; fast setup.
 ;-------------------
 ANDTBL:
-    .BYTE $FF-$01
+    .BYTE %11111110
 ORTBL:
-    .BYTE $01
-    .BYTE $FF-$02
-    .BYTE $02
-    .BYTE $FF-$04
-    .BYTE $04
-    .BYTE $FF-$08
-    .BYTE $08
-    .BYTE $FF-$10
-    .BYTE $10
-    .BYTE $FF-$20
-    .BYTE $20
-    .BYTE $FF-$40
-    .BYTE $40
-    .BYTE $FF-$80
-    .BYTE $80
+    .BYTE %00000001
+    .BYTE %11111101
+    .BYTE %00000010
+    .BYTE %11111011
+    .BYTE %00000100
+    .BYTE %11110111
+    .BYTE %00001000
+    .BYTE %11101111
+    .BYTE %00010000
+    .BYTE %11011111
+    .BYTE %00100000
+    .BYTE %10111111
+    .BYTE %01000000
+    .BYTE %01111111
+    .BYTE %10000000
 ;-------------------------------------------------------------------------------
