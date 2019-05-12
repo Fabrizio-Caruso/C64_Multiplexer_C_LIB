@@ -412,7 +412,15 @@ IRQ3_ENDSPR:
     SEC                                 ; That coordinate - $07 is the
     SBC #$07                            ; position for next interrupt
     CMP VIC_HLINE                       ; Already late from that?
-    BCC IRQ3_DIRECT                     ; Then go directly to next IRQ directly
+
+    .IF (IRQ3_DIRECT-*)<-128
+        BCS NO_IRQ3_DIRECT
+        JMP IRQ3_DIRECT
+    NO_IRQ3_DIRECT:
+    .ELSE
+        BCC IRQ3_DIRECT                 ; Then go directly to next IRQ directly
+    .ENDIF    
+    
     STA VIC_HLINE                       ; otherwise set new IRQ position
     JMP EXIT_IRQ                        ; and normally exit this IRQ.
 IRQ3_LASTSPR:
