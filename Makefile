@@ -1,6 +1,7 @@
 # Makefile 
 CC65_PATH ?=
 SOURCE_PATH ?= ./src
+DEMOS_PATH ?= ./demos
 GRAPHICS_PATH ?= ./graphics
 SID_PATH ?= ./sid
 ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
@@ -49,8 +50,9 @@ some_sprites:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=26 -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=24 \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/many_sprites.c $(ASMFILES) \
+	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
 	-o $(BUILD_PATH)/some_sprites.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -58,8 +60,9 @@ many_sprites:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/many_sprites.c $(ASMFILES) \
+	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -67,7 +70,8 @@ sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define FAST_MODE=1 \
 	--asm-define MAXSPR=16 \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -75,8 +79,9 @@ sin_scroller_multicolor:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(MULTICFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_multicolor.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -85,8 +90,9 @@ sin_scroller_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_expand_x.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o    
 
@@ -94,8 +100,9 @@ sin_scroller_multicolor_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) $(MULTICFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_multicolor_expand_x.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 
     
@@ -103,8 +110,9 @@ sin_scroller_expand_y:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDYCFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_expand_y.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
 
@@ -114,8 +122,9 @@ sin_scroller_music:
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	$(SID_PATH)/sid.s \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_music.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o        
@@ -125,9 +134,10 @@ sin_scroller_c128:
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	$(SOURCE_PATH)/multi_ca65_split.s \
-	$(SOURCE_PATH)/sin_scroller.c \
+	$(DEMOS_PATH)/sin_scroller.c \
 	$(GRAPHICS_PATH)/graphics.s \
 	-o $(BUILD_PATH)/sin_scroller_c128.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
@@ -136,11 +146,12 @@ sin_scroller_music_c128:
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
-	$(SOURCE_PATH)/sin_scroller.c \
+	$(DEMOS_PATH)/sin_scroller.c \
 	$(SOURCE_PATH)/multi_ca65_split.s \
 	$(SID_PATH)/sid_at_2400.s \
     $(GRAPHICS_PATH)/graphics.s \
 	-o $(BUILD_PATH)/sin_scroller_music_c128.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(SID_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
@@ -152,33 +163,35 @@ all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller
 clean:
 	rm -rf *.prg
 	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/*.o
 	rm -rf ./build/*
 	rm -rf main.s
 
     
 many_sprites_debug:
 	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=25 \
-	$(SOURCE_PATH)/many_sprites.c -o $(SOURCE_PATH)/many_sprites.s
+	$(DEMOS_PATH)/many_sprites.c -o $(DEMOS_PATH)/many_sprites.s
 	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define DEBUG=1 --asm-define MAXSPR=34 -D_NUMBER_OF_SPRITES_=36  \
-	$(SOURCE_PATH)/many_sprites.s $(ASMFILES) \
+	$(DEMOS_PATH)/many_sprites.s $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites_debug.prg
-	rm $(SOURCE_PATH)/many_sprites.s
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
     
  
-sid_debug:
+sin_scroller_debug:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define DEBUG=1 \
 	$(SID_PATH)/sid.s \
-	$(SOURCE_PATH)/sin_scroller.c $(ASMFILES) \
-	-o $(BUILD_PATH)/sid_debug.prg
+	$(DEMOS_PATH)/sin_scroller.c $(ASMFILES) \
+	-o $(BUILD_PATH)/sin_scroller_debug.prg
+	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
 
-    
+debug: many_sprites_debug sin_scroller_debug
      
