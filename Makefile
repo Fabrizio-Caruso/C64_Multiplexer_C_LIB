@@ -174,6 +174,7 @@ many_sprites_debug:
 	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define DEBUG=1 --asm-define MAXSPR=34 -D_NUMBER_OF_SPRITES_=36  \
 	$(DEMOS_PATH)/many_sprites.s $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites_debug.prg
+	rm $(DEMOS_PATH)/many_sprites.s
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
