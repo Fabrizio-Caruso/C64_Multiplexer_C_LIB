@@ -5,6 +5,7 @@ We use a modified and extended version of the Ocean Cadaver's sprite multiplexer
 https://cadaver.github.io/rants/sprite.html
 
 Most signification modifications of the multiplexer and support for sid tunes have been implemented by FlavioWeb.
+
 C128 fast mode, sprite expand flags, minor C code tuning, linker configuration have been implemented by Fabrizio Caruso.
 
 FEATURES
