@@ -3,4 +3,5 @@ main.s
 *.prg
 ./build/*.prg
 ./vscode/*
+map.txt
 
