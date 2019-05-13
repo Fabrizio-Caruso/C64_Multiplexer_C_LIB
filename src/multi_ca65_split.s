@@ -282,10 +282,10 @@ IRQ1_SORTLOOP3:
     .IFDEF DEBUG
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
-    .IFDEF FAST_MODE
-        LDA #$00                        ; Disable "2 mhz mode under the border" if this code is
-        STA VIC_CLK_128                 ; executed on C128. On other machines this store is useless.
-    .ENDIF    
+;    .IFDEF FAST_MODE
+;        LDA #$00                        ; Disable "2 mhz mode under the border" if this code is
+;        STA VIC_CLK_128                 ; executed on C128. On other machines this store is useless.
+;    .ENDIF    
     INC _MULTIPLEX_DONE                 ; Set _MULTIPLEX_DONE flag to 1 to keep MAIN code in sync with multiplexer.
     JMP IRQ1_NONEWSPRITES
 ;---------------------------------------
@@ -343,6 +343,10 @@ IRQ3_DIRECT:
     LDA #$FF                            ; Endpoint can't be more than $ff
 IRQ3_NOTOVER:
     STA TEMPVARIABLE
+    .IFDEF FAST_MODE
+        LDA #$00                        ; Disable "2 mhz mode under the border" if this code is
+        STA VIC_CLK_128                 ; executed on C128. On other machines this store is useless.
+    .ENDIF        
 IRQ3_SPRITELOOP:
     LDA SORTSPRY,Y
     CMP TEMPVARIABLE                    ; End of this IRQ?
