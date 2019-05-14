@@ -5,7 +5,8 @@ This "library" is used by following these main steps:
 1. link your C with the provided Assembly routine in the "src" directory and pass the required options
 2. declare some extern variables and prototypes in your C code 
 3. invoke some sprite and raster interrupt initialization routines
-4. handle the sprites number, movement, color and flags (muno/multicolor, x-expand, y-expand) through some shared variables
+4. handle the sprites number, movement, color and flags (monochromatic/multicolor, x-expand, y-expand) through some shared variables
+5. set up the sid tune
 
 LINKING
 The easiest way to do the link is two use the examples in the provided Makefile.
@@ -33,7 +34,7 @@ To have the x-expand flag (i.e., a mix of x-expanded and unexpanded sprites) use
 --asm-define EXPANDX=1 
 
 - Y-EXPAND
-Expading only some multiplexed sprites vertically can cause problems because the y-sort routine assuem the same height for all sprites.
+Expanding only some multiplexed sprites vertically can cause problems because the y-sort routine assume the same height for all sprites.
 Moreover extra height can be achieved by just stacking multiplexed sprites. Use this option at your own risk.
 To have the y-expand flag (i.e., a mix of y-expanded and unexpanded sprites) use:
 -asm-define EXPANDY=1 
@@ -48,7 +49,7 @@ You can trace the raster lines used by the SID tune and sort algorithm with:
 
 
 DECLARE YOUR INTERFACE
-Your C code will interract with the multiplexer through some "interface variables" (i.e., shared memory).
+Your C code will interact with the multiplexer through some "interface variables" (i.e., shared memory).
 In order to have your C code use the multiplexer you must include something like the following declarations:
 
 /*******************
@@ -125,5 +126,14 @@ The two shared colors used in multicolor sprites are not multiplexed and are set
 Use SPREX and SPREY arrays. Warning: y-expanded multiplexed sprites are imperfect because the sorting algorithms assume the same height for all sprites.
 Moreover one could simply stack multiplexed sprites to achieve higher sprites.
 
-    
+SET UP THE SID TUNE
+In order to set up the SID tune, you need to copy over a compatible sid tune onto the "sid" directory.
+If you use the provided linker configurations your SID tune has to comply with the following conditions:
+- C64: it must start at $1000 and cannot exceed 4k  
+- native C128: it must start at $2400 and cannot exceed 3k
+Moreover the SID tune should not use the same page zero locations as the ones used by the Assembly routine and by CC65.
+Some of the locations that must be avoided are the ones declared in the Assembly routine and the ones CC65 declares in the zeropage.inc file.
+If your tune does not comply with these conditions, you can still use it by relocating it with tools such as "sidreloc" and adapt the linker configuration to provide more space for your tune.
+
+
     
