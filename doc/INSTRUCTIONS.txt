@@ -1,0 +1,129 @@
+HOW TO USE
+
+INTRODUCTION
+This "library" is used by following these main steps:
+1. link your C with the provided Assembly routine in the "src" directory and pass the required options
+2. declare some extern variables and prototypes in your C code 
+3. invoke some sprite and raster interrupt initialization routines
+4. handle the sprites number, movement, color and flags (muno/multicolor, x-expand, y-expand) through some shared variables
+
+LINKING
+The easiest way to do the link is two use the examples in the provided Makefile.
+
+LINKER CONFIGURATION
+In the "cfg" directory we provide 4 possible linker configurations for C64 and C127 with or without a SID tune. 
+
+ASSEMBLY PARAMETERS
+We give a list of the parameters that can be used to set up the multiplexer at linking/compiling time.
+
+- MAX NUMBER OF SPRITES
+You set the maximum number of virtual sprites with:
+--asm-define MAXSPR=<number of sprites>
+
+- FAST MODE (2mhz on Commodore 128)
+You can have your C128 native binary and even your C64 binary (when run on the C128) use 2mhz (on the top and bottom borders) with:
+--asm-define FAST_MODE=1
+
+- MONO/MULTICOLOR
+To have the multiplexed monochromatic/multicolor flag (i.e., have a mix of monochromatic and multicolor sprites) use:
+--asm-define MULTICOLOR=1
+
+- X-EXPAND
+To have the x-expand flag (i.e., a mix of x-expanded and unexpanded sprites) use:
+--asm-define EXPANDX=1 
+
+- Y-EXPAND
+Expading only some multiplexed sprites vertically can cause problems because the y-sort routine assuem the same height for all sprites.
+Moreover extra height can be achieved by just stacking multiplexed sprites. Use this option at your own risk.
+To have the y-expand flag (i.e., a mix of y-expanded and unexpanded sprites) use:
+-asm-define EXPANDY=1 
+
+- MUSIC
+You can enable the SID playing routine with:
+--asm-define MUSIC_CODE=1
+
+- DEBUG
+You can trace the raster lines used by the SID tune and sort algorithm with:
+--asm-define DEBUG=1
+
+
+DECLARE YOUR INTERFACE
+Your C code will interract with the multiplexer through some "interface variables" (i.e., shared memory).
+In order to have your C code use the multiplexer you must include something like the following declarations:
+
+/*******************
+* Prototypes
+*******************/
+void INITSPRITES(void);
+void INITRASTER(void);
+/******************/
+extern unsigned char SPRX[];
+extern unsigned char SPRY[];
+extern unsigned char SPRC[];
+extern unsigned char SPRF[];
+#if defined(MULTI_COLOR)
+extern unsigned char SPRM[];
+#endif
+#if defined(EXPAND_X)
+extern unsigned char SPREX[];
+#endif
+#if defined(EXPAND_Y)
+extern unsigned char SPREY[];
+#endif
+extern unsigned char NUMSPRITES;
+extern unsigned char SPRUPDATEFLAG;
+extern unsigned char MULTIPLEX_DONE;
+#pragma zpsym ("NUMSPRITES")
+#pragma zpsym ("SPRUPDATEFLAG")
+#pragma zpsym ("MULTIPLEX_DONE")
+
+
+If you are using the provided linker configurations, the graphics data start at 0x2000 for the C64 and at 0x3000 for the C128.
+If this is the case then it may be convenient to also define:
+#if defined(__C64__)
+    #define GFX_START 0x2000
+#else
+    #define GFX_START 0x3000
+#endif
+#define GFX_START_INDEX (GFX_START/0x40)
+
+INITIALIZATION
+In order to initialize the sprites and the raster interrupt routine you simply do:
+INITSPRITES();
+INITRASTER();
+NUMSPRITES = <number of used sprites>;
+    
+SPRITE HANDLING
+Sprite handling is done primarily by setting the interface variables declared above and by checking the value of the MULTIPLEX_DONE flag.
+All these variables are "unsigned char", i.e., single bytes.
+We advice to look at the examples provided in the "demos" directory.
+
+The most important interface variable is MULTIPLEX_DONE which has to be verified BEFORE any sprite variable is updated.
+This variable is set to 1 by the multiplexer once it has finished sorting the sprites. 
+Your code should set it back to zero once it has updated the interface variables.
+
+- DISPLAY SPRITES
+In order to display the sprites after each new position/color/flag has been updated, you need to set 
+SPRUPDATEFLAG=1
+
+- MOVEMENT
+Use SPRX and SPRY arrays.
+Remark: the x-coordinate is a single byte that represents the position of the sprites at a 2-pixel boundary. 
+This is a good compromise to improve speed because the Assembly routine also takes care of setting the ninth bit.
+
+- SHAPE
+Use the SPRF array to set the 64-byte aligned pointer of each sprites to VIC-II memory. 
+
+- COLOR
+Use the SPRC array for the color of each specific sprite.
+
+- MULTICOLOR FLAGS
+Use the SPRM array to set the monochromatic vs multicolor bit for each sprite.
+The two shared colors used in multicolor sprites are not multiplexed and are set with the VIC-II registers as usual.
+
+- EXPAND FLAGS
+Use SPREX and SPREY arrays. Warning: y-expanded multiplexed sprites are imperfect because the sorting algorithms assume the same height for all sprites.
+Moreover one could simply stack multiplexed sprites to achieve higher sprites.
+
+    
+    
