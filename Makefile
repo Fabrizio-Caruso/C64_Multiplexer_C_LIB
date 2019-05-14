@@ -4,7 +4,7 @@ SOURCE_PATH ?= ./src
 DEMOS_PATH ?= ./demos
 GRAPHICS_PATH ?= ./graphics
 SID_PATH ?= ./sid
-ASMFILES=$(SOURCE_PATH)/multi_ca65_split.s $(GRAPHICS_PATH)/graphics.s
+ASMFILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 
 ASMTEST=$(SOURCE_PATH)/irq_test.s $(GRAPHICS_PATH)/graphics.s
 
@@ -133,7 +133,7 @@ sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
-	$(SOURCE_PATH)/multi_ca65_split.s \
+	$(SOURCE_PATH)/generic_multiplexer.s \
 	$(DEMOS_PATH)/sin_scroller.c \
 	$(GRAPHICS_PATH)/graphics.s \
 	-o $(BUILD_PATH)/sin_scroller_c128.prg
@@ -147,7 +147,7 @@ sin_scroller_music_c128:
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	$(DEMOS_PATH)/sin_scroller.c \
-	$(SOURCE_PATH)/multi_ca65_split.s \
+	$(SOURCE_PATH)/generic_multiplexer.s \
 	$(SID_PATH)/sid_at_2400.s \
     $(GRAPHICS_PATH)/graphics.s \
 	-o $(BUILD_PATH)/sin_scroller_music_c128.prg
