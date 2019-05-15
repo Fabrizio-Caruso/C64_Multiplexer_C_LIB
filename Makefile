@@ -194,5 +194,18 @@ sin_scroller_debug:
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
 
-debug: many_sprites_debug sin_scroller_debug
-     
+raster_split_demo:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define MAXSPR=16 \
+	$(DEMOS_PATH)/raster_split_demo.c \
+	$(SOURCE_PATH)/raster_split.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split.prg
+	rm $(DEMOS_PATH)/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o     
+    
+    
+debug: many_sprites_debug sin_scroller_debug raster_split_demo
+
+         

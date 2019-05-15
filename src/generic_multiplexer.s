@@ -11,8 +11,6 @@
         .INCLUDE "c64.inc"              ; Include file for C64 specific compilation
     .ELSEIF .DEFINED(__C128__)
         .INCLUDE "c128.inc"             ; Include file for C128 specific compilation
-    .ELSEIF .DEFINED(__CBM510__)
-        .INCLUDE "cbm510.inc"
     .ENDIF 
 ;-------------------
    .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
