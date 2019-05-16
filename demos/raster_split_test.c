@@ -51,6 +51,8 @@ int main()
     unsigned char j;
     #if defined(NO_INPUT)
         unsigned short k;
+    #else
+        unsigned char ch;
     #endif
 /******************/
     // POKE(0xd020, 0x00);
@@ -80,7 +82,9 @@ int main()
         gotoxy(16,j); cprintf("SPRY: %02u",SPRY[j]);
         
         SPRF[j]= GFX_START_INDEX+j;
-        gotoxy(30,j); cprintf("SPRF: %02u",SPRF[j]);        
+        gotoxy(30,j); cprintf("SPRF: %02u",SPRF[j]);  
+
+        SPRC[j]= j&0xFD;        
     }
 
     for(j=0;j<8;++j)
@@ -99,13 +103,14 @@ int main()
     {
         for(j=0;j<16;++j)
         {
-            SPRC[j]= (i+j)&0xFD;
+            SPRC[j]= SPRF[(j+1)&15];
             SPRF[j]= SPRF[(j+1)&15];
         }  
         ++i;
-        i=i&0x1F;
         #if !defined(NO_INPUT)
-            cgetc();
+            ch=cgetc();
+            --SPRY[0];
+            ++SPRY[8];
         #else
             for(k=0;k<7400;++k){};
         #endif
