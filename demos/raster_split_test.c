@@ -49,11 +49,19 @@ int main()
 
     unsigned char i = 0;
     unsigned char j;
+    #if defined(NO_INPUT)
+        unsigned short k;
+    #endif
 /******************/
     // POKE(0xd020, 0x00);
     // POKE(0xd021, 0x00);
     clrscr();
-    cgetc();
+    
+    #if !defined(NO_INPUT)
+        gotoxy(1,1);cprintf("press a key to start");
+        cgetc();
+        clrscr();
+    #endif
         
     INITSPRITES();
     INITRASTER();
@@ -71,7 +79,7 @@ int main()
         SPRY[j]= 0x60;
         gotoxy(16,j); cprintf("SPRY: %02u",SPRY[j]);
         
-        SPRF[j]= 0x80+j;
+        SPRF[j]= GFX_START_INDEX+j;
         gotoxy(30,j); cprintf("SPRF: %02u",SPRF[j]);        
     }
 
@@ -83,7 +91,7 @@ int main()
         SPRY[j+8]= 0xA0;
         gotoxy(16,j+8); cprintf("SPRY: %02u",SPRY[j+8]);
         
-        SPRF[j+8]= 0x88+j;
+        SPRF[j+8]= GFX_START_INDEX+0x08+j;
         gotoxy(30,j+8); cprintf("SPRF: %02u",SPRF[j+8]);        
     }    
     
@@ -96,7 +104,11 @@ int main()
         }  
         ++i;
         i=i&0x1F;
-        cgetc();
+        #if !defined(NO_INPUT)
+            cgetc();
+        #else
+            for(k=0;k<7400;++k){};
+        #endif
     }
     // Never fall here...
     return 0;

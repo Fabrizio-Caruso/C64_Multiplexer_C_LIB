@@ -205,7 +205,19 @@ raster_split_test:
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
-    
+ 
+
+raster_split_test_c128:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=16 \
+	-DNO_INPUT \
+	$(DEMOS_PATH)/raster_split_test.c \
+	$(SOURCE_PATH)/raster_split.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split_c128.prg
+	rm $(DEMOS_PATH)/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o     
     
 debug: many_sprites_debug sin_scroller_debug raster_split_demo
 

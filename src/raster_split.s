@@ -41,7 +41,7 @@
    .ENDIF
    .IF .DEFINED(__C128__)
        .IFDEF STANDARD_IRQ
-            KERNAL_IRQ=$FF33
+            KERNAL_IRQ=$FA65
        .ELSE
             KERNAL_IRQ=$FF33
        .ENDIF
