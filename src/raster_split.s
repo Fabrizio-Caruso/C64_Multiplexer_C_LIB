@@ -31,7 +31,21 @@
    .ENDIF
    .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
         .EXPORT _SPREY                  ; export _SPRM SPRites EXPANDY array of flags
-   .ENDIF   
+   .ENDIF  
+   .IF .DEFINED(__C64__)
+       .IFDEF STANDARD_IRQ
+            KERNAL_IRQ=$EA31
+       .ELSE
+            KERNAL_IRQ=$EA81
+       .ENDIF
+   .ENDIF
+   .IF .DEFINED(__C128__)
+       .IFDEF STANDARD_IRQ
+            KERNAL_IRQ=$FF33
+       .ELSE
+            KERNAL_IRQ=$FF33
+       .ENDIF
+   .ENDIF  
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
@@ -329,11 +343,11 @@ EXIT_IRQ:                               ; Exit IRQ code.
             LDX #$00
             STORE_Y = *+$0001           ; IRQ call
             LDY #$00         
-        .ELSE
-            JMP $EA81                   ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
+        .ELSE ; JMP $EA31/$EA81
+            JMP KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
         .ENDIF
     .ELSEIF .DEFINED(__C128__) 
-            JMP $FF33                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
+            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 

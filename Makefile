@@ -194,10 +194,11 @@ sin_scroller_debug:
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
 
-raster_split_demo:
+raster_split_test:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
-	$(DEMOS_PATH)/raster_split_demo.c \
+	--asm-define STANDARD_IRQ=1 \
+	$(DEMOS_PATH)/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
 	-o $(BUILD_PATH)/raster_split.prg

@@ -49,12 +49,11 @@ int main()
 
     unsigned char i = 0;
     unsigned char j;
-    unsigned short k;
 /******************/
     // POKE(0xd020, 0x00);
     // POKE(0xd021, 0x00);
     clrscr();
-    // cgetc();
+    cgetc();
         
     INITSPRITES();
     INITRASTER();
@@ -97,7 +96,7 @@ int main()
         }  
         ++i;
         i=i&0x1F;
-        for(k=0;k<8000;++k){};
+        cgetc();
     }
     // Never fall here...
     return 0;
