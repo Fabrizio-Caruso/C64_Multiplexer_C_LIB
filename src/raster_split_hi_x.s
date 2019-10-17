@@ -169,7 +169,7 @@ IRQTOP:
     LDA SPRX
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
-    BCS _HIMSB_0                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
+    BCS _HIMSB_0                     ; if > 255 set sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL                        ; Do a logic AND operation to set actual sprite bit OFF
     JMP _SET_SPR_HI_0
@@ -279,7 +279,7 @@ IRQBOTTOM:
     LDA SPRX+$08
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
-    BCS _HIMSB_9                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
+    BCS _HIMSB_9                     ; if > 255 set sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL                        ; Do a logic AND operation to set actual sprite bit OFF
     JMP _SET_SPR_HI_8
