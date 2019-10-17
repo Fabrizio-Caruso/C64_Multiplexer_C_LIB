@@ -219,6 +219,31 @@ raster_split_test_c128:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
     
-debug: many_sprites_debug sin_scroller_debug raster_split_demo
 
-         
+raster_split_hi_x_test:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define MAXSPR=16 \
+	--asm-define STANDARD_IRQ=1 \
+	$(DEMOS_PATH)/raster_split_hi_x_test.c \
+	$(SOURCE_PATH)/raster_split_hi_x.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split.prg
+	rm $(DEMOS_PATH)/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o     
+ 
+
+raster_split_hi_x_test_c128:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=16 \
+	-DNO_INPUT \
+	$(DEMOS_PATH)/raster_split_hi_x_test.c \
+	$(SOURCE_PATH)/raster_split_hi_x.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split_c128.prg
+	rm $(DEMOS_PATH)/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o         
+    
+debug: many_sprites_debug sin_scroller_debug raster_split_hi_x_test raster_split_hi_x_test_c128
+
