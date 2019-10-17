@@ -78,7 +78,7 @@ int main()
         SPRX[j]= 0x17*((j&7)+3);
         gotoxy(1,j); cprintf("SPRX: %02u",SPRX[j]);
         
-        SPRY[j]= 0x60-j*4;
+        SPRY[j]= 0x60-j*6;
         gotoxy(16,j); cprintf("SPRY: %02u",SPRY[j]);
         
         SPRF[j]= GFX_START_INDEX+j;
@@ -92,7 +92,7 @@ int main()
         SPRX[j+8]= 0x17*((j&7)+3);
         gotoxy(1,j+8); cprintf("SPRX: %02u",SPRX[j+8]);
         
-        SPRY[j+8]= 0xA0+j*4;
+        SPRY[j+8]= 0xA0+j*6;
         gotoxy(16,j+8); cprintf("SPRY: %02u",SPRY[j+8]);
         
         SPRF[j+8]= GFX_START_INDEX+0x08+j;
@@ -111,6 +111,8 @@ int main()
             ch=cgetc();
             --SPRX[0];
             ++SPRX[8];
+            --SPRX[1];
+            ++SPRX[9];           
         #else
             for(k=0;k<7400;++k){};
         #endif
