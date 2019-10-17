@@ -1,0 +1,655 @@
+Gli Interrupt del Commodore 64.
+by Flavio Web Pasqualin
+-------------------------------
+
+In questo testo mi prefiggo di spiegare, in modo dettagliato, il funzionamento 
+degli Interrupt mascherabili e non mascherabili, all'interno del Commodore 64.
+Dato che la fruizione di queste informazioni è utile soprattutto nella 
+programmazione della macchina a basso livello, un'infarinatura sul 
+funzionamento del processore 6502, sulla sintassi e l'uso dei relativi opcodes 
+è richiesta per capire alcuni concetti qui espressi. Non serve essere un mago 
+del coding diretto in linguaggio macchina... ma una ripassata ai concetti base 
+sarebbe utile, ove non necessaria.
+Detto questo... iniziamo!
+
+
+Due tipi di Interrupt.
+----------------------
+Il processore 6502 (con i suoi derivati 6510, 8502, etc...) è in grado di 
+gestire due tipi differenti di Interrupts: gli Interrupts mascherabili (d'ora in 
+poi IRQ) e gli Interrupts non mascherabili (d'ora in poi NMI, Not Maskable Irq).
+La differenza principale fra questi due tipi di Interrupts sta nel fatto che il 
+codice eseguito a seguito di una richiesta di Irq, può essere inibito 
+semplicemente settando il flag I nel registro di stato della CPU, attraverso 
+l'uso dell'opcode SEI (Set Irq), mentre il codice da eseguire a seguito di una 
+richiesta di NMI viene comunque eseguito anche se il bit riferito al flag I nel 
+registro di stato della CPU è settato a 1.
+
+E' idea diffusa che l'Interrupt NMI sia stato introdotto nella CPU pensando ad 
+un utilizzo della stessa su macchine professionali. Essendo gestito da una 
+linea preferenziale e prioritaria, si ritiene probabile che servisse per 
+identificare la mancanza di tensione di alimentazione (richiesta NMI generata 
+da un gruppo di continuità), permettendo così alla macchina di interrompere 
+qualsiasi operazione in corso, salvare lo stato attuale, per poi ritornare 
+completamente operativa appena l'alimentazione elettrica fosse tornata alla 
+normalità.
+Nel Commodore 64 questa linea è stata utilizzata per un più semplice scopo: 
+ripristinare lo stato della macchina ad una condizione "usabile", anche se il 
+codice in esecuzione dovesse trovarsi in un "loop" infinito o, comunque, un bug 
+o una condizione non prevista ne impedisse il corretto funzionamento.
+La linea fisica prioritaria è stata perciò collegata al tasto RESTORE, la cui 
+pressione genera sempre e comunque un NMI gestito poi dal Kernal.
+Un secondo modo per ottenere degli NMI su C64 è quello di programmare il chip 
+CIA2, mappato agli indirizzi da $DD00 fino a $DD0F per generare una richiesta 
+di Interrupt a seconda del verificarsi di un evento su porta seriale, porta 
+parallea o timer. La richiesta di Interrupt da parte del CIA2 è sempre di tipo 
+non mascherabile e il settaggio viene fatto attraverso la scrittura nel 
+registro $DD0D del chip:
+
+DD0D/56589/CIA2+13:  Interrupt (NMI) Control Register
+
+   +-------+------------------------------------------------------+
+   | Bit 7 |   On Read:  1 = Interrupt occured                    |
+   |       |   On Write: 1 = Set Int.-Flags, 0 = Clear Int.-Flags |
+   | Bit 4 |   FLAG1 NMI (User/RS232 Received Data Input)         |
+   | Bit 3 |   Serial Port Interrupt ($DD0C full/empty)           |
+   | Bit 2 |   Time-of-Day Clock Alarm Interrupt                  |
+   | Bit 1 |   Timer B Interrupt (RS232)                          |
+   | Bit 0 |   Timer A Interrupt (RS232)                          |
+   +-------+------------------------------------------------------+
+
+Diverso è invece il comportamento delle richieste di Interrupt generate dal 
+CIA1, mappato da $DC00 a $DC0F.
+Questo chip genera sempre Interrupts di tipo mascherabile e che possono essere 
+causati da eventi su bus datasette, seriale, timer:
+
+$DC0D/56333/CIA1+13:  Interrupt (IRQ) Control Register
+
+   +-------+------------------------------------------------------+
+   | Bit 7 |   On Read:  1 = Interrupt occured                    |
+   |       |   On Write: 1 = Set Int.-Flags, 0 = Clear Int-.Flags |
+   | Bit 4 |   FLAG1 IRQ (Cassette Read / Serial Bus SRQ Input)   |
+   | Bit 3 |   Serial Port Interrupt ($DC0C full/empty)           |
+   | Bit 2 |   Time-of-Day Clock Alarm Interrupt                  |
+   | Bit 1 |   Timer B Interrupt (Tape, Serial Port)              |
+   | Bit 0 |   Timer A Interrupt (Kernal-IRQ, Tape)               |
+   +-------+------------------------------------------------------+
+   
+Non spiegherò qui il funzionamento dei settaggi di questi 2 chips... Perché 
+solo questo argomento richiederebbe un testo a se stante...
+Basti sapere che l'IRQ di sistema è generato dal CIA1 e, quindi, si tratta un 
+Interrupt di tipo mascherabile.
+
+Altri IRQ mascherabili sono genrati dal chip video VIC-II e possono essere 
+generati a causa di un evento: raster, collisioni sprite/sprite - 
+sprite/sfondo, penna ottica, attraverso il settaggio del registo $D01A:
+
+ $D01A/53274/VIC+26:  Interrupt Mask Register (IMR)
+
+   1 = IRQ enabled
+
+   +----------+-------------------------------------------------------+
+   | Bit 7-4  |   Always 1                                            |
+   | Bit 3    |   Light-Pen Triggered IRQ Flag                        |
+   | Bit 2    |   Sprite to Sprite Collision IRQ Flag     (see $D01E) |
+   | Bit 1    |   Sprite to Background Collision IRQ Flag (see $D01F) |
+   | Bit 0    |   Raster Compare IRQ Flag                 (see $D012) |
+   +----------+-------------------------------------------------------+
+   
+Anche in questo caso salto a piè pari la descrizione del funzionamento e 
+settaggio di questi bits...
+
+
+Gestione richieste Interrupts.
+------------------------------
+Lo schema di pinout del processore 6502 riporta che, al pin 3 è mappata la 
+richiesta di un IRQ e al pin 4 la richiesta di un NMI.
+Quando la CPU si "accorge" che su uno dei 2 pin è presente una richiesta di 
+interrupt fa esattamente questo:
+- aspetta la fine dell'esecuzione dell'opcode in corso;
+- salva l'indirizzo di ritorno al codice corrente nello stack;
+- salva il registro di stato della cpu nello stack;
+- legge l'indirizzo d'esecuzione della routine Interrupt necessaria da un 
+vettore, il cui indirizzo è hardcoded nella CPU stessa. Precisamente per gli 
+IRQ il vettore è a $FFFE/F, mentre per gli NMI si trova a $FFFA/B.
+- setta il Program Counter a questo indirizzo e continua l'esecuzione da li.
+
+Dalla richiesta dell'Interrupt all'esecuzione del primo opcode del codice 
+puntato dal vettore, passano come MINIMO 9 cicli macchina... ma approfondiremo 
+questo aspetto più tardi, Perché è un discorso importante e un po' complesso.
+
+Tornando "a bomba" sulla nostra richiesta di Interrupt da soddisfare, l'utente 
+più smaliziato o che, comunque, ha già provato a redirigere l'IRQ di sistema 
+per inserirvi proprio codice, si starà chiedendo: "Ma Perché, se io normalmente 
+per redirigere l'IRQ o NMI devo, rispettivamente settare i vettori a $0314/5 e 
+$0318/9, tu mi stai dicendo che i vettori sono a $FFFx?".
+E' presto detto.
+I vettori a $FFFx sono gestiti direttamente dalla CPU, mentre quelli a $03xx 
+sono gestiti dal Kernal.
+Se mappato in maniera visibile alla CPU, il Kernal occupa gli indirizzi di 
+memoria da $E000 a $FFFF. Gli ultimi bytes di questa ROM contengono:
+FFFA: 43 FE                      $FE43
+FFFE: 48 FF                      $FF48
+cioè, ad una richiesta di IRQ, la CPU salta all'indirizzo $FF48 della rom, 
+invece per un NMI salta a $FE43.
+Nel caso di IRQ troviamo:
+
+FF48: 48        PHA
+FF49: 8A        TXA
+FF4A: 48        PHA
+FF4B: 98        TYA
+FF4C: 48        PHA
+FF4D: BA        TSX
+FF4E: BD 04 01  LDA $0104,X   ; 6510 Hardware Stack Area
+FF51: 29 10     AND #$10
+FF53: F0 03     BEQ $FF58
+FF55: 6C 16 03  JMP ($0316)   ; Vector: BRK Instruction Interrupt Address
+FF58: 6C 14 03  JMP ($0314)   ; Vector: Hardware IRQ Interrupt Address
+
+invece per l'NMI abbiamo:
+FE43: 78        SEI
+FE44: 6C 18 03  JMP ($0318)   ; Vector: Hardware NMI Interrupt Address
+
+Dove $0318 normalmente punta a $FE47... quindi subito dopo:
+FE47: 48        PHA
+FE48: 8A        TXA
+FE49: 48        PHA
+FE4A: 98        TYA
+FE4B: 48        PHA
+FE4C: A9 7F     LDA #$7F
+FE4E: 8D 0D DD  STA $DD0D     ; CIA2: Interrupt (NMI) Control Register
+FE51: AC 0D DD  LDY $DD0D     ; CIA2: Interrupt (NMI) Control Register
+FE54: 30 1C     BMI $FE72     ; Warm Start Basic
+FE56: 20 02 FD  JSR $FD02     ; Check For 8-ROM
+FE59: D0 03     BNE $FE5E
+FE5B: 6C 02 80  JMP ($8002)
+FE5E: 20 BC F6  JSR $F6BC     ; Bump Clock
+FE61: 20 E1 FF  JSR $FFE1     ; Test-Stop Vector
+FE64: D0 0C     BNE $FE72     ; Warm Start Basic
+
+etc... etc...
+
+Indipendentemente dal tipo di Interrupt si nota subito che tutti e due iniziano 
+con la sequenza PHA/TXA/PHA/TYA/PHA che serve per salvare i tre registri 
+della CPU A/X/Y nello stack per poi essere ripristinati in uscita 
+dall'interrupt con la sequenza PLA/TAY/PLA/TAX/PLA.
+Da questo ne consegue che qualsiasi codice giri in Interrupt e che sia gestito 
+attraverso le routines del Kernal avrà, negli ultimi bytes dello stack i valori 
+di: Y, X, A, Status, Return Address Low, Return Address Hi.
+
+Perché si salvano i valori dei registri?
+Molto semplice. Un codice che "gira in Interrupt" può interrompere in un punto 
+qualsiasi un altro codice in esecuzione. Avendo la CPU 6502 solo 3 registri, 
+questi saranno usati sia dal codice normalmente in esecuzione che dal codice in 
+Interrupt.
+Esempio. Supponiamo di avere in esecuzione PROGRAMMA con questo codice:
+
+    LDA #$00
+LOOP
+    STA $D020
+    JMP LOOP
+
+e settato per essere eseguito in IRQ, questo codice:
+
+    LDA #$01
+    STA $D021
+    RTI
+    
+Il normale flusso di PROGRAMMA, se non subisce interruzioni, è quello di 
+caricare il valore $00 nell'accumulatore e di settare il registro COLORE DEL 
+BORDO del chip VIC-II del C64 scrivendovi il valore $00 = colore nero.
+La terza istruzione (JMP) fa continuare il flusso dalla label LOOP e quindi il 
+valore dell'accumulatore viene semplicemente riscritto in $D020 ma MAI PIU' 
+caricato (LDA #$00 non viene più eseguita).
+Ovviamente, in questo caso, il valore dell'accumulatore non cambierà mai, e il 
+bordo dello schermo rimarrà sempre nero.
+Nel nostro sistema però, noi abbiamo settato il codice in IRQ che, 
+semplicemente, carica il valore $01 nell'accumulatore, lo scrive nel registro 
+COLORE DI SFONDO del VIC-II e poi esce (ReTurn from Interrupt) e continua 
+l'esecuzione di PROGRAMMA dall'istruzione successiva a quella in cui è avvenuta 
+l'interruzione.
+Poco importa se l'interruzione di PROGRAMMA è avvenuta prima di STA o prima di 
+JMP. Fatto sta che ora (dopo l'esecuzione del codice in IRQ), l'accumulatore 
+contiene il valore $01 e il codice LDA #$00 di PROGRAMMA non verrà più eseguito.
+Come conseguenza avremo il colore BIANCO (valore $01) sia nel bordo che nello 
+sfondo del C64.
+Ovviamente questo genera un comportamento "inatesso" nell'esecuzione di 
+PROGRAMMA e questo esempio è volutamente stupido. Pensate alle conseguenze di 
+programmi reali se l'interruzione dovesse avvenire all'interno di loops 
+indicizzati o durante operazioni matematiche...
+
+Il codice in Interrupt, che sia IRQ o NMI deve essere eseguito in maniera 
+TRASPARENTE rispetto al codice di un PROGRAMMA in esecuzione "fuori interrupt".
+Quindi SALVARE IL CONTENUTO DEI REGISTRI è un'operazione di VITALE IMPORTANZA 
+per il corretto funzionamento di tutto il sistema/programmi in esecuzione.
+
+Dato che la CPU NON SI PREOCCUPA di salvarne il contenuto, è necessario che 
+il sistema operativo (kernal), oppure il codice scritto dall'utente si 
+preoccupi di compiere questa operazione.
+Non è un dogma il fatto che i valori vadano salvati nello stack con la sequenza 
+PHA/TXA/PHA/TYA/PHA per poi essere recuperati al termine del codice in 
+Interrupt con la sequenza PLA/TAY/PLA/TAX/PLA. Questo viene fatto per 
+"comodità" da molti coders.
+Per questione di velocità e per evitare di "sporcare" lo stack, può essere 
+usato anche un codice tipo:
+
+    STA STORE_A
+    STX STORE_X
+    STY STORE_Y
+
+per salvare e quest'altro:
+
+STORE_A = *+$0001
+    LDA #$00
+STORE_X = *+$0001
+    LDX #$00
+STORE_Y = *+$0001
+    LDY #$00
+    
+per ripristinarne i valori alla condizione precente la chiamata della routine 
+eseguita in Interrupt.
+Questo metodo ha anche il vantaggio di usare meno cicli macchina rispetto alla 
+scrittura/lettura dei valori nello/dallo stack.
+
+
+Un Interrupt particolare: il BREAK
+----------------------------------
+Il "BREAK" è un particolare tipo di Interrupt, che fa parte degli IRQ, che 
+viene generato via SOFTWARE, attraverso l'uso dell'opcode BRK all'interno di un 
+codice in esecuzione.
+Questo tipo di Interrupt ha un nome ben preciso: "BREAK POINT" e può essere 
+utilizzato per il DEBUG di codice.
+Nel C64 il vettore che gestisce i BREAK POINTS è quello a $0316/7.
+Per la CPU il BRK è identico ad un qualsiasi altro IRQ, tranne per un piccolo 
+dettaglio: il flag B del registro di stato della CPU viene posto a 1 se la 
+richiesta di IRQ viene generata dall'opcode BRK.
+Questo permette di "intercettare" via software, nel codice di gestione degli 
+IRQ, il tipo "Break" e quindi redirigere l'esecuzione ad un codice di debug (o 
+a qualsiasi altra cosa c'interessi fare nel caso specifico).
+Per esempio, nel C64, il vettore break a $0316/7 punta a $FE66, cioè al 
+"restart a caldo" dell' editor BASIC (come se si fossero premuti 
+contemporaneamente i tasti RUN/STOP e RESTORE).
+
+
+Un po' di pratica per schiarire le idee.
+----------------------------------------
+Dato che abbiamo scritto tante cose strane sin qui, credo sia ora di mettere 
+insieme qualche opcode per far vedere che tutta sta roba funziona =)
+Iniziamo da una cosa semplice semplice: eseguiamo un nostro codice in IRQ 
+appena prima che la routine di sistema venga eseguita.
+Per farlo dobbiamo:
+- redirigere il vettore IRQ $0314-$0315 al nostro codice;
+- fare in modo che al termine della sua esecuzione, il nostro codice salti alla 
+routine originariamente puntata dal vettore ($EA31 nel caso del C64).
+Il tutto si fa con questo codice:
+
+.> c000 78        sei
+.> c001 a9 0d     lda #$0d
+.> c003 8d 14 03  sta $0314
+.> c006 a9 c0     lda #$c0
+.> c008 8d 15 03  sta $0315
+.> c00b 58        cli
+.> c00c 60        rts
+.> c00d ee 20 d0  inc $d020
+.> c010 ee 21 d0  inc $d021
+.> c013 ce 20 d0  dec $d020
+.> c016 ce 21 d0  dec $d021
+.> c019 4c 31 ea  jmp $ea31
+
+Spiegazione.
+Il primo opcode SEI serve per settare il flag I del registro di stato della CPU 
+a 1, in modo che l'esecuzione degli IRQ sia inibita da qui in avanti, finchè 
+non si incontrerà l'opcode CLI (CLear Irq).
+Questo passaggio è tanto semplice quanto fondamentale.
+Vi ricordate che noi NON possiamo sapere in quale punto di un PROGRAMMA la CPU 
+possa ricevere la richiesta di un Interrupt, vero?
+Bene. Supponiamo di non inserire l'istruzione SEI e che durante l'esecuzione 
+del secondo LDA a $C006, parta la richiesta IRQ. Cosa succederebbe?
+Originariamente il vettore $0314/5 contiene i valori $31 $EA, cioè l'indirizzo 
+$EA31 dove inizia la routine IRQ di sistema.
+A $C006 noi abbiamo già scritto il valore $0D in $0314 ma NON ABBIAMO ANCORA 
+TERMINATO il settaggio completo del vettore con la scrittura del byte alto del 
+nuovo indirizzo da eseguire in IRQ (dobbiamo ancora scrivere $C0 in $0315).
+Avremo quindi i valori $0D $EA = $EA0D come riferimento per l'indirizzo di 
+inizio della routine in IRQ. Cosa che farà settare il Program Counter da parte 
+della CPU ad un indirizzo che "solo Dio sa cosa possa contenere", causando 
+nella migliore delle ipotesi, un crash clamoroso del nostro codice.
+Per evitare ciò dobbiamo avere la certezza che nessun IRQ venga eseguito PRIMA 
+che il settaggio dell'intero vettore sia completo. E questo si ottiene 
+premettendo il SEI ai due LDA/STA e postponendovi un CLI. Solo in questo modo 
+avremo la certezza che nessuna chiamata punti verso nessundove.
+A questo punto, l'RTS uscirà dal programma e il nostro codice in IRQ sarà vivo 
+e attivo, legato ai settaggi dell'irq di sistema.
+In questo esempio, il codice eseguito appena prima della routine di sistema, 
+parte da $C00D e si limita a incrementare e subito dopo decrementare il colore 
+di bordo e sfondo, generando in pratica "una linea colorata" a video nel punto 
+esatto in cui il sistema richiama l'IRQ.
+Il JMP $EA31 a $C019 non fa nient'altro che proseguire con l'esecuzione del 
+codice normale, contenuto nel kernal, come se niente fosse accaduto.
+
+In questo caso stiamo usando un IRQ generato dal chip CIA1 che viene settato 
+automaticamente dal sistema durante la fase di reset della macchina.
+Durante il "boot", il chip CIA1 viene programmato per contare i cicli di clock 
+e generare un IRQ al raggiungimento del ciclo numero $4025 in PAL (quindi poco 
+più di una volta per frame video, dato che i cicli in un frame video PAL sono 
+$4CC8).
+Il chip CIA può contare 2 tipi di "eventi" per decidere quando è il momento di 
+far partire la richiesta di un IRQ: i cicli di sistema e i passaggi del segnale 
+sul pin CNT da negativo a positivo (ma non il contrario, da positivo a 
+negativo!). 
+
+Come aggiungere un RASTER IRQ?
+------------------------------
+Prendo come esempio il RASTER IRQ ma lo stesso concetto è applicabile a 
+qualsiasi altro IRQ generato dal chip VIC-II (collisioni, penna ottica...).
+Dovrebbe essere a questo punto chiaro che gli IRQ e gli NMI sono gestiti 
+direttamente dalla CPU. I chip CIA o VIC-II si limitano ad inviare una 
+richiesta di IRQ o NMI mandando un segnale verso uno dei due pins preposti 
+alla rilevazione di queste richieste.
+Dato che sia il VIC-II che il CIA1 generano richieste di IRQ, come può fare la 
+CPU a sapere da quale chip arrivi la richiesta e attivare di conseguenza il 
+codice relativo? Molto semplice: non lo sa!
+Osservate questo codice:
+
+.> c000 78        sei       ; Disabilito l'esecuzione degli IRQ
+.> c001 a9 1c     lda #$1c  ; Redirigo il vettore
+.> c003 8d 14 03  sta $0314 ; presente all' indirizzo $0314/5
+.> c006 a9 c0     lda #$c0  ; verso la mia routine IRQ
+.> c008 8d 15 03  sta $0315 ; che inizia a $C01C in questo caso
+.> c00b a9 1b     lda #$9b  ; Setto una richiesta RASTER IRQ 
+.> c00d 8d 11 d0  sta $d011 ; che deve partire alla rasterline
+.> c010 a9 00     lda #$00  ; $100 (il bit più significativo è
+.> c012 8d 12 d0  sta $d012 ; il bit 7 di $d011).
+.> c015 a9 01     lda #$01  ; Attivo l'IRQ sul chip VIC-II
+.> c017 8d 1a d0  sta $d01a
+.> c01a 58        cli       ; Riabilito gli IRQ
+.> c01b 60        rts       ; Esco.
+.> c01c ad 19 d0  lda $d019 ; Controllo il bit 0 di $D019 per verificare se
+.> c01f 29 01     and #$01  ; la richiesta IRQ che ha portato all'esecuzione
+.> c021 d0 0f     bne $c032 ; di questo codice è causata dal RASTER. Si -> $C032
+.> c023 ee 20 d0  inc $d020 ; Altrimenti questo codice in IRQ è stato triggerato
+.> c026 ee 21 d0  inc $d021 ; da un evento generato dal CIA1.
+.> c029 ce 20 d0  dec $d020 ; Cambio i vari colori di bordo e sfondo...
+.> c02c ce 21 d0  dec $d021
+.> c02f 4c 31 ea  jmp $ea31 ; ed esco eseguendo la normale routine in IRQ.
+.> c032 ee 20 d0  inc $d020 ; Questo è il codice eseguito in caso l'IRQ sia
+.> c035 ee 21 d0  inc $d021 ; di tipo RASTER.
+.> c038 ad 12 d0  lda $d012 ; Setto una "barra colorata" alta, più o meno
+.> c03b 18        clc
+.> c03c 69 08     adc #$08  ; otto linee video...
+.> c03e cd 12 d0  cmp $d012
+.> c041 d0 fb     bne $c03e
+.> c043 ce 20 d0  dec $d020
+.> c046 ce 21 d0  dec $d021
+.> c049 4e 19 d0  lsr $d019 ; Faccio l'acknowledge dell'IRQ...
+.> c04c 4c 81 ea  jmp $ea81 ; ed esco saltando direttamente al codice che 
+                            ; ripristina i registri prima di uscire dall'IRQ.
+
+Da notare in questo codice:
+
+.> c01c ad 19 d0  lda $d019 ; Controllo il bit 0 di $D019 per verificare se
+.> c01f 29 01     and #$01  ; la richiesta IRQ che ha portato all'esecuzione
+.> c021 d0 0f     bne $c032 ; di questo codice è causata dal RASTER. Si -> $C032
+
+la locazione $D019, se letta, fornisce la "causa" dell'IRQ generato dal VIC-II:
+$D019/53273/VIC+25:  Interrupt Request Register (IRR)
+
+   1 = IRQ occured
+
+   +----------+-------------------------------------------------------+
+   | Bit 7    |   1 = IRQ has been generated                          |
+   | Bit 3    |   Light-Pen Triggered IRQ Flag                        |
+   | Bit 2    |   Sprite to Sprite Collision IRQ Flag     (see $D01E) |
+   | Bit 1    |   Sprite to Background Collision IRQ Flag (see $D01F) |
+   | Bit 0    |   Raster Compare IRQ Flag                 (see $D012) |
+   +----------+-------------------------------------------------------+
+   
+A seconda del valore del bit 0, possiamo capire se è necessario eseguire il 
+codice legato al RASTER IRQ, oppure quello legato all'evento CIA1.
+In questo esempio il CIA1 gestisce il normale IRQ di sistema, cioè l'esecuzione 
+del codice contenuto nel kernal dall'indirizzo $EA31.
+
+La locazione $D019 deve essere scritta con un valore qualsiasi per effettuare 
+l'acknowledge dell'IRQ. In questo esempio l'ACK dell' IRQ viene eseguito da
+
+.> c049 4e 19 d0  lsr $d019 ; Faccio l'acknowledge dell'IRQ...
+
+che in maniera un po' "acrobatica" scrive su $D019.
+
+Perché bisogna fare l'acknowledge di un IRQ?
+--------------------------------------------
+Lo si capisce bene proprio da questo esempio.
+In questo caso specifico abbiamo un IRQ eseguito ad una posizione fissa e 
+predifinita del raster beam, mentre l'altro può partire in un punto qualsiasi 
+del quadro video. Molto probabilmente, ad un cero punto, le due esecuzioni si 
+"sovrapporranno"... ma la CPU può eseguire solo una delle due routine per volta.
+Semplificando un pochino le cose, diciamo che i chip che generano le richieste 
+IRQ sono progettati per continuare a "rompere le scatole" alla CPU finchè la 
+loro richiesta non viene soddisfatta. Ma come possono sapere quando la loro 
+richiesta è stata esaudita dato che il processore non ha modo di 
+capire "da chi" riceve la richiesta e di differenziare autonomamente 
+l'esecuzione del codice? Semplice: glie lo diciamo noi attraverso l'acknowledge!
+Se l'ACK non viene effettuato, il chip continuerà ad inviare una richiesta per 
+IRQ al processore, il quale eseguirà il codice IRQ in continuazione, anche se 
+la condizione che dovrebbe triggerare l'IRQ in quel momento non risultasse 
+"vera".
+
+Ora resta da capire la differenza fra i due JMP di uscita delle routine IRQ.
+La routine triggerata dal CIA esce con JMP $EA31, mentre quella triggerata dal 
+chip VIC-II esce con $EA81. Perché?
+Perché nel primo caso noi vogliamo che la routine di sistema che gira 
+normalmente in IRQ, continui a farlo come se niente fosse. Ed infatti, pur 
+avendo rediretto il vettore $0314/5 al nostro codice, ci premuriamo di saltare 
+all'indirizzo $EA31 che è il "Main IRQ Entry Point".
+Nel secondo caso (RASTER IRQ) invece, non abbiamo la necessità di rieseguire 
+tutto il codice del Main IRQ (Perché di questo se ne sta occupando l'altra 
+routine in IRQ): abbiamo solo bisogno di uscire in maniera "pulita" dall'IRQ.
+Cosa vuol dire "uscire in maniera pulita" da un IRQ?
+Come scritto in precedenza, quando la CPU riceve una richiesta IRQ si premura 
+di salvare l'indirizzo di ritorno e lo stato del processore nello stack e di 
+recuperare queste info al momento di incontrare un istruzione RTI (ReTurn from 
+Interrupt). A carico del codice in IRQ resta il salvataggio/ripristino dei 
+registri A/X/Y del processore.
+Essendo il nostro codice IRQ eseguito attraverso il redirezionamento del 
+vettore $0314/5, in realtà stiamo utilizzando parte del codice presente nella 
+rom del Kernal per preparare la sua esecuzione. Il codice in questione è quello 
+puntato dal vettore $FFFE/F, presente a $FF48 e che iniza con:
+
+FF48: 48        PHA
+FF49: 8A        TXA
+FF4A: 48        PHA
+FF4B: 98        TYA
+FF4C: 48        PHA
+
+cioè inizia "pushando" i tre registri nello stack.
+Se terminassimo il nostro codice in IRQ con un semplice RTI, non recupereremmo 
+il valore dei 3 registri dallo stack, lasciandolo di fatto "sporco" ma questi 
+valori non andrebbero persi come lacrime nella pioggia...
+Bensì, questi 3 bytes verrebbero recuperati dalla CPU nella convinzione di 
+trovarsi a gestire il registro di stato e i 2 bytes dell'indirizzo di ritorno, 
+finendo dritta come un missile in un crash.
+
+Ovviamente potremmo inserire, come uscita dal nostro IRQ, la sequenza di 
+istruzioni "PLA/TAY/PLA/TAX/PLA/RTI"... Ma Perché sprecare bytes quando tutto 
+ciò è già bello e pronto nel Kernal all'indirizzo $EA81?
+Basta saltare li, e tutto tornerà al posto giusto.
+
+Questo esempio tratta 2 IRQ generati da chip differenti ma le stesse regole 
+valgono per IRQ generati dallo stesso chip.
+Si può differenziare, ad esempio, un IRQ generato dalla collisione di 2 sprites 
+da quello generato dalla posizione del raster, oppure quello generato dalla 
+collisione sprite/sfondo da uno generato da una penna ottica...
+Il concetto resta lo stesso, basta solo verificare i bit relativi agli eventi 
+da rilevare e redirigere il flusso del programma di conseguenza.
+
+Tecniche avanzate:
+il timing di un IRQ
+-------------------
+In questo paragrafo voglio fare chiarezza su una questione che mi sono 
+trovato a puntualizzare molte volte nei forum, per chat e nei messaggi provati 
+sui vari social network: il timing degli Interrupts.
+
+Perché a qualcuno dovrebbe interessare il timing di un Irq/Nmi?
+Durante il coding di applicazioni "normali", fondamentalmente possiamo 
+infischiarcene di quanto tempo passi fra la richiesta di un interrupt e 
+l'esecuzione del primo opcode che forma la routine da eseguire.
+Le cose si complicano quando abbiamo bisogno di Interrupts "stabilizzati", 
+utilizzati ad esempio nelle routines RASTER oppure nel play di suoni digitali 
+realizzati usando la tecnica PWM.
+In entrambi i casi abbiamo bisogno che il tempo trascorso fra la richiesta di 
+Interrupt e l'esecuzione del primo Opcode della routine sia FISSO.
+Renderlo "fisso" significa eseguire il primo opcode della routine in IRQ SEMPRE 
+alla massima "distanza possibile" in termine di cicli macchina, cioè 
+sempre al "caso peggiore", riempiendo il gap con un "dummy code" che ha il solo 
+scopo di "cosumare" in maniera dinamica i cicli di differenza.
+Ora, non mi addentro nei dettagli sulla realizzazione di suddette routines 
+(Internet è pieno di esempi e Google è nostro amico) ma mi limiterò a dipanare 
+i dubbi sul problema fondamentale da risolvere: "quandi cicli macchina passano 
+fra la richiesta di Irq ricevuta dal processore e l'esecuzione del primo ciclo 
+dell'opcode della routine in IRQ?".
+
+Immaginate ora di dover scrivere una routine di split screen che cambi colore 
+al bordo, allo sfondo e il charset allo schermo, tagliandolo esattamente in 2 
+alla char line 12. Settiamo un IRQ alla linea 51 (prima linea dell'area 
+caratteri) + 8*12 (8 linee per carattere per 12 righe caratteri) = 147 = $93.
+Il codice necessario per settare colori/charset sarà simile a:
+
+    LDA #$01
+    STA $D020
+    LDA #$00
+    STA $D021
+    LDA #$15
+    STA $D018
+    
+A questo punto occorre sapere che "la parte sinistra" del bordo dello schermo 
+del C64 "dura" 16 cicli (dal ciclo 0 al 15) ed il codice qui sopra dura 
+2+4+2+4+2+4 = 18 cicli. Quindi anche se fosse eseguito istantaneamente al 
+ciclo zero, avremmo dei glitches sui primi caratteri della linea.
+E' sempre molto importante tenere presente in questi casi che
+1 ciclo macchina = 8 pixel su schermo = 1 charattere visualizzato.
+Capite da voi che già un piccolo ritardo di 2/3 cicli macchina crea un problema 
+visibile per 16/24 pixels e su uno schermo largo 320 pixels... non passerà 
+proprio inosservato.
+Come si può risolvere la questione? Magari sarebbe possibile anticipare alla 
+linea precedente il cambio di colori/charset in modo da far trovare "tutto a 
+posto" al Vic-II quando inizierà a disegnare la linea $93.
+Come facciamo ad anticipare l'esecuzione del codice senza creare glitches 
+sulla linea $92? Se ci limitassimo a cambiare il valore della rasterline alla 
+quale avviene la richiesta di IRQ, presto ci accorgeremmo che il cambio di 
+colore/charset avviene più o meno alla sua metà... visualizzando un problema 
+ancora maggiore del precedente.
+C'è ancora una possibilità però: esiste un'area del video chiamata Horizontal 
+Blank che, analogamente al Vertical Blank, non è normalmente visibile a video, 
+pur essendo "visualizzata" dal Vic-II, ed è posizionata circa "a metà 
+strada" fra l'inizio del bordo a destra e la fine del bordo a sinistra.
+Se riuscissimo a fare tutti i cambi (specialmente di colore) in quest'area, 
+avremmo risolto tutti i nostri problemi.
+Come facciamo a sapere quando il Raster Beam si trova in quest'area per 
+iniziare a fare i cambiamenti?
+Il Vic-II non ha un registro della posizione X del raster (o, meglio, ce l'ha 
+ma l'utente non può accedervi se non utilizzando tecniche troppo -fragili- e 
+complesse) quindi, l'unico modo sicuro che ci resta per sapere "dove siamo" è 
+quello di conoscere a quale ciclo macchina rispetto al ciclo zero della 
+rasterline il codice venga eseguito.
+
+Come calcolare il ciclo macchina al quale il codice verrà eseguito,
+stabilizzando l'irq e vivendo felici.
+-------------------------------------------------------------------
+Quando la CPU riceve una richiesta di Interrupt deve:
+1) attendere la fine dell'esecuzione dell'opcode corrente;
+2) salvare indirizzo di ritorno e status register nello stack;
+3) leggere il valore contenuto nel vettore $FFFE/F e continuare da li.
+
+Nota Bene: questo è quanto è a carico della sola CPU ed esclude il salvataggio 
+del valore dei registri A/X/Y.
+
+L'attesa della fine dell' istruzione corrente.
+----------------------------------------------
+Questo è il punto più controverso e che genera più confusione in chi si 
+avvicina per la prima volta a tecniche di stabilizzazione IRQ (e qualche volta 
+anche agli utenti più preparati =) ).
+Per tenere il discorso il più semplice possibile, parliamo solo di OPCODE 
+LEGALI. Gli "Unintended Opcodes" usano semplicemente più cicli macchina e se 
+ritenete necessario usarli, non dovreste avere difficoltà nel tenerne conto 
+durante la stesura della routine di stabilizzazione.
+
+Gli Opcodes Legali usano da un minimo di 2 ad un massimo di 7 cicli macchina.
+Una richiesta di Interrupt può arrivare durante l'esecuzione di uno qualsiasi 
+di questi cicli, cioè anche nel bel mezzo di un istruzione, o al suo inizio o 
+alla sua fine... cioè ovunque... e non è prevedibile.
+
+[PARTE_DIFFICILE_MODE]
+La CPU ha bisogno di un MINIMO di 2 cicli macchina per INTERROMPERE 
+L'ESECUZIONE di un codice "fuori Interrupt".
+Se la richiesta di Interrupt avviene PRIMA del penultimo ciclo, l'istruzione 
+corrente verrà eseguita fino al suo ultimo ciclo e poi interromperà il codice 
+in esecuzione.
+Se la richiesta di Interrupt avviene DURANTE l'esecuzione del penultimo ciclo, 
+allora verrà eseguito anche l'ultimo ciclo dell'istruzione corrente, PIU' TUTTA 
+L'ISTRUZIONE SUCCESSIVA, prima che il codice corrente venga interrotto.
+Per complicare un pochino le cose (nel caso ce ne fosse bisogno) esite un 
+caso particolare: le istruzioni di BRANCH CONDIZIONALE.
+Sono istruzioni di BRANCH CONDIZIONALE tutte quelle istruzioni che deviano il 
+flusso dell'esecuzione del codice in funzione del valore vero o falso di una 
+condizione, e nel caso del C64 sono gli opcodes BNE, BEQ, BMI, BPL, BVC, BVS, 
+BCC, BCS.
+Questi opcodes usano 2 cicli macchina quando il salto NON deve essere eseguito, 
+mentre ne usano 3 quando il salto DEVE essere eseguito.
+Se la richiesta di IRQ avviene durante l'esecuzione del primo ciclo di queste 
+istruzioni, allora dopo 2 cicli se il salto non deve essere eseguito oppure 
+dopo 3 se deve esserlo, il codice attualmente in esecuzione viene fermato.
+Ma se la richiesta avviene sul secondo ciclo dell'istruzione, allora la CPU 
+aspetterà 1+cicli usati dall'opcode sucessivo se il salto non deve essere 
+eseguito, oppure 2+cicli usati dall'opcode sucessivo se il salto deve essere 
+eseguito, prima di interrompere l'esecuzione del codice.
+
+Nell'immaginario comune del coders del C64, il JITTER introdotto dall'attesa 
+del termine dell'opcode attuale ha un valore che va da 0 a 7 cicli.
+In verità questa idea è ALTAMENTE FUORVIANTE e, pensandoci bene, palesemente 
+incongruente.
+Il valore 0 - 7 è istintivamente scelto a causa del numero massimo di cicli 
+usabili da un opcode legale (7 cicli)... però un JITTER 0 - 7 implica un range 
+di 8 valori... 0, 1, 2, 3, 4, 5, 6, 7.
+Infatti cercando in molto forums, ci sono parecchi threads in cui alcuni 
+coders, scrivendo le loro routines per interrupts stabili, rilevano un ritardo 
+di 8 cicli ma non riescono bene a spiegarsi da dove provenga...
+La spiegazione corretta è leggermente più complessa ed è la seguente.
+
+Calcolare il delay totale dell'esecuzione di un codice in Interrput.
+--------------------------------------------------------------------
+
+Il delay TOTALE è dato dalla somma JITTER + DELAY FISSO.
+
+JITTER è un numero di cicli che va da un minimo di 2 ad un massimo di 9.
+Il DELAY FISSO è il numero di cicli usato dalla CPU per:
+- settare il flag I
+- salvare l'indirizzo di ritorno dall' interrupt nello stack
+- salvare il registro di stato della CPU nello stack
+- leggere l'indirizzo della routine Interrupt dal vettore
+- saltare all'indirizzo contenuto nel vettore.
+
+Tutto questo viene eseguito in 7 cicli macchina.
+[/PARTE_DIFFICILE_MODE]
+
+Precisazione sul JITTER.
+------------------------
+Voglio insistere ancora un attimo sul numero di cicli di JITTER perchè è la 
+parte più importante di questo discorso.
+Supponiamo di avere questo codice:
+
+LOOP
+    LDX #$20------------------> 2 cicli macchina
+    BNE SALTO_ESEGUITO--------> 3 cicli macchina (salto eseguito)
+    NOP-----------------------> 2 cicli macchina (mai eseguito)
+SALTO_ESEGUITO
+    INC $D000,X---------------> 7 cicli macchina
+    JMP LOOP------------------> 3 cicli macchina
+
+Se una richiesta di Interrupt venisse ricevuto dalla CPU durante il secondo 
+ciclo dell'istruzione BNE, allora verrebbero eseguiti i 2 cicli mancanti di 
+questo opcode, ma essendo questo un "caso particolare" verranno eseguiti anche 
+i 7 cicli di INC $D000,X e solo a questo punto il codice verrebbe interrotto.
+In questo caso il delay totale sarebbe di 9+7 = 16 cicli cioè, nel caso di un 
+RASTER IRQ, essendo triggerato durante il ciclo zero della linea di 
+riferimento, il primo opcode della routine in IRQ sarebbe eseguito al ciclo 18 
+della rasterline, esattamente 24 pixels più a destra della fine del bordo.
