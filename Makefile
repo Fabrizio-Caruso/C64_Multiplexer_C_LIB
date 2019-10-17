@@ -227,7 +227,7 @@ raster_split_hi_x_test:
 	$(DEMOS_PATH)/raster_split_hi_x_test.c \
 	$(SOURCE_PATH)/raster_split_hi_x.s \
 	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split.prg
+	-o $(BUILD_PATH)/raster_split_hi_x.prg
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
@@ -240,7 +240,7 @@ raster_split_hi_x_test_c128:
 	$(DEMOS_PATH)/raster_split_hi_x_test.c \
 	$(SOURCE_PATH)/raster_split_hi_x.s \
 	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split_c128.prg
+	-o $(BUILD_PATH)/raster_split_hi_x_c128.prg
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o         
