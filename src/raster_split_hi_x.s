@@ -169,17 +169,17 @@ IRQTOP:
     LDA SPRX
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
-    BCC _LOWMSB_0                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    ORA ORTBL                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    JMP _SPRX_1
-_LOWMSB_0:
+    BCS _HIMSB_0                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL                        ; Do a logic AND operation to set actual sprite bit OFF
+    JMP _SET_SPR_HI_0
+_HIMSB_0:
+    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
+    ORA ORTBL                         ; Do a logic OR operation to set actual sprite bit ON
+_SET_SPR_HI_0:
     STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
 
-_SPRX_1:
+
     LDA SPRX+$01
     STA VIC_SPR1_X
     LDA SPRX+$02
@@ -279,17 +279,15 @@ IRQBOTTOM:
     LDA SPRX+$08
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
-    BCC _LOWMSB_9                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    ORA ORTBL                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    JMP _SPRX_9
-_LOWMSB_9:
+    BCS _HIMSB_9                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL                        ; Do a logic AND operation to set actual sprite bit OFF
+    JMP _SET_SPR_HI_8
+_HIMSB_9:
+    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
+    ORA ORTBL                         ; Do a logic OR operation to set actual sprite bit ON
+_SET_SPR_HI_8:
     STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-
-_SPRX_9:
 
 
     LDA SPRX+$09
