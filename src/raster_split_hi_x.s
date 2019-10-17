@@ -167,7 +167,6 @@ IRQTOP:
     STA VIC_SPR7_Y   
     
     LDA SPRX
-    
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
     BCC _LOWMSB_0                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
@@ -278,65 +277,27 @@ IRQBOTTOM:
     STA VIC_SPR7_Y                     ; to the bottom to prevent
     
     LDA SPRX+$08
-
     ASL                                 ; multiply by 2
     STA VIC_SPR0_X                      ; weird effects when sprite    
-    BCC _LOWMSB8                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
+    BCC _LOWMSB_9                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     ORA ORTBL                         ; Do a logic OR operation to set actual sprite bit ON
     STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
     JMP _SPRX_9
-_LOWMSB8:
+_LOWMSB_9:
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL                        ; Do a logic AND operation to set actual sprite bit OFF
     STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
 
 _SPRX_9:
+
+
     LDA SPRX+$09
-
-    ASL                                 ; multiply by 2
-    STA VIC_SPR1_X                      ; weird effects when sprite    
-    BCC _LOWMSB_9                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    ORA ORTBL+$1                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    JMP _SPRX_A
-_LOWMSB_9:
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    AND ANDTBL+$1                        ; Do a logic AND operation to set actual sprite bit OFF
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    
-_SPRX_A:
+    STA VIC_SPR1_X                      ; weird effects when sprite
     LDA SPRX+$0A
-
-    ASL                                 ; multiply by 2
-    STA VIC_SPR2_X                      ; weird effects when sprite    
-    BCC _LOWMSB_A                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    ORA ORTBL+$2                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    JMP _SPRX_B
-_LOWMSB_A:
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    AND ANDTBL+$2                        ; Do a logic AND operation to set actual sprite bit OFF
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-
-_SPRX_B:
+    STA VIC_SPR2_X                      ; moves lower than what it
     LDA SPRX+$0B
-    
-    ASL                                 ; multiply by 2
-    STA VIC_SPR3_X                      ; weird effects when sprite    
-    BCC _LOWMSB_B                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    ORA ORTBL+$3                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    JMP _SPRX_C
-_LOWMSB_B:
-    LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
-    AND ANDTBL+$3                        ; Do a logic AND operation to set actual sprite bit OFF
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.    
-
-_SPRX_C:
+    STA VIC_SPR3_X                      ; previously was
     LDA SPRX+$0C
     STA VIC_SPR4_X
     LDA SPRX+$0D
@@ -345,6 +306,7 @@ _SPRX_C:
     STA VIC_SPR6_X
     LDA SPRX+$0F
     STA VIC_SPR7_X    
+
 
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register

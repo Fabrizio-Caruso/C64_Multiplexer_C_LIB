@@ -109,8 +109,8 @@ int main()
         ++i;
         #if !defined(NO_INPUT)
             ch=cgetc();
-            --SPRY[0];
-            ++SPRY[8];
+            --SPRX[0];
+            ++SPRX[8];
         #else
             for(k=0;k<7400;++k){};
         #endif
