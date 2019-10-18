@@ -47,19 +47,19 @@
        .ENDIF
    .ENDIF  
    
-    .macro handle_x spr_number 
+   .MACRO handle_x spr_number 
         LDA SPRX+spr_number
         ASL                                 ; multiply by 2
         STA VIC_SPR0_X+(spr_number & 7)*2   ; weird effects when sprite
         LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value        
         BCS :+                              ; if > 255 set sprite MSB in VIC_SPR_HI_X
-        AND ANDTBL+(spr_number & 7)         ; Do a logic AND operation to set actual sprite bit OFF
+        AND #<~(%1 << (spr_number & 7))     ; Do a logic AND operation to set actual sprite bit OFF
         JMP :++
     :
-        ORA ORTBL+(spr_number & 7)          ; Do a logic OR operation to set actual sprite bit ON
+        ORA #%1 << (spr_number & 7)         ; Do a logic OR operation to set actual sprite bit ON
     :
         STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-    .endmacro
+   .ENDMACRO
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
@@ -179,34 +179,15 @@ IRQTOP:
     STA VIC_SPR6_Y
     LDA SPRY+$07
     STA VIC_SPR7_Y   
-
     
-;    handle_x $0
-;    handle_x $1
-;    handle_x $2
-;    handle_x $3
-;    handle_x $4
-;    handle_x $5
-;    handle_x $6
-;    handle_x $7
-
-    LDA SPRX+$00
-    STA VIC_SPR0_X
-    LDA SPRX+$01
-    STA VIC_SPR1_X
-    LDA SPRX+$02
-    STA VIC_SPR2_X                      ; moves lower than what it
-    LDA SPRX+$03
-    STA VIC_SPR3_X                      ; previously was
-    LDA SPRX+$04
-    STA VIC_SPR4_X
-    LDA SPRX+$05
-    STA VIC_SPR5_X
-    LDA SPRX+$06
-    STA VIC_SPR6_X
-    LDA SPRX+$07
-    STA VIC_SPR7_X
-
+    handle_x $0
+    handle_x $1
+    handle_x $2
+    handle_x $3
+    handle_x $4
+    handle_x $5
+    handle_x $6
+    handle_x $7
 
     LDX SPRF                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
@@ -289,34 +270,14 @@ IRQBOTTOM:
     LDA SPRY+$0F
     STA VIC_SPR7_Y                     ; to the bottom to prevent
     
-;    handle_x $8
-;    handle_x $9
-;    handle_x $A
-;    handle_x $B
-;    handle_x $C
-;    handle_x $D
-;    handle_x $E
-;    handle_x $F
-
-    LDA SPRX+$08
-    STA VIC_SPR0_X                      ; weird effects when sprite
-    LDA SPRX+$09
-    STA VIC_SPR1_X                      ; weird effects when sprite
-    LDA SPRX+$0A
-    STA VIC_SPR2_X                      ; moves lower than what it
-    LDA SPRX+$0B
-    STA VIC_SPR3_X                      ; previously was
-    LDA SPRX+$0C
-    STA VIC_SPR4_X
-    LDA SPRX+$0D
-    STA VIC_SPR5_X
-    LDA SPRX+$0E
-    STA VIC_SPR6_X
-    LDA SPRX+$0F
-    STA VIC_SPR7_X
-
-
-
+    handle_x $8
+    handle_x $9
+    handle_x $A
+    handle_x $B
+    handle_x $C
+    handle_x $D
+    handle_x $E
+    handle_x $F
 
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
