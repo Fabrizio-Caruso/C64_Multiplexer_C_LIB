@@ -69,8 +69,8 @@
 ;-------------------
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
-IRQTOPLINE = $23                          ; Sprites display IRQ at rasterline $023.
-IRQBOTTOMLINE = $90                          ; Sorting code IRQ at rasterline $0FC
+IRQTOPLINE = $23                        ; Sprites display IRQ at rasterline $023.
+IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
 
 ;-------------------
 ;MUSIC_CODE = $01                       ; Set to $01 to enable music routines
@@ -413,58 +413,4 @@ SORTSPRF:
     SORTSPREY:
         .RES MAXSPR, $00                ; Sorted sprites EXPANDY flags array
     .ENDIF    
-;-------------------
-D015TBL:
-    .BYTE %00000000                     ; Table of sprites that are "on"
-    .BYTE %00000001                     ; for VIC_SPR_ENA
-    .BYTE %00000011
-    .BYTE %00000111
-    .BYTE %00001111
-    .BYTE %00011111
-    .BYTE %00111111
-    .BYTE %01111111
-    .BYTE %11111111
-;---------------------------------------
-; Indexes to frame & color registers
-;-------------------
-PHYSICALSPRTBL1:
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-PHYSICALSPRTBL2:
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-;---------------------------------------
-; AND/OR tables for various register
-; fast setup.
-;-------------------
-ANDTBL:
-    .BYTE %11111110
-ORTBL:
-    .BYTE %00000001
-    .BYTE %11111101
-    .BYTE %00000010
-    .BYTE %11111011
-    .BYTE %00000100
-    .BYTE %11110111
-    .BYTE %00001000
-    .BYTE %11101111
-    .BYTE %00010000
-    .BYTE %11011111
-    .BYTE %00100000
-    .BYTE %10111111
-    .BYTE %01000000
-    .BYTE %01111111
-    .BYTE %10000000
-;-------------------------------------------------------------------------------
+
