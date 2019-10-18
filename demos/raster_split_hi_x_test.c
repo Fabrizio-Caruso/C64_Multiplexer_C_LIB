@@ -10,6 +10,10 @@
 #include <string.h>
 /******************/
 #include <peekpoke.h>
+
+#define X_SPACING 0x10
+#define X_OFFSET 2
+
 /*******************
 * Prototypes
 *******************/
@@ -75,7 +79,7 @@ int main()
 
     for(j=0;j<8;++j)
     {
-        SPRX[j]= 0x17*((j&7)+3);
+        SPRX[j]= X_SPACING*((j&7)+X_OFFSET);
         gotoxy(1,j); cprintf("SPRX: %02u",SPRX[j]);
         
         SPRY[j]= 0x60-j*6;
@@ -89,7 +93,7 @@ int main()
 
     for(j=0;j<8;++j)
     {
-        SPRX[j+8]= 0x17*((j&7)+3);
+        SPRX[j+8]= X_SPACING*((j&7)+X_OFFSET);
         gotoxy(1,j+8); cprintf("SPRX: %02u",SPRX[j+8]);
         
         SPRY[j+8]= 0xA0+j*6;

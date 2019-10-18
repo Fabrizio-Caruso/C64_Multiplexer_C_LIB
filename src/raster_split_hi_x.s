@@ -176,9 +176,11 @@ IRQTOP:
     LDA SPRY+$05
     STA VIC_SPR5_Y
     LDA SPRY+$06
-    STA VIC_SPR6_Y
+    STA VIC_SPR6_Y    
+    .IF .NOT .DEFINED(FREE_SPRITES) 
     LDA SPRY+$07
     STA VIC_SPR7_Y   
+    .ENDIF
     
     handle_x $0
     handle_x $1
@@ -187,7 +189,9 @@ IRQTOP:
     handle_x $4
     handle_x $5
     handle_x $6
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     handle_x $7
+    .ENDIF
 
     LDX SPRF                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
@@ -203,9 +207,11 @@ IRQTOP:
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$06
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
+    .IF .NOT .DEFINED(FREE_SPRITES) 
     LDX SPRF+$07
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
-
+    .ENDIF
+    
     LDA SPRC
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
     LDA SPRC+$01    
@@ -219,9 +225,11 @@ IRQTOP:
     LDA SPRC+$05
     STA VIC_SPR5_COLOR
     LDA SPRC+$06
-    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register
+    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
+    .IF .NOT .DEFINED(FREE_SPRITES)
     LDA SPRC+$07
-    STA VIC_SPR7_COLOR 
+    STA VIC_SPR7_COLOR
+    .ENDIF
     
     LDA #<IRQBOTTOM                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
@@ -266,9 +274,11 @@ IRQBOTTOM:
     LDA SPRY+$0D
     STA VIC_SPR5_Y
     LDA SPRY+$0E
-    STA VIC_SPR6_Y   
+    STA VIC_SPR6_Y
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDA SPRY+$0F
     STA VIC_SPR7_Y                     ; to the bottom to prevent
+    .ENDIF
     
     handle_x $8
     handle_x $9
@@ -277,7 +287,9 @@ IRQBOTTOM:
     handle_x $C
     handle_x $D
     handle_x $E
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     handle_x $F
+    .ENDIF
 
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
@@ -293,9 +305,10 @@ IRQBOTTOM:
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$0E
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDX SPRF+$0F
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
-    
+    .ENDIF
     
     LDA SPRC+$08 
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
@@ -310,9 +323,11 @@ IRQBOTTOM:
     LDA SPRC+$0D
     STA VIC_SPR5_COLOR
     LDA SPRC+$0E
-    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register
+    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDA SPRC+$0F
     STA VIC_SPR7_COLOR        
+    .ENDIF
     
     LDA #<IRQTOP                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
