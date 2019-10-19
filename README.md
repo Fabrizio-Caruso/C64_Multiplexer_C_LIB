@@ -1,9 +1,7 @@
 # C64_Multiplexer_C_LIB
-Multiplexer adaptation, sid support and demos by Flavio Web Pasqualin (@Flaviowebit)
-
-Raster split adaptation, CC65 and C support by Fabrizio Caruso (@Fabrizio-Caruso)
-
-Initial work on the multiplxer by Antonino Porcino (@nippur72)
+_Multiplexer adaptation, sid support and demos by Flavio Web Pasqualin (@Flaviowebit)_ \
+_Raster split adaptation, CC65 and C support by Fabrizio Caruso (@Fabrizio-Caruso)_ \
+_Initial work on the multiplxer by Antonino Porcino (@nippur72)_ 
 
 
 We provide a little template with a generic sprite multiplexer and a SID tune player for both the Commodore 64 and the native Commodore 128.
