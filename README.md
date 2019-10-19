@@ -7,6 +7,9 @@ _Initial work on the multiplxer by Antonino Porcino (@nippur72)_
 We provide a little template with a generic sprite multiplexer and a SID tune player for both the Commodore 64 and the native Commodore 128.
 
 We use a modified and extended version of Cadaver's Ocean sprite multiplexer originally taken from:
+https://cadaver.github.io/rants/multi.zip
+
+See more details in:
 https://cadaver.github.io/rants/sprite.html
 
 Most signification modifications of the multiplexer and support for SID tunes have been implemented by FlavioWeb.
