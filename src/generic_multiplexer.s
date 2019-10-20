@@ -56,10 +56,9 @@ IRQ3LINE = $23                          ; Sprites display IRQ at rasterline $023
 .ENDIF    
 ;MAXSPR = 16                            ; Maximum number of sprites
 ;-------------------
-_MULTIPLEX_DONE = $FA                   ; "Job done" flag.
-_NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
-_SPRUPDATEFLAG = $FC                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
-SORTEDSPRITES = $FD                     ; Number of sorted sprites for the raster interrupt
+_MULTIPLEX_DONE = $FB                   ; "Job done" flag.
+_NUMSPRITES = $FC                       ; Number of sprites that the main program wants to pass to the sprite sorter
+_SPRUPDATEFLAG = $FD                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
 TEMPVARIABLE = $FE                      ; Just a temp variable used by the raster interrupt
 SPRIRQCOUNTER = $FF                     ; Sprite counter used by the interrupt
 SORTORDER = $50                         ; Order-table for sorting. Needs as many bytes
@@ -125,8 +124,7 @@ _INITRASTER:
 ; sprite multiplexing system
 ;-------------------
 _INITSPRITES:
-    LDX #$00
-    STX SORTEDSPRITES                   ; Reset...
+    LDX #$00                            ; Reset...
     STX _SPRUPDATEFLAG                  ; three...
     INX                                 ; internal ...
     STX _MULTIPLEX_DONE                 ; flags.
@@ -161,10 +159,9 @@ IRQ1:
     LDA #$00
     STA _SPRUPDATEFLAG
     LDA _NUMSPRITES                     ; Take number of sprites given by the main program
-    STA SORTEDSPRITES                   ; If it's zero, don't need to
-    BNE IRQ1_BEGINSORT                  ; sort
+    BNE IRQ1_BEGINSORT                  ; If it's zero, don't need to sort
 IRQ1_NONEWSPRITES:
-    LDX SORTEDSPRITES
+    LDX _NUMSPRITES
     CPX #$09
     BCC IRQ1_NOTMORETHAN8
     LDX #$08
@@ -213,13 +210,13 @@ IRQ1_BEGINSORT:
     .ENDIF    
     LDX #MAXSPR                         ; We needo to sort
     DEX                                 ; this sprite?
-    CPX SORTEDSPRITES
+    CPX _NUMSPRITES
     BCC IRQ1_CLEARDONE                  ; Yes -> go sorting.
     LDA #$FF                            ; No -> mark unused sprites with the
 IRQ1_CLEARLOOP:
     STA SPRY,X                          ; lowest Y-coordinate ($ff)
     DEX                                 ; these will "fall" to the
-    CPX SORTEDSPRITES                   ; bottom of the sorted table
+    CPX _NUMSPRITES                   ; bottom of the sorted table
     BCS IRQ1_CLEARLOOP
 IRQ1_CLEARDONE:
     LDX #$00
@@ -248,7 +245,7 @@ IRQ1_SORTSKIP:
     INX
     CPX #MAXSPR-$01
     BCC IRQ1_SORTLOOP
-    LDX SORTEDSPRITES
+    LDX _NUMSPRITES
     LDA #$FF                            ; $ff is the endmark for the
     STA SORTSPRY,X                      ; sprite interrupt routine
     LDX #$00
@@ -275,7 +272,7 @@ IRQ1_SORTLOOP3:
         STA SORTSPREY,X
     .ENDIF    
     INX
-    CPX SORTEDSPRITES
+    CPX _NUMSPRITES
     BCC IRQ1_SORTLOOP3
     .IFDEF DEBUG
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
