@@ -61,7 +61,7 @@ _NUMSPRITES = $FC                       ; Number of sprites that the main progra
 _SPRUPDATEFLAG = $FD                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
 TEMPVARIABLE = $FE                      ; Just a temp variable used by the raster interrupt
 SPRIRQCOUNTER = $FF                     ; Sprite counter used by the interrupt
-SORTORDER = $50                         ; Order-table for sorting. Needs as many bytes
+SORTORDER = $40                         ; Order-table for sorting. Needs as many bytes
 SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;---------------------------------------
 ; Routine to init the

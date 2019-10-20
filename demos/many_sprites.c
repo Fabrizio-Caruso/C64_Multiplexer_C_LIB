@@ -55,6 +55,9 @@ const char yValues[] = {
     0, 0, 0, 1, 2, 3, 5, 7, 
     9, 11, 14, 16, 19, 22, 25, 28
 };
+
+#define GFX_START 0x3000
+#define GFX_START_INDEX (GFX_START/0x40)
 /******************/
 int main()
 {    
@@ -71,7 +74,7 @@ int main()
     
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = 0x81+i+21*(i>=26);
+        SPRF[i] = GFX_START_INDEX+1+i+21*(i>=26);
         SPRC[i] = i&0xfd;        
     }
     
