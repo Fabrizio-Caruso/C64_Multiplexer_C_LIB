@@ -58,7 +58,7 @@ some_sprites:
 
 many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20 -D_SPRITE_SEPARATION_=25 \
+	--asm-define MAXSPR=21 -D_NUMBER_OF_SPRITES_=21 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites.prg
