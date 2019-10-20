@@ -48,7 +48,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 
 some_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=26 -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=24 \
+	--asm-define MAXSPR=16 -D_NUMBER_OF_SPRITES_=16 -D_SPRITE_SEPARATION_=24 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
 	-o $(BUILD_PATH)/some_sprites.prg
@@ -58,7 +58,7 @@ some_sprites:
 
 many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
+	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites.prg
@@ -169,9 +169,9 @@ clean:
 
     
 many_sprites_debug:
-	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=25 \
+	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) -D_NUMBER_OF_SPRITES_=18 -D_SPRITE_SEPARATION_=25 \
 	$(DEMOS_PATH)/many_sprites.c -o $(DEMOS_PATH)/many_sprites.s
-	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define DEBUG=1 --asm-define MAXSPR=26 \
+	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define DEBUG=1 --asm-define MAXSPR=18 \
 	$(DEMOS_PATH)/many_sprites.s $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites_debug.prg
 	rm $(DEMOS_PATH)/many_sprites.s
@@ -244,6 +244,7 @@ raster_split_hi_x_test_c128:
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o         
+
     
 debug: many_sprites_debug sin_scroller_debug raster_split_hi_x_test raster_split_hi_x_test_c128
 
