@@ -1,6 +1,6 @@
 # C64_Multiplexer_C_LIB
-_Multiplexer adaptation, sid support and demos by Flavio Web Pasqualin (@Flaviowebit)_ \
-_Raster split adaptation, CC65 and C support by Fabrizio Caruso (@Fabrizio-Caruso)_ \
+_Multiplexer adaptation, sid support and most demo code by Flavio Web Pasqualin (@Flaviowebit)_ \
+_Raster split adaptation, sprite expand code, some C128 code, CC65 and C support by Fabrizio Caruso (@Fabrizio-Caruso)_ \
 _Initial work on the multiplxer by Antonino Porcino (@nippur72)_ 
 
 
@@ -12,8 +12,6 @@ https://cadaver.github.io/rants/multi.zip
 See more details in:
 https://cadaver.github.io/rants/sprite.html
 
-Most signification modifications of the multiplexer and support for SID tunes have been implemented by FlavioWeb.
-C128 fast mode, sprite expand flags, minor C code tuning, linker configuration have been implemented by Fabrizio Caruso.
 
 FEATURES
 - Freely moving multiplexed sprites (up to 36), i.e., generic sprite multiplexer 
