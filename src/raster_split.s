@@ -46,6 +46,20 @@
             KERNAL_IRQ=$FF33
        .ENDIF
    .ENDIF  
+   
+   .MACRO handle_x spr_number 
+        LDA SPRX+spr_number
+        ASL                                 ; multiply by 2
+        STA VIC_SPR0_X+(spr_number & 7)*2   ; weird effects when sprite
+        LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value        
+        BCS :+                              ; if > 255 set sprite MSB in VIC_SPR_HI_X
+        AND #<~(%1 << (spr_number & 7))     ; Do a logic AND operation to set actual sprite bit OFF
+        JMP :++
+    :
+        ORA #%1 << (spr_number & 7)         ; Do a logic OR operation to set actual sprite bit ON
+    :
+        STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
+   .ENDMACRO
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
@@ -55,8 +69,8 @@
 ;-------------------
 SCREEN_RAM = $0400                      ; Screen ram start address
 ;-------------------
-IRQTOPLINE = $23                          ; Sprites display IRQ at rasterline $023.
-IRQBOTTOMLINE = $90                          ; Sorting code IRQ at rasterline $0FC
+IRQTOPLINE = $23                        ; Sprites display IRQ at rasterline $023.
+IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
 
 ;-------------------
 ;MUSIC_CODE = $01                       ; Set to $01 to enable music routines
@@ -162,26 +176,22 @@ IRQTOP:
     LDA SPRY+$05
     STA VIC_SPR5_Y
     LDA SPRY+$06
-    STA VIC_SPR6_Y
+    STA VIC_SPR6_Y    
+    .IF .NOT .DEFINED(FREE_SPRITES) 
     LDA SPRY+$07
     STA VIC_SPR7_Y   
+    .ENDIF
     
-    LDA SPRX
-    STA VIC_SPR0_X                      ; to the bottom to prevent
-    LDA SPRX+$01
-    STA VIC_SPR1_X                      ; weird effects when sprite
-    LDA SPRX+$02
-    STA VIC_SPR2_X                      ; moves lower than what it
-    LDA SPRX+$03
-    STA VIC_SPR3_X                      ; previously was
-    LDA SPRX+$04
-    STA VIC_SPR4_X
-    LDA SPRX+$05
-    STA VIC_SPR5_X
-    LDA SPRX+$06
-    STA VIC_SPR6_X
-    LDA SPRX+$07
-    STA VIC_SPR7_X        
+    handle_x $0
+    handle_x $1
+    handle_x $2
+    handle_x $3
+    handle_x $4
+    handle_x $5
+    handle_x $6
+    .IF .NOT .DEFINED(FREE_SPRITES)     
+    handle_x $7
+    .ENDIF
 
     LDX SPRF                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
@@ -197,9 +207,11 @@ IRQTOP:
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$06
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
+    .IF .NOT .DEFINED(FREE_SPRITES) 
     LDX SPRF+$07
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
-
+    .ENDIF
+    
     LDA SPRC
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
     LDA SPRC+$01    
@@ -213,9 +225,11 @@ IRQTOP:
     LDA SPRC+$05
     STA VIC_SPR5_COLOR
     LDA SPRC+$06
-    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register
+    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
+    .IF .NOT .DEFINED(FREE_SPRITES)
     LDA SPRC+$07
-    STA VIC_SPR7_COLOR 
+    STA VIC_SPR7_COLOR
+    .ENDIF
     
     LDA #<IRQBOTTOM                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
@@ -260,26 +274,22 @@ IRQBOTTOM:
     LDA SPRY+$0D
     STA VIC_SPR5_Y
     LDA SPRY+$0E
-    STA VIC_SPR6_Y   
+    STA VIC_SPR6_Y
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDA SPRY+$0F
     STA VIC_SPR7_Y                     ; to the bottom to prevent
+    .ENDIF
     
-    LDA SPRX+$08
-    STA VIC_SPR0_X                      ; to the bottom to prevent
-    LDA SPRX+$09
-    STA VIC_SPR1_X                      ; weird effects when sprite
-    LDA SPRX+$0A
-    STA VIC_SPR2_X                      ; moves lower than what it
-    LDA SPRX+$0B
-    STA VIC_SPR3_X                      ; previously was
-    LDA SPRX+$0C
-    STA VIC_SPR4_X
-    LDA SPRX+$0D
-    STA VIC_SPR5_X
-    LDA SPRX+$0E
-    STA VIC_SPR6_X
-    LDA SPRX+$0F
-    STA VIC_SPR7_X    
+    handle_x $8
+    handle_x $9
+    handle_x $A
+    handle_x $B
+    handle_x $C
+    handle_x $D
+    handle_x $E
+    .IF .NOT .DEFINED(FREE_SPRITES)     
+    handle_x $F
+    .ENDIF
 
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
@@ -295,9 +305,10 @@ IRQBOTTOM:
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$0E
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDX SPRF+$0F
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
-    
+    .ENDIF
     
     LDA SPRC+$08 
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
@@ -312,9 +323,11 @@ IRQBOTTOM:
     LDA SPRC+$0D
     STA VIC_SPR5_COLOR
     LDA SPRC+$0E
-    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register
+    STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
+    .IF .NOT .DEFINED(FREE_SPRITES)     
     LDA SPRC+$0F
     STA VIC_SPR7_COLOR        
+    .ENDIF
     
     LDA #<IRQTOP                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
@@ -400,58 +413,4 @@ SORTSPRF:
     SORTSPREY:
         .RES MAXSPR, $00                ; Sorted sprites EXPANDY flags array
     .ENDIF    
-;-------------------
-D015TBL:
-    .BYTE %00000000                     ; Table of sprites that are "on"
-    .BYTE %00000001                     ; for VIC_SPR_ENA
-    .BYTE %00000011
-    .BYTE %00000111
-    .BYTE %00001111
-    .BYTE %00011111
-    .BYTE %00111111
-    .BYTE %01111111
-    .BYTE %11111111
-;---------------------------------------
-; Indexes to frame & color registers
-;-------------------
-PHYSICALSPRTBL1:
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-    .BYTE $00, $01,$02, $03, $04, $05, $06, $07
-PHYSICALSPRTBL2:
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-    .BYTE $00, $02, $04, $06, $08, $0A, $0C, $0E
-;---------------------------------------
-; AND/OR tables for various register
-; fast setup.
-;-------------------
-ANDTBL:
-    .BYTE %11111110
-ORTBL:
-    .BYTE %00000001
-    .BYTE %11111101
-    .BYTE %00000010
-    .BYTE %11111011
-    .BYTE %00000100
-    .BYTE %11110111
-    .BYTE %00001000
-    .BYTE %11101111
-    .BYTE %00010000
-    .BYTE %11011111
-    .BYTE %00100000
-    .BYTE %10111111
-    .BYTE %01000000
-    .BYTE %01111111
-    .BYTE %10000000
-;-------------------------------------------------------------------------------
+
