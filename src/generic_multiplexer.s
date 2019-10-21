@@ -355,13 +355,12 @@ IRQ3_SPRITELOOP:
     BCC IRQ3_LOWMSB                     ; if < 255 clear sprite MSB in VIC_SPR_HI_X
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     ORA ORTBL,X                         ; Do a logic OR operation to set actual sprite bit ON
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
     JMP IRQ3_MSBOK
 IRQ3_LOWMSB:
     LDA VIC_SPR_HI_X                    ; Load actual VIC_SPR_HI_X value
     AND ANDTBL,X                        ; Do a logic AND operation to set actual sprite bit OFF
-    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
 IRQ3_MSBOK:
+    STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.    
     .IFDEF MULTICOLOR                   ; If multicolor mode flag is ON
         LDA SORTSPRM,Y                  ; check if actual sprite is MULTI or SINGLE color mode
         BEQ IRQ3_NO_MULTI               ; No -> clear sprite related bit into VIC_SPR_MCOLOR
