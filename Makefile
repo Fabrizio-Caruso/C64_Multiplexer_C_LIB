@@ -56,6 +56,7 @@ some_sprites:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 
+
 many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
@@ -65,6 +66,7 @@ many_sprites:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
+
     
 too_many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
@@ -85,6 +87,7 @@ sin_scroller:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
+
 
 sin_scroller_multicolor:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(MULTICFG) \
@@ -107,6 +110,7 @@ sin_scroller_expand_x:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o    
 
+
 sin_scroller_multicolor_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) $(MULTICFG) \
 	--asm-define MAXSPR=16  \
@@ -116,6 +120,7 @@ sin_scroller_multicolor_expand_x:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 
+
     
 sin_scroller_expand_y:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDYCFG) \
@@ -126,6 +131,7 @@ sin_scroller_expand_y:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
+
 
 sin_scroller_music:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
@@ -139,7 +145,8 @@ sin_scroller_music:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o        
-    
+
+   
 sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
@@ -151,6 +158,7 @@ sin_scroller_c128:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
+
 
 sin_scroller_music_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYSIDC128CFG) \
@@ -206,6 +214,7 @@ sin_scroller_debug:
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o    
 
+
 raster_split_test:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
@@ -230,34 +239,9 @@ raster_split_test_c128:
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
-    
-
-raster_split_hi_x_test:
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=16 \
-	--asm-define STANDARD_IRQ=1 \
-	$(DEMOS_PATH)/raster_split/raster_split_test.c \
-	$(SOURCE_PATH)/raster_split.s \
-	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split_hi_x.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o     
  
 
-raster_split_hi_x_test_c128:
-	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
-	--asm-define MAXSPR=16 \
-	-DNO_INPUT \
-	$(DEMOS_PATH)/raster_split/raster_split_test.c \
-	$(SOURCE_PATH)/raster_split.s \
-	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split_hi_x_c128.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o         
-
-raster_split_tests: raster_split_test raster_split_test_c128 raster_split_hi_x_test raster_split_hi_x_test_c128
+raster_split_tests: raster_split_test raster_split_test_c128
    
 all: raster_split_tests generic_multiplexer_tests
    
