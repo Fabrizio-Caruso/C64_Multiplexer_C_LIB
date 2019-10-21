@@ -19,7 +19,7 @@ EXPANDXCFG=--asm-define EXPANDX=1 -DEXPAND_X
 EXPANDYCFG=--asm-define EXPANDY=1 -DEXPAND_Y
 
 
-MYCFG=--config ./cfg/c64_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
+MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
 MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg --asm-define USE_KERNAL=1
