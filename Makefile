@@ -65,6 +65,17 @@ many_sprites:
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
+    
+too_many_sprites: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define MAXSPR=48 -D_NUMBER_OF_SPRITES_=48 -D_SPRITE_SEPARATION_=25 \
+	--asm-define FAST_MODE=1 \
+	$(DEMOS_PATH)/many_sprites.c $(ASMFILES) \
+	-o $(BUILD_PATH)/too_many_sprites.prg
+	rm $(DEMOS_PATH)/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o    
+    
 
 sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
@@ -157,7 +168,7 @@ sin_scroller_music_c128:
 	rm $(GRAPHICS_PATH)/*.o   
 
 
-all: some_sprites many_sprites sin_scroller sin_scroller_multicolor sin_scroller_expand_x sin_scroller_multicolor_expand_x sin_scroller_expand_y sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
+all: some_sprites many_sprites too_many_sprites sin_scroller sin_scroller_multicolor sin_scroller_expand_x sin_scroller_multicolor_expand_x sin_scroller_expand_y sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
 
 
 clean:
