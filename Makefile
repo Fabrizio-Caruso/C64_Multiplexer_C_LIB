@@ -219,7 +219,6 @@ raster_split_test:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
-	--asm-define FREE_SPRITES=2 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
