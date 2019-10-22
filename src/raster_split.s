@@ -74,6 +74,11 @@ IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
 
 ;-------------------
 ;MUSIC_CODE = $01                       ; Set to $01 to enable music routines
+
+ .IF .NOT .DEFINED(FREE_SPRITES)
+     FREE_SPRITES=0
+ .ENDIF
+
 .IF .DEFINED(__C64__)
     MUSIC_INIT = $1000                  ; Music init address for C64 specific compilation
     MUSIC_PLAY = $1003                  ; Music play address for C64 specific compilation
@@ -175,9 +180,11 @@ IRQTOP:
     STA VIC_SPR4_Y
     LDA SPRY+$05
     STA VIC_SPR5_Y
+    .IF FREE_SPRITES<2
     LDA SPRY+$06
     STA VIC_SPR6_Y    
-    .IF .NOT .DEFINED(FREE_SPRITES) 
+    .ENDIF
+    .IF FREE_SPRITES<1
     LDA SPRY+$07
     STA VIC_SPR7_Y   
     .ENDIF
@@ -188,8 +195,10 @@ IRQTOP:
     handle_x $3
     handle_x $4
     handle_x $5
+    .IF FREE_SPRITES<2
     handle_x $6
-    .IF .NOT .DEFINED(FREE_SPRITES)     
+    .ENDIF
+    .IF FREE_SPRITES<1     
     handle_x $7
     .ENDIF
 
@@ -205,9 +214,11 @@ IRQTOP:
     STX SCREEN_RAM+$03FC              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$05
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
+    .IF FREE_SPRITES<2
     LDX SPRF+$06
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
-    .IF .NOT .DEFINED(FREE_SPRITES) 
+    .ENDIF
+    .IF FREE_SPRITES<1 
     LDX SPRF+$07
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
     .ENDIF
@@ -224,9 +235,11 @@ IRQTOP:
     STA VIC_SPR4_COLOR                ; Set sprite color to actual sprite color register
     LDA SPRC+$05
     STA VIC_SPR5_COLOR
+    .IF FREE_SPRITES<2
     LDA SPRC+$06
     STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
-    .IF .NOT .DEFINED(FREE_SPRITES)
+    .ENDIF
+    .IF FREE_SPRITES<1
     LDA SPRC+$07
     STA VIC_SPR7_COLOR
     .ENDIF
@@ -273,9 +286,11 @@ IRQBOTTOM:
     STA VIC_SPR4_Y
     LDA SPRY+$0D
     STA VIC_SPR5_Y
+    .IF FREE_SPRITES<2
     LDA SPRY+$0E
     STA VIC_SPR6_Y
-    .IF .NOT .DEFINED(FREE_SPRITES)     
+    .ENDIF 
+    .IF FREE_SPRITES<1     
     LDA SPRY+$0F
     STA VIC_SPR7_Y                     ; to the bottom to prevent
     .ENDIF
@@ -286,8 +301,10 @@ IRQBOTTOM:
     handle_x $B
     handle_x $C
     handle_x $D
+    .IF FREE_SPRITES<2
     handle_x $E
-    .IF .NOT .DEFINED(FREE_SPRITES)     
+    .ENDIF
+    .IF FREE_SPRITES<1     
     handle_x $F
     .ENDIF
 
@@ -303,9 +320,11 @@ IRQBOTTOM:
     STX SCREEN_RAM+$03FC              ; Set sprite frame pointer to actual sprite register
     LDX SPRF+$0D
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
+    .IF FREE_SPRITES<2
     LDX SPRF+$0E
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
-    .IF .NOT .DEFINED(FREE_SPRITES)     
+    .ENDIF
+    .IF FREE_SPRITES<1     
     LDX SPRF+$0F
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
     .ENDIF
@@ -322,9 +341,11 @@ IRQBOTTOM:
     STA VIC_SPR4_COLOR                ; Set sprite color to actual sprite color register
     LDA SPRC+$0D
     STA VIC_SPR5_COLOR
+    .IF FREE_SPRITES<2
     LDA SPRC+$0E
     STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
-    .IF .NOT .DEFINED(FREE_SPRITES)     
+    .ENDIF
+    .IF FREE_SPRITES<1     
     LDA SPRC+$0F
     STA VIC_SPR7_COLOR        
     .ENDIF
