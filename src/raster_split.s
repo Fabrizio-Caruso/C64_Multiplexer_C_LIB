@@ -4,6 +4,7 @@
 
     .IF .DEFINED(BASIC)
         .ORG $C000 
+        USE_KERNAL=1
     .ENDIF
 ;--------------------------------------
 ; C64 sprites multiplexer
@@ -11,7 +12,7 @@
 ; by Lasse Oorni (Cadaver)
 ;-------------------
     .INCLUDE "zeropage.inc"
-    .IF .DEFINED(__C64__)
+    .IF .DEFINED(__C64__) .OR .DEFINED(BASIC)
         .INCLUDE "c64.inc"              ; Include file for C64 specific compilation
     .ELSEIF .DEFINED(__C128__)
         .INCLUDE "c128.inc"             ; Include file for C128 specific compilation

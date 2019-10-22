@@ -240,6 +240,10 @@ raster_split_test_c128:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
  
+raster_split_basic_test:
+	$(CC65_PATH)ca65$(EXEEXT) -DBASIC \
+	$(SOURCE_PATH)/raster_split.s \
+  	-o $(BUILD_PATH)/raster_split_basic.prg
 
 raster_split_tests: raster_split_test raster_split_test_c128
    
