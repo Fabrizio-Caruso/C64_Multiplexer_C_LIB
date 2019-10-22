@@ -178,12 +178,18 @@ IRQTOP:
 
     LDA SPRY
     STA VIC_SPR0_Y                     ; to the bottom to prevent
+    .IF FREE_SPRITES<7
     LDA SPRY+$01
     STA VIC_SPR1_Y                      ; weird effects when sprite
+    .ENDIF
+    .IF FREE_SPRITES<6    
     LDA SPRY+$02
+    .ENDIF
     STA VIC_SPR2_Y                      ; moves lower than what it
+    .IF FREE_SPRITES<5    
     LDA SPRY+$03
     STA VIC_SPR3_Y                      ; previously was
+    .ENDIF
     .IF FREE_SPRITES<4
     LDA SPRY+$04
     STA VIC_SPR4_Y
@@ -202,9 +208,15 @@ IRQTOP:
     .ENDIF
     
     handle_x $0
+    .IF FREE_SPRITES<7
     handle_x $1
+    .ENDIF    
+    .IF FREE_SPRITES<6    
     handle_x $2
+    .ENDIF
+    .IF FREE_SPRITES<5    
     handle_x $3
+    .ENDIF
     .IF FREE_SPRITES<4
     handle_x $4
     .ENDIF
@@ -220,11 +232,17 @@ IRQTOP:
 
     LDX SPRF                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
+    .IF FREE_SPRITES<7    
     LDX SPRF+$01
     STX SCREEN_RAM+$03F9              ; Set sprite frame pointer to actual sprite register
+    .ENDIF
+    .IF FREE_SPRITES<6    
     LDX SPRF+$02
     STX SCREEN_RAM+$03FA              ; Set sprite frame pointer to actual sprite register
+    .ENDIF
+    .IF FREE_SPRITES<5
     LDX SPRF+$03
+    .ENDIF
     STX SCREEN_RAM+$03FB              ; Set sprite frame pointer to actual sprite register
     .IF FREE_SPRITES<4
     LDX SPRF+$04
@@ -245,12 +263,18 @@ IRQTOP:
     
     LDA SPRC
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
+    .IF FREE_SPRITES<7    
     LDA SPRC+$01    
     STA VIC_SPR1_COLOR
+    .ENDIF
+    .IF FREE_SPRITES<6
     LDA SPRC+$02
     STA VIC_SPR2_COLOR                ; Set sprite color to actual sprite color register
+    .ENDIF
+    .IF FREE_SPRITES<5    
     LDA SPRC+$03    
     STA VIC_SPR3_COLOR
+    .ENDIF
     .IF FREE_SPRITES<4
     LDA SPRC+$04
     STA VIC_SPR4_COLOR                ; Set sprite color to actual sprite color register
@@ -300,12 +324,18 @@ IRQBOTTOM:
 
     LDA SPRY+$08
     STA VIC_SPR0_Y                      ; weird effects when sprite
+    .IF FREE_SPRITES<7    
     LDA SPRY+$09
     STA VIC_SPR1_Y                      ; moves lower than what it
+    .ENDIF
+    .IF FREE_SPRITES<6    
     LDA SPRY+$0A
     STA VIC_SPR2_Y                      ; previously was
+    .ENDIF
+    .IF FREE_SPRITES<5    
     LDA SPRY+$0B
     STA VIC_SPR3_Y
+    .ENDIF
     .IF FREE_SPRITES<4
     LDA SPRY+$0C
     STA VIC_SPR4_Y
@@ -324,9 +354,15 @@ IRQBOTTOM:
     .ENDIF
     
     handle_x $8
+    .IF FREE_SPRITES<7    
     handle_x $9
+    .ENDIF
+    .IF FREE_SPRITES<6    
     handle_x $A
+    .ENDIF
+    .IF FREE_SPRITES<5    
     handle_x $B
+    .ENDIF
     .IF FREE_SPRITES<4
     handle_x $C
     .ENDIF
@@ -342,12 +378,18 @@ IRQBOTTOM:
 
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
+    .IF FREE_SPRITES<7    
     LDX SPRF+$09
     STX SCREEN_RAM+$03F9              ; Set sprite frame pointer to actual sprite register
+    .ENDIF
+    .IF FREE_SPRITES<6    
     LDX SPRF+$0A
     STX SCREEN_RAM+$03FA              ; Set sprite frame pointer to actual sprite register
+    .ENDIF
+    .IF FREE_SPRITES<5    
     LDX SPRF+$0B
     STX SCREEN_RAM+$03FB              ; Set sprite frame pointer to actual sprite register
+    .ENDIF
     .IF FREE_SPRITES<4
     LDX SPRF+$0C
     STX SCREEN_RAM+$03FC              ; Set sprite frame pointer to actual sprite register
@@ -367,12 +409,18 @@ IRQBOTTOM:
     
     LDA SPRC+$08 
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
+    .IF FREE_SPRITES<7    
     LDA SPRC+$09    
     STA VIC_SPR1_COLOR
+    .ENDIF
+    .IF FREE_SPRITES<6    
     LDA SPRC+$0A
     STA VIC_SPR2_COLOR                ; Set sprite color to actual sprite color register
+    .ENDIF
+    .IF FREE_SPRITES<5    
     LDA SPRC+$0B    
     STA VIC_SPR3_COLOR
+    .ENDIF
     .IF FREE_SPRITES<4
     LDA SPRC+$0C
     STA VIC_SPR4_COLOR                ; Set sprite color to actual sprite color register
