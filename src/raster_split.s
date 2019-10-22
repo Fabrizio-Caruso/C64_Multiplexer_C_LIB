@@ -3,9 +3,9 @@
 .ENDIF
 
     .IF .DEFINED(BASIC)
-        .ORG $C000 
         USE_KERNAL=1
-        .BYTE $00, $C0        
+        .BYTE $00, $C0    
+        .ORG $C000         
     .ENDIF
 ;--------------------------------------
 ; C64 sprites multiplexer
@@ -38,7 +38,7 @@
    .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
         .EXPORT _SPREY                  ; export _SPRM SPRites EXPANDY array of flags
    .ENDIF  
-   .IF .DEFINED(__C64__)
+   .IF .DEFINED(__C64__) 
        .IFDEF STANDARD_IRQ
             KERNAL_IRQ=$EA31
        .ELSE
@@ -52,6 +52,9 @@
             KERNAL_IRQ=$FF33
        .ENDIF
    .ENDIF  
+   .IF .DEFINED(BASIC)
+            KERNAL_IRQ=$EA31   
+   .ENDIF
    
    .MACRO handle_x spr_number 
         LDA SPRX+spr_number
@@ -108,8 +111,10 @@ TEMPVARIABLE = $FE                      ; Just a temp variable used by the raste
 ; raster interrupt system
 ;-------------------
 _INITRASTER:
+    .IF .NOT .DEFINED(BASIC)
     LDA #$7F
     STA CIA1_ICR                        ; CIA interrupt off
+    .ENDIF
     SEI
     .IFDEF __C64__                      ; C64 RAM setup
         .IFDEF USE_KERNAL
@@ -459,7 +464,7 @@ IRQBOTTOM:
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
     .IF .DEFINED(__C64__)
-        .IF .NOT .DEFINED(USE_KERNAL)
+        .IF .NOT .DEFINED(USE_KERNAL) .OR .DEFINED(BASIC)
             STORE_A = *+$0001           ; Restore original registers value
             LDA #$00
             STORE_X = *+$0001           ; at the original values they have before
@@ -471,22 +476,24 @@ EXIT_IRQ:                               ; Exit IRQ code.
         .ENDIF
     .ELSEIF .DEFINED(__C128__) 
             JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
+    .ELSEIF .DEFINED(BASIC)
+            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
 _SPRX:
 SPRX:
-    .RES MAXSPR, $00                    ; Unsorted sprites X coords array
+    .RES MAXSPR, $40                    ; Unsorted sprites X coords array
 _SPRY:
 SPRY:
-    .RES MAXSPR, $00                    ; Unsorted sprites Y coords array
+    .RES MAXSPR, $80                    ; Unsorted sprites Y coords array
 _SPRC:
 SPRC:
     .RES MAXSPR, $00                    ; Unsorted sprites colors array
 _SPRF:
 SPRF:
-    .RES MAXSPR, $00                    ; Unsorted sprites frame pointer array
+    .RES MAXSPR, $80                    ; Unsorted sprites frame pointer array
     .IFDEF MULTICOLOR
     _SPRM:
     SPRM:
