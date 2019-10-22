@@ -5,6 +5,7 @@
     .IF .DEFINED(BASIC)
         .ORG $C000 
         USE_KERNAL=1
+        .BYTE $00, $C0        
     .ENDIF
 ;--------------------------------------
 ; C64 sprites multiplexer

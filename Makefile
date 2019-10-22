@@ -241,9 +241,10 @@ raster_split_test_c128:
 	rm $(GRAPHICS_PATH)/*.o     
  
 raster_split_basic_test:
-	$(CC65_PATH)ca65$(EXEEXT) -DBASIC \
-	$(SOURCE_PATH)/raster_split.s \
-  	-o $(BUILD_PATH)/raster_split_basic.prg
+	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -D BASE=0xC000 \
+	$(SOURCE_PATH)/raster_split.s -o $(BUILD_PATH)/raster_split_basic.o
+	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
+	--start-addr 0xC000 -o $(BUILD_PATH)/raster_split_basic.prg
 
 raster_split_tests: raster_split_test raster_split_test_c128
    
