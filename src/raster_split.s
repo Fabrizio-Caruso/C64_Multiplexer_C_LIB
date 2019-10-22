@@ -1,6 +1,10 @@
 .IF .DEFINED(__C128__)
     .SEGMENT "CODE2"
 .ENDIF
+
+    .IF .DEFINED(BASIC)
+        .ORG $C000 
+    .ENDIF
 ;--------------------------------------
 ; C64 sprites multiplexer
 ; Based on 32 sprites multiplexer
@@ -87,7 +91,10 @@ IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
     MUSIC_INIT = $2400                  ; Music init address for C128 specific compilation
     MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
 .ENDIF    
-;MAXSPR = 16                            ; Maximum number of sprites
+
+    .IF .NOT .DEFINED(MAXSPR)
+        MAXSPR = 16                            ; Maximum number of sprites
+    .ENDIF
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
