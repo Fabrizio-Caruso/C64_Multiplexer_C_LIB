@@ -213,14 +213,19 @@ raster_split_test_c128:
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
- 
+
+
+raster_split_tests: raster_split_test raster_split_test_c128
+
+
+####################################################
+# BASIC 
 raster_split_basic_test:
 	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -D BASE=0xC000 \
 	$(SOURCE_PATH)/raster_split.s -o $(BUILD_PATH)/raster_split_basic.o
 	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
 	--start-addr 0xC000 -o $(BUILD_PATH)/raster_split_basic.prg
 
-raster_split_tests: raster_split_test raster_split_test_c128
  
  
 ####################################################
@@ -264,14 +269,28 @@ sin_scroller_debug:
 	rm $(SID_PATH)/*.o    
 
 
-raster_split_test_c128_debug:
-	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+raster_split_test_debug:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
-	--asm-define KERNAL=1 \
+	--asm-define STANDARD_IRQ=1 \
+	--asm-define DEBUG=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split_c128.prg
+	-o $(BUILD_PATH)/raster_split_debug.prg
+	rm $(DEMOS_PATH)/raster_split/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o   
+
+raster_split_test_c128_debug:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=16 \
+	--asm-define STANDARD_IRQ=1 \
+	--asm-define DEBUG=1 \
+	$(DEMOS_PATH)/raster_split/raster_split_test.c \
+	$(SOURCE_PATH)/raster_split.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split_c128_debug.prg
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 

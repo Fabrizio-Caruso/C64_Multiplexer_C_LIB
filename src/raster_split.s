@@ -177,6 +177,9 @@ _INITSPRITES:
 ; This is where sorting happens.
 ;-------------------
 IRQTOP:
+    .IFDEF DEBUG 
+        INC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
+    .ENDIF
     .IFNDEF USE_KERNAL
         STA STORE_A                     ; Fast way to store/restore
         STX STORE_X                     ; CPU regs after an IRQ
@@ -313,7 +316,10 @@ IRQTOP:
     .ENDIF
     LDA #IRQBOTTOMLINE                       ; Load position where sort IRQ happens,
     STA VIC_HLINE                       ; and set it.    
-    
+
+    .IFDEF DEBUG 
+        DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
+    .ENDIF    
 .IF .NOT .DEFINED(BASIC)
     JMP EXIT_IRQ
 .ELSE
@@ -324,6 +330,9 @@ IRQTOP:
 ; This is where sprite displaying happens
 ;-------------------
 IRQBOTTOM:
+    .IFDEF DEBUG 
+        INC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
+    .ENDIF   
     .IFNDEF USE_KERNAL
         STA STORE_A                     ; Fast way to store/restore
         STX STORE_X                     ; CPU regs after an IRQ
@@ -462,6 +471,9 @@ IRQBOTTOM:
     LDA #IRQTOPLINE                       ; Load position where sort IRQ happens,
     STA VIC_HLINE                       ; and set it.
 
+    .IFDEF DEBUG 
+        DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
+    .ENDIF    
     ;JMP EXIT_IRQ
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
