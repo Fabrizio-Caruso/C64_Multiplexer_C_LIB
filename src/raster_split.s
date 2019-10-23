@@ -53,7 +53,8 @@
        .ENDIF
    .ENDIF  
    .IF .DEFINED(BASIC)
-            KERNAL_IRQ=$EA31   
+        TOP_KERNAL_IRQ=$EA81
+        BOTTOM_KERNAL_IRQ=$EA31
    .ENDIF
    
    .MACRO handle_x spr_number 
@@ -313,9 +314,11 @@ IRQTOP:
     LDA #IRQBOTTOMLINE                       ; Load position where sort IRQ happens,
     STA VIC_HLINE                       ; and set it.    
     
+.IF .NOT .DEFINED(BASIC)
     JMP EXIT_IRQ
-
-
+.ELSE
+    JMP TOP_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+.ENDIF
 ;---------------------------------------
 ; Raster interrupt 3.
 ; This is where sprite displaying happens
@@ -459,7 +462,7 @@ IRQBOTTOM:
     LDA #IRQTOPLINE                       ; Load position where sort IRQ happens,
     STA VIC_HLINE                       ; and set it.
 
-    JMP EXIT_IRQ
+    ;JMP EXIT_IRQ
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
@@ -477,7 +480,7 @@ EXIT_IRQ:                               ; Exit IRQ code.
     .ELSEIF .DEFINED(__C128__) 
             JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
     .ELSEIF .DEFINED(BASIC)
-            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+            JMP BOTTOM_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
