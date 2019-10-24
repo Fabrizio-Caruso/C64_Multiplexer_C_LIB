@@ -221,7 +221,7 @@ raster_split_tests: raster_split_test raster_split_test_c128
 ####################################################
 # BASIC 
 raster_split_basic_test:
-	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -D BASE=0xC000 \
+	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -DBASE=0xC000 -D__C64__ \
 	$(SOURCE_PATH)/raster_split.s -o $(BUILD_PATH)/raster_split_basic.o
 	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
 	--start-addr 0xC000 -o $(BUILD_PATH)/raster_split_basic.prg

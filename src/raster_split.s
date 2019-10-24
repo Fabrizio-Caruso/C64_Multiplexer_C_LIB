@@ -38,24 +38,24 @@
    .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
         .EXPORT _SPREY                  ; export _SPRM SPRites EXPANDY array of flags
    .ENDIF  
+   
    .IF .DEFINED(__C64__) 
-       .IFDEF STANDARD_IRQ
-            KERNAL_IRQ=$EA31
-       .ELSE
-            KERNAL_IRQ=$EA81
-       .ENDIF
+        FULL_STANDARD_KERNAL=$EA31
+        LIGHT_STANDARD_KERNAL=$EA81
+   .ELSEIF .DEFINED(__C128__)
+        FULL_STANDARD_KERNAL=$FA65
+        LIGHT_STANDARD_KERNAL=$FF33
+   .ENDIF   
+   
+   .IFDEF STANDARD_IRQ
+        KERNAL_IRQ=FULL_STANDARD_KERNAL
+   .ELSE
+        KERNAL_IRQ=LIGHT_STANDARD_KERNAL
    .ENDIF
-   .IF .DEFINED(__C128__)
-       .IFDEF STANDARD_IRQ
-            KERNAL_IRQ=$FA65
-       .ELSE
-            KERNAL_IRQ=$FF33
-       .ENDIF
-   .ENDIF  
-   .IF .DEFINED(BASIC)
-        TOP_KERNAL_IRQ=$EA81
-        BOTTOM_KERNAL_IRQ=$EA31
-   .ENDIF
+ 
+   TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
+   BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL
+
    
    .MACRO handle_x spr_number 
         LDA SPRX+spr_number
