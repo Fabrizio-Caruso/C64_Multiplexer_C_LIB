@@ -226,7 +226,11 @@ raster_split_basic_test:
 	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
 	--start-addr 0xC000 -o $(BUILD_PATH)/raster_split_basic.prg
 
- 
+
+# - Start: SYS49152 (try twice?)
+# - Enable all sprites: POKE 53269,255  
+# - Sprite data in $2000 (Monitor: f 2000 203F ff)
+basic_tests: raster_split_basic_test
  
 ####################################################
 clean:

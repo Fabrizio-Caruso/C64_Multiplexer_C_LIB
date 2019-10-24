@@ -20,46 +20,45 @@
         .INCLUDE "c128.inc"             ; Include file for C128 specific compilation
     .ENDIF 
 ;-------------------
-   .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
-   .EXPORTZP _NUMSPRITES
-   .EXPORTZP _MULTIPLEX_DONE
+    .EXPORTZP _SPRUPDATEFLAG             ; Export zeropage
+    .EXPORTZP _NUMSPRITES
+    .EXPORTZP _MULTIPLEX_DONE
 ;-------------------
-   .EXPORT _INITSPRITES                 ; Export program variables
-   .EXPORT _INITRASTER
-   .EXPORT _SPRX
-   .EXPORT _SPRY
-   .EXPORT _SPRC
-   .EXPORT _SPRF
-   .IFDEF MULTICOLOR                    ; If MULTICOLOR flag is set, then
+    .EXPORT _INITSPRITES                 ; Export program variables
+    .EXPORT _INITRASTER
+    .EXPORT _SPRX
+    .EXPORT _SPRY
+    .EXPORT _SPRC
+    .EXPORT _SPRF
+    .IFDEF MULTICOLOR                    ; If MULTICOLOR flag is set, then
         .EXPORT _SPRM                   ; export _SPRM SPRites Multicolor array of flags
-   .ENDIF
-   .IFDEF EXPANDX                       ; If EXPANDX flag is set, then
+    .ENDIF
+    .IFDEF EXPANDX                       ; If EXPANDX flag is set, then
         .EXPORT _SPREX                  ; export _SPRM SPRites EXPANDX array of flags
-   .ENDIF
-   .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
+    .ENDIF
+    .IFDEF EXPANDY                       ; If EXPANDY flag is set, then
         .EXPORT _SPREY                  ; export _SPRM SPRites EXPANDY array of flags
-   .ENDIF  
+    .ENDIF  
    
-   .IF .DEFINED(__C64__) 
+    .IF .DEFINED(__C64__) 
         FULL_STANDARD_KERNAL=$EA31
         LIGHT_STANDARD_KERNAL=$EA81
-   .ELSEIF .DEFINED(__C128__)
+    .ELSEIF .DEFINED(__C128__)
         FULL_STANDARD_KERNAL=$FA65
         LIGHT_STANDARD_KERNAL=$FF33
-   .ENDIF   
+    .ENDIF   
    
     TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
-   .IFDEF STANDARD_IRQ
+    .IFDEF STANDARD_IRQ
         KERNAL_IRQ=FULL_STANDARD_KERNAL
         BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
-   .ELSE
+    .ELSE
         KERNAL_IRQ=LIGHT_STANDARD_KERNAL
         BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
-   .ENDIF
+    .ENDIF
 
 
-   
-   .MACRO handle_x spr_number 
+    .MACRO handle_x spr_number 
         LDA SPRX+spr_number
         ASL                                 ; multiply by 2
         STA VIC_SPR0_X+(spr_number & 7)*2   ; weird effects when sprite
@@ -71,7 +70,8 @@
         ORA #%1 << (spr_number & 7)         ; Do a logic OR operation to set actual sprite bit ON
     :
         STA VIC_SPR_HI_X                    ; and store new value back to the VIC_SPR_HI_X register.
-   .ENDMACRO
+    .ENDMACRO
+   
 ;-------------------
 ;DEBUG = $00                             ; Set to != $00 to show rastertime usage.
 ;USE_KERNAL = $01                        ; Set to != $00 to enable normal kernal usage
@@ -87,22 +87,22 @@ IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
 ;-------------------
 ;MUSIC_CODE = $01                       ; Set to $01 to enable music routines
 
- .IF .NOT .DEFINED(FREE_SPRITES)
-     FREE_SPRITES=0
- .ENDIF
+    .IF .NOT .DEFINED(FREE_SPRITES)
+        FREE_SPRITES=0
+    .ENDIF
 
-.IF .DEFINED(__C64__)
-    MUSIC_INIT = $1000                  ; Music init address for C64 specific compilation
-    MUSIC_PLAY = $1003                  ; Music play address for C64 specific compilation
-.ENDIF
-.IF .DEFINED(__C128__)
-    MUSIC_INIT = $2400                  ; Music init address for C128 specific compilation
-    MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
-.ENDIF    
+    .IF .DEFINED(__C64__)
+        MUSIC_INIT = $1000                  ; Music init address for C64 specific compilation
+        MUSIC_PLAY = $1003                  ; Music play address for C64 specific compilation
+    .ENDIF
+    .IF .DEFINED(__C128__)
+        MUSIC_INIT = $2400                  ; Music init address for C128 specific compilation
+        MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
+    .ENDIF    
 
-.IF .NOT .DEFINED(MAXSPR)
-    MAXSPR = 16                            ; Maximum number of sprites
-.ENDIF
+    .IF .NOT .DEFINED(MAXSPR)
+        MAXSPR = 16                            ; Maximum number of sprites
+    .ENDIF
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
@@ -189,6 +189,7 @@ IRQTOP:
     .IFDEF DEBUG 
         INC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
+    
     .IFNDEF USE_KERNAL
         STA STORE_A                     ; Fast way to store/restore
         STX STORE_X                     ; CPU regs after an IRQ
@@ -328,7 +329,8 @@ IRQTOP:
 
     .IFDEF DEBUG 
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
-    .ENDIF    
+    .ENDIF  
+    
 .IF .NOT .DEFINED(BASIC)
     JMP EXIT_IRQ
 .ELSE
@@ -341,13 +343,13 @@ IRQTOP:
 IRQBOTTOM:
     .IFDEF DEBUG 
         INC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
-    .ENDIF   
+    .ENDIF
+    
     .IFNDEF USE_KERNAL
         STA STORE_A                     ; Fast way to store/restore
         STX STORE_X                     ; CPU regs after an IRQ
         STY STORE_Y                     ; for kernal OFF only
     .ENDIF
-    
 
     LDA SPRY+$08
     STA VIC_SPR0_Y                      ; weird effects when sprite
@@ -482,7 +484,8 @@ IRQBOTTOM:
 
     .IFDEF DEBUG 
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
-    .ENDIF    
+    .ENDIF
+    
     ;JMP EXIT_IRQ
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
