@@ -98,9 +98,9 @@ IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
     MUSIC_PLAY = $2403                  ; Music play address for C128 specific compilation
 .ENDIF    
 
-    .IF .NOT .DEFINED(MAXSPR)
-        MAXSPR = 16                            ; Maximum number of sprites
-    .ENDIF
+.IF .NOT .DEFINED(MAXSPR)
+    MAXSPR = 16                            ; Maximum number of sprites
+.ENDIF
 ;-------------------
 _MULTIPLEX_DONE = $FA                   ; "Job done" flag.
 _NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
@@ -157,7 +157,14 @@ _INITRASTER:
     LDA #IRQTOPLINE
     STA VIC_HLINE                       ; Set position where first IRQ happens.
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
-    
+
+    .IFDEF __C128__
+        LDA #$FF
+        STA $D8
+        LDA $0A04
+        AND #$FE
+        STA $0A04
+    .ENDIF
     CLI                                 ; Let IRQs happen.
     RTS                                 ; Back to where he came from.
 ;---------------------------------------

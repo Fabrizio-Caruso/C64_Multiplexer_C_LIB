@@ -72,11 +72,6 @@ int main()
     INITSPRITES();
     INITRASTER();
     NUMSPRITES = 16;
-    
-    #if defined(__C128__)
-        POKE(0x0D8,0xFF);
-        POKE(0x2564,PEEK(0x2564)&254);
-    #endif
 
 /***************************************
 * Main loop
