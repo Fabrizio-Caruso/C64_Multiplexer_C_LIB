@@ -47,7 +47,8 @@
    .ENDIF
    .IF .DEFINED(__C128__)
        .IFDEF STANDARD_IRQ
-            KERNAL_IRQ=$FA65
+            TOP_KERNAL_IRQ=$FF33
+            BOTTOM_KERNAL_IRQ=$FA65
        .ELSE
             KERNAL_IRQ=$FF33
        .ENDIF
@@ -320,10 +321,10 @@ IRQTOP:
     .IFDEF DEBUG 
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF    
-.IF .NOT .DEFINED(BASIC)
-    JMP EXIT_IRQ
-.ELSE
+.IF .DEFINED(BASIC) .OR (.DEFINED(__C128__) .AND .DEFINED(USE_KERNAL))
     JMP TOP_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+.ELSE
+    JMP EXIT_IRQ
 .ENDIF
 ;---------------------------------------
 ; Raster interrupt 3.
@@ -489,10 +490,10 @@ EXIT_IRQ:                               ; Exit IRQ code.
         .ELSE ; JMP $EA31/$EA81
             JMP KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
         .ENDIF
-    .ELSEIF .DEFINED(__C128__) 
-            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
-    .ELSEIF .DEFINED(BASIC)
+    .ELSEIF .DEFINED(BASIC) .OR (.DEFINED(__C128__) .AND .DEFINED(USE_KERNAL))
             JMP BOTTOM_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+    .ELSEIF .DEFINED(__C128__) 
+            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
