@@ -4,6 +4,7 @@
 
     .IF .DEFINED(BASIC)
         USE_KERNAL=1
+        STANDARD_IRQ=1
         .BYTE $00, $C0    
         .ORG $C000         
     .ENDIF
@@ -47,14 +48,15 @@
         LIGHT_STANDARD_KERNAL=$FF33
    .ENDIF   
    
+    TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
    .IFDEF STANDARD_IRQ
         KERNAL_IRQ=FULL_STANDARD_KERNAL
+        BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
    .ELSE
         KERNAL_IRQ=LIGHT_STANDARD_KERNAL
+        BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
    .ENDIF
- 
-   TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
-   BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL
+
 
    
    .MACRO handle_x spr_number 
@@ -486,7 +488,7 @@ IRQBOTTOM:
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
     .IF .DEFINED(__C64__)
-        .IF .NOT .DEFINED(USE_KERNAL) .OR .DEFINED(BASIC)
+        .IF .NOT .DEFINED(USE_KERNAL)
             STORE_A = *+$0001           ; Restore original registers value
             LDA #$00
             STORE_X = *+$0001           ; at the original values they have before
