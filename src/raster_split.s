@@ -329,12 +329,6 @@ IRQTOP:
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF  
  
-    
-;.IF .NOT .DEFINED(BASIC)
-;    JMP EXIT_IRQ
-;.ELSE
-;    JMP TOP_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
-;.ENDIF
 
 TOP_EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
