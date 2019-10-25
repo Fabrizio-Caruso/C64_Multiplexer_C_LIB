@@ -50,13 +50,10 @@
    
     TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
     .IFDEF STANDARD_IRQ
-        KERNAL_IRQ=FULL_STANDARD_KERNAL
         BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
     .ELSE
-        KERNAL_IRQ=LIGHT_STANDARD_KERNAL
-        BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
+        BOTTOM_KERNAL_IRQ=LIGHT_STANDARD_KERNAL        
     .ENDIF
-
 
     .MACRO handle_x spr_number 
         LDA SPRX+spr_number
@@ -331,12 +328,30 @@ IRQTOP:
     .IFDEF DEBUG 
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF  
+ 
     
-.IF .NOT .DEFINED(BASIC)
-    JMP EXIT_IRQ
-.ELSE
-    JMP TOP_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
-.ENDIF
+;.IF .NOT .DEFINED(BASIC)
+;    JMP EXIT_IRQ
+;.ELSE
+;    JMP TOP_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+;.ENDIF
+
+TOP_EXIT_IRQ:                               ; Exit IRQ code.
+    LSR VIC_IRR                         ; Acknowledge raster IRQ
+
+    .IF .NOT .DEFINED(USE_KERNAL)
+        STORE_A = *+$0001           ; Restore original registers value
+        LDA #$00
+        STORE_X = *+$0001           ; at the original values they have before
+        LDX #$00
+        STORE_Y = *+$0001           ; IRQ call
+        LDY #$00         
+    .ELSE ; JMP $EA31/$EA81
+        JMP TOP_KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
+    .ENDIF
+    RTI
+
+
 ;---------------------------------------
 ; Raster interrupt 3.
 ; This is where sprite displaying happens
@@ -487,26 +502,21 @@ IRQBOTTOM:
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
     
-    ;JMP EXIT_IRQ
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
-    .IF .DEFINED(__C64__)
-        .IF .NOT .DEFINED(USE_KERNAL)
-            STORE_A = *+$0001           ; Restore original registers value
-            LDA #$00
-            STORE_X = *+$0001           ; at the original values they have before
-            LDX #$00
-            STORE_Y = *+$0001           ; IRQ call
-            LDY #$00         
-        .ELSE ; JMP $EA31/$EA81
-            JMP KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
-        .ENDIF
-    .ELSEIF .DEFINED(__C128__) 
-            JMP KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
-    .ELSEIF .DEFINED(BASIC)
-            JMP BOTTOM_KERNAL_IRQ                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON     
+
+    .IF .NOT .DEFINED(USE_KERNAL)
+        STORE_A = *+$0001           ; Restore original registers value
+        LDA #$00
+        STORE_X = *+$0001           ; at the original values they have before
+        LDX #$00
+        STORE_Y = *+$0001           ; IRQ call
+        LDY #$00         
+    .ELSE ; JMP $EA31/$EA81
+        JMP BOTTOM_KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
     .ENDIF
+
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
 ;---------------------------------------
