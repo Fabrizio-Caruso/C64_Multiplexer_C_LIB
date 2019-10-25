@@ -64,6 +64,21 @@ SPRIRQCOUNTER = $FF                     ; Sprite counter used by the interrupt
 SORTORDER = $40                         ; Order-table for sorting. Needs as many bytes
 SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 ;---------------------------------------
+.IF .DEFINED(__C64__) 
+    FULL_STANDARD_KERNAL=$EA31
+    LIGHT_STANDARD_KERNAL=$EA81
+.ELSEIF .DEFINED(__C128__)
+    FULL_STANDARD_KERNAL=$FA65
+    LIGHT_STANDARD_KERNAL=$FF33
+.ENDIF   
+
+TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
+.IFDEF STANDARD_IRQ
+    BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
+.ELSE
+    BOTTOM_KERNAL_IRQ=LIGHT_STANDARD_KERNAL        
+.ENDIF
+;---------------------------------------
 ; Routine to init the
 ; raster interrupt system
 ;-------------------
@@ -443,19 +458,15 @@ IRQ3_LASTSPR:
 ;-------------------
 EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
-    .IF .DEFINED(__C64__)
-        .IF .NOT .DEFINED(USE_KERNAL)
-            STORE_A = *+$0001           ; Restore original registers value
-            LDA #$00
-            STORE_X = *+$0001           ; at the original values they have before
-            LDX #$00
-            STORE_Y = *+$0001           ; IRQ call
-            LDY #$00         
-        .ELSE
-            JMP $EA81                   ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
-        .ENDIF
-    .ELSEIF .DEFINED(__C128__) 
-            JMP $FF33                   ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
+    .IF .NOT .DEFINED(USE_KERNAL)
+        STORE_A = *+$0001           ; Restore original registers value
+        LDA #$00
+        STORE_X = *+$0001           ; at the original values they have before
+        LDX #$00
+        STORE_Y = *+$0001           ; IRQ call
+        LDY #$00         
+    .ELSE 
+        JMP LIGHT_STANDARD_KERNAL       ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
     .ENDIF
 IRQ_RTI:
     RTI                                 ; ReTurn from Interrupt 
