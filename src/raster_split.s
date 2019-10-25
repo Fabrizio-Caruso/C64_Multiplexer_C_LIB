@@ -160,6 +160,7 @@ _INITRASTER:
     STA VIC_HLINE                       ; Set position where first IRQ happens.
     LDA CIA1_ICR                        ; Acknowledge IRQ (to be sure)
 
+    ; Disable split screen and Vic-IIe interrupts to disable sprite control from BASIC V7
     .IFDEF __C128__
         LDA #$FF
         STA $D8
