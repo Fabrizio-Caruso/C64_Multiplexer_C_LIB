@@ -19,11 +19,10 @@ EXPANDXCFG=--asm-define EXPANDX=1 -DEXPAND_X
 EXPANDYCFG=--asm-define EXPANDY=1 -DEXPAND_Y
 
 
-MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
-MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
-MYC128CFG_NO_KERNAL=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg
-MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg --asm-define USE_KERNAL=1
-MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg --asm-define USE_KERNAL=1
+MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg 
+MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg 
+MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg 
+MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg 
 
 
 ifneq ($(COMSPEC),)
@@ -54,6 +53,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 # -- MANY_SPRITES TESTS C64
 some_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1  \
 	--asm-define MAXSPR=26 -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=24 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
@@ -65,6 +65,7 @@ some_sprites:
 
 many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1  \
 	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
@@ -76,6 +77,7 @@ many_sprites:
     
 too_many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1  \
 	--asm-define MAXSPR=48 -D_NUMBER_OF_SPRITES_=48 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
@@ -88,6 +90,7 @@ too_many_sprites:
 # -- MANY_SPRITES TESTS C128
 many_sprites_c128: 
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
@@ -103,6 +106,7 @@ many_sprites_tests: some_sprites many_sprites too_many_sprites many_sprites_c128
 # -- SIN SCROLLER TESTS C64
 sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MAXSPR=16 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
@@ -113,6 +117,7 @@ sin_scroller:
 
 sin_scroller_multicolor:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(MULTICFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -124,6 +129,7 @@ sin_scroller_multicolor:
     
 sin_scroller_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -135,6 +141,7 @@ sin_scroller_expand_x:
 
 sin_scroller_multicolor_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) $(MULTICFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -146,6 +153,7 @@ sin_scroller_multicolor_expand_x:
     
 sin_scroller_expand_y:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDYCFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -157,6 +165,7 @@ sin_scroller_expand_y:
 
 sin_scroller_music:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
@@ -172,6 +181,7 @@ sin_scroller_music:
 # -- SIN SCROLLER TESTS C128   
 sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	$(SOURCE_PATH)/generic_multiplexer.s \
@@ -185,6 +195,7 @@ sin_scroller_c128:
 
 sin_scroller_music_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYSIDC128CFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
@@ -211,6 +222,7 @@ generic_multiplexer_tests: \
 # RASTER SPLIT 
 raster_split:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
@@ -224,6 +236,7 @@ raster_split:
 
 raster_split_no_input_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
@@ -237,6 +250,7 @@ raster_split_no_input_c128:
 
 raster_split_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
@@ -283,6 +297,7 @@ many_sprites_debug:
 	$(CC65_PATH)$(MYCC65) $(MYDEBUGCCFLAGS) -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c -o $(DEMOS_PATH)/many_sprites.s
 	$(CC65_PATH)$(MYCL65) $(MYDEBUGCCFLAGS) $(MYCFG) --asm-define DEBUG=1 --asm-define MAXSPR=36 \
+	--asm-define USE_KERNAL=1 \
 	$(DEMOS_PATH)/many_sprites.s $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites_debug.prg
 	rm $(DEMOS_PATH)/many_sprites.s
@@ -296,6 +311,7 @@ many_sprites_c128_debug:
 	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	--asm-define DEBUG=1 \
+	--asm-define USE_KERNAL=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
 	-o $(BUILD_PATH)/many_sprites_c128_debug.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
@@ -309,6 +325,7 @@ sin_scroller_debug:
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define DEBUG=1 \
+	--asm-define USE_KERNAL=1 \
 	$(SID_PATH)/sid.s \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
 	-o $(BUILD_PATH)/sin_scroller_debug.prg
@@ -323,6 +340,7 @@ raster_split_debug:
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
 	--asm-define DEBUG=1 \
+	--asm-define USE_KERNAL=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
@@ -337,6 +355,7 @@ raster_split_c128_debug:
 	--asm-define MAXSPR=16 \
 	--asm-define DEBUG=1 \
 	-DNO_INPUT \
+	--asm-define USE_KERNAL=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
