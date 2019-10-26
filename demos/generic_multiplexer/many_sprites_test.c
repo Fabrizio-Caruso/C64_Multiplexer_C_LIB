@@ -87,7 +87,7 @@ int main()
     }
     for(i=36;i<NUMSPRITES;++i)
     {
-        SPRF[i]= GFX_START_INDEX;
+        SPRF[i]= GFX_START_INDEX+i+1-36;
     }
     
     SPRX[NUMSPRITES-2]=120;
