@@ -21,6 +21,7 @@ EXPANDYCFG=--asm-define EXPANDY=1 -DEXPAND_Y
 
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg --asm-define USE_KERNAL=1
+MYC128CFG_NO_KERNAL=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg
 MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg --asm-define USE_KERNAL=1
 MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg --asm-define USE_KERNAL=1
 
@@ -330,11 +331,12 @@ raster_split_debug:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
 
+
 raster_split_c128_debug:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
-	--asm-define STANDARD_IRQ=1 \
 	--asm-define DEBUG=1 \
+	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
