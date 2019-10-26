@@ -202,20 +202,33 @@ raster_split_test:
 	rm $(GRAPHICS_PATH)/*.o     
  
 
-raster_split_test_c128:
+raster_split_test_no_input_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
 	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(SOURCE_PATH)/raster_split.s \
 	$(GRAPHICS_PATH)/graphics.s \
-	-o $(BUILD_PATH)/raster_split_c128.prg
+	-o $(BUILD_PATH)/raster_split_c128_no_input.prg
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
 
 
-raster_split_tests: raster_split_test raster_split_test_c128
+raster_split_test_c128:
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=16 \
+	--asm-define STANDARD_IRQ=1 \
+	$(DEMOS_PATH)/raster_split/raster_split_test.c \
+	$(SOURCE_PATH)/raster_split.s \
+	$(GRAPHICS_PATH)/graphics.s \
+	-o $(BUILD_PATH)/raster_split_c128.prg
+	rm $(DEMOS_PATH)/raster_split/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o 
+
+
+raster_split_tests: raster_split_test raster_split_test_no_input_c128 raster_split_test_c128
 
 
 ####################################################
