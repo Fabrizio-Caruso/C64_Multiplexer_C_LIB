@@ -106,7 +106,6 @@ many_sprites_tests: some_sprites many_sprites too_many_sprites many_sprites_c128
 # -- SIN SCROLLER TESTS C64
 sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MAXSPR=16 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) -o $(BUILD_PATH)/sin_scroller.prg
@@ -117,7 +116,6 @@ sin_scroller:
 
 sin_scroller_multicolor:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(MULTICFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -129,7 +127,6 @@ sin_scroller_multicolor:
     
 sin_scroller_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -141,7 +138,6 @@ sin_scroller_expand_x:
 
 sin_scroller_multicolor_expand_x:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDXCFG) $(MULTICFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -153,7 +149,6 @@ sin_scroller_multicolor_expand_x:
     
 sin_scroller_expand_y:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) $(EXPANDYCFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c $(ASMFILES) \
@@ -165,7 +160,6 @@ sin_scroller_expand_y:
 
 sin_scroller_music:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
-	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16  \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
@@ -278,7 +272,7 @@ raster_split_basic:
 # - Enable all sprites: POKE 53269,255  
 # - Sprite data in $2000 (Monitor: f 2000 203F ff)
 basic_tests: raster_split_basic
- 
+
 ####################################################
 clean:
 	rm -rf *.prg
