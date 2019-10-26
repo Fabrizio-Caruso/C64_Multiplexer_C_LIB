@@ -74,7 +74,7 @@ SORTORDERLAST = SORTORDER+MAXSPR-$01    ; as there are sprites.
 
 TOP_KERNAL_IRQ=LIGHT_STANDARD_KERNAL
 .IFDEF STANDARD_IRQ
-    BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL        
+    BOTTOM_KERNAL_IRQ=FULL_STANDARD_KERNAL
 .ELSE
     BOTTOM_KERNAL_IRQ=LIGHT_STANDARD_KERNAL        
 .ENDIF
@@ -464,7 +464,7 @@ EXIT_IRQ:                               ; Exit IRQ code.
         STORE_X = *+$0001           ; at the original values they have before
         LDX #$00
         STORE_Y = *+$0001           ; IRQ call
-        LDY #$00         
+        LDY #$00  
     .ELSE 
         JMP LIGHT_STANDARD_KERNAL       ; Use normal Kernal C128 IRQ exit code if Kernal is ON 
     .ENDIF

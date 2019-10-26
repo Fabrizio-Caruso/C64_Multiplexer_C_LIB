@@ -56,8 +56,13 @@ const char yValues[] = {
     9, 11, 14, 16, 19, 22, 25, 28
 };
 
-#define GFX_START 0x2000
+#if defined(__C64__)
+    #define GFX_START 0x2000
+#else
+    #define GFX_START 0x3000
+#endif
 #define GFX_START_INDEX (GFX_START/0x40)
+
 /******************/
 int main()
 {    

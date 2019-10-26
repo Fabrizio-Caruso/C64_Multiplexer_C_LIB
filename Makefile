@@ -50,7 +50,7 @@ MYCL65 ?= cl65$(EXEEXT) $(INCLUDE_OPTS)
 # GENERIC MULTIPLEXER
 
 
-# -- MANY_SPRITES TESTS
+# -- MANY_SPRITES TESTS C64
 some_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=26 -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=24 \
@@ -70,8 +70,8 @@ many_sprites:
 	-o $(BUILD_PATH)/many_sprites.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-
+	rm $(GRAPHICS_PATH)/*.o  
+    
     
 too_many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
@@ -82,9 +82,24 @@ too_many_sprites:
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o    
-    
 
-# -- SIN SCROLLER TESTS
+
+# -- MANY_SPRITES TESTS C128
+many_sprites_c128: 
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
+	--asm-define FAST_MODE=1 \
+	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
+	-o $(BUILD_PATH)/many_sprites_c128.prg
+	rm $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o     
+   
+
+many_sprites_tests: some_sprites many_sprites too_many_sprites many_sprites_c128
+
+
+# -- SIN SCROLLER TESTS C64
 sin_scroller:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define FAST_MODE=1 \
@@ -152,7 +167,8 @@ sin_scroller_music:
 	rm $(GRAPHICS_PATH)/*.o
 	rm $(SID_PATH)/*.o        
 
-   
+
+# -- SIN SCROLLER TESTS C128   
 sin_scroller_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
@@ -182,9 +198,12 @@ sin_scroller_music_c128:
 	rm $(GRAPHICS_PATH)/*.o   
 
 
-generic_multiplexer_tests: \
-	some_sprites many_sprites too_many_sprites sin_scroller sin_scroller_multicolor sin_scroller_expand_x sin_scroller_multicolor_expand_x sin_scroller_expand_y sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
+sin_scroller_tests: \
+    sin_scroller sin_scroller_multicolor sin_scroller_expand_x sin_scroller_multicolor_expand_x sin_scroller_expand_y sin_scroller_music sin_scroller_c128 sin_scroller_music_c128
 
+
+generic_multiplexer_tests: \
+	many_sprites_tests sin_scroller_tests 
 
 
 ####################################################
@@ -269,6 +288,18 @@ many_sprites_debug:
 	rm $(DEMOS_PATH)/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
+    
+
+many_sprites_c128_debug: 
+	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
+	--asm-define MAXSPR=36 -D_NUMBER_OF_SPRITES_=36 -D_SPRITE_SEPARATION_=25 \
+	--asm-define FAST_MODE=1 \
+	--asm-define DEBUG=1 \
+	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
+	-o $(BUILD_PATH)/many_sprites_c128_debug.prg
+	rm $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm $(SOURCE_PATH)/*.o
+	rm $(GRAPHICS_PATH)/*.o    
     
  
 sin_scroller_debug:
