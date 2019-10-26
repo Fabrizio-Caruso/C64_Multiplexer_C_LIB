@@ -208,7 +208,7 @@ generic_multiplexer_tests: \
 
 ####################################################
 # RASTER SPLIT 
-raster_split_test:
+raster_split:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
@@ -221,7 +221,7 @@ raster_split_test:
 	rm $(GRAPHICS_PATH)/*.o     
  
 
-raster_split_test_no_input_c128:
+raster_split_no_input_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
 	-DNO_INPUT \
@@ -234,7 +234,7 @@ raster_split_test_no_input_c128:
 	rm $(GRAPHICS_PATH)/*.o     
 
 
-raster_split_test_c128:
+raster_split_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
@@ -247,12 +247,12 @@ raster_split_test_c128:
 	rm $(GRAPHICS_PATH)/*.o 
 
 
-raster_split_tests: raster_split_test raster_split_test_no_input_c128 raster_split_test_c128
+raster_split_tests: raster_split raster_split_no_input_c128 raster_split_c128
 
 
 ####################################################
 # BASIC 
-raster_split_basic_test:
+raster_split_basic:
 	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -DBASE=0xC000 -D__C64__ \
 	$(SOURCE_PATH)/raster_split.s -o $(BUILD_PATH)/raster_split_basic.o
 	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
@@ -262,7 +262,7 @@ raster_split_basic_test:
 # - Start: SYS49152 (try twice?)
 # - Enable all sprites: POKE 53269,255  
 # - Sprite data in $2000 (Monitor: f 2000 203F ff)
-basic_tests: raster_split_basic_test
+basic_tests: raster_split_basic
  
 ####################################################
 clean:
@@ -317,7 +317,7 @@ sin_scroller_debug:
 	rm $(SID_PATH)/*.o    
 
 
-raster_split_test_debug:
+raster_split_debug:
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
@@ -330,7 +330,7 @@ raster_split_test_debug:
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
 
-raster_split_test_c128_debug:
+raster_split_c128_debug:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
@@ -342,8 +342,9 @@ raster_split_test_c128_debug:
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 
-   
-debug: many_sprites_debug sin_scroller_debug raster_split_test_c128_debug
+
+
+debug: many_sprites_debug sin_scroller_debug raster_split_debug raster_split_c128_debug
 
 
 
