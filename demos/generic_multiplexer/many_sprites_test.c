@@ -103,6 +103,9 @@ int main()
     #if _NUMBER_OF_SPRITES_>43
         SPRF[43]= GFX_START_INDEX; 
     #endif
+    #if _NUMBER_OF_SPRITES_>44
+        SPRF[44]= GFX_START_INDEX+1+41+21;
+    #endif
     
     SPRX[NUMSPRITES-2]=120;
     SPRX[NUMSPRITES-1]=40;

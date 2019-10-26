@@ -74,7 +74,7 @@ many_sprites:
     
 too_many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=44 -D_NUMBER_OF_SPRITES_=44 -D_SPRITE_SEPARATION_=25 \
+	--asm-define MAXSPR=43 -D_NUMBER_OF_SPRITES_=43 -D_SPRITE_SEPARATION_=25 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c $(ASMFILES) \
 	-o $(BUILD_PATH)/too_many_sprites.prg
