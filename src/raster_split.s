@@ -101,9 +101,9 @@ IRQBOTTOMLINE = $90                     ; Sorting code IRQ at rasterline $0FC
         MAXSPR = 16                            ; Maximum number of sprites
     .ENDIF
 ;-------------------
-_MULTIPLEX_DONE = $FA                   ; "Job done" flag.
-_NUMSPRITES = $FB                       ; Number of sprites that the main program wants to pass to the sprite sorter
-_SPRUPDATEFLAG = $FC                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
+_MULTIPLEX_DONE = $FB                   ; "Job done" flag.
+_NUMSPRITES = $FC                       ; Number of sprites that the main program wants to pass to the sprite sorter
+_SPRUPDATEFLAG = $FD                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
 TEMPVARIABLE = $FE                      ; Just a temp variable used by the raster interrupt
 
 ;---------------------------------------
