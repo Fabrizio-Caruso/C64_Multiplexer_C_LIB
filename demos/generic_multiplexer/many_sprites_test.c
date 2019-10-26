@@ -68,6 +68,9 @@ int main()
 {    
     unsigned char XX = 0;
     unsigned char i;
+
+    // Only use clrscr() before when the kernal is still active
+    clrscr();  
     
     INITSPRITES();
     INITRASTER();
@@ -79,16 +82,32 @@ int main()
     
     for(i=0;i<NUMSPRITES;++i)
     {
-        SPRF[i] = GFX_START_INDEX+1+i+21*(i>=26);
+        SPRF[i] = GFX_START_INDEX+1+i+21*(i>=(26));
         SPRC[i] = i&0xfd;        
     }
+    #if _NUMBER_OF_SPRITES_>38
+        SPRF[38]= GFX_START_INDEX+1+41+21;
+    #endif    
+    #if _NUMBER_OF_SPRITES_>39
+        SPRF[39]= GFX_START_INDEX;
+    #endif
+    #if _NUMBER_OF_SPRITES_>40
+        SPRF[40]= GFX_START_INDEX+1+41+21;
+    #endif
+    #if _NUMBER_OF_SPRITES_>41
+        SPRF[41]= GFX_START_INDEX; 
+    #endif
+    #if _NUMBER_OF_SPRITES_>42
+        SPRF[42]= GFX_START_INDEX+1+41+21;
+    #endif
+    #if _NUMBER_OF_SPRITES_>43
+        SPRF[43]= GFX_START_INDEX; 
+    #endif
     
     SPRX[NUMSPRITES-2]=120;
     SPRX[NUMSPRITES-1]=40;
-    clrscr();
     while(1) 
     {
-        // gotoxy(1,1); cprintf("%u",SPRUPDATEFLAG);
         if (MULTIPLEX_DONE) {
             SPRY[NUMSPRITES-2]=XX;
             SPRY[NUMSPRITES-1]=255-XX;
