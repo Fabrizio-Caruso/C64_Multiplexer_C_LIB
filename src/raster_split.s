@@ -189,9 +189,9 @@ IRQTOP:
     .ENDIF
     
     .IFNDEF USE_KERNAL
-        STA STORE_A                     ; Fast way to store/restore
-        STX STORE_X                     ; CPU regs after an IRQ
-        STY STORE_Y                     ; for kernal OFF only
+        STA TOP_STORE_A                     ; Fast way to store/restore
+        STX TOP_STORE_X                     ; CPU regs after an IRQ
+        STY TOP_STORE_Y                     ; for kernal OFF only
     .ENDIF
 
     LDA SPRY
@@ -334,11 +334,11 @@ TOP_EXIT_IRQ:                               ; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
 
     .IF .NOT .DEFINED(USE_KERNAL)
-        STORE_A = *+$0001           ; Restore original registers value
+        TOP_STORE_A = *+$0001           ; Restore original registers value
         LDA #$00
-        STORE_X = *+$0001           ; at the original values they have before
+        TOP_STORE_X = *+$0001           ; at the original values they have before
         LDX #$00
-        STORE_Y = *+$0001           ; IRQ call
+        TOP_STORE_Y = *+$0001           ; IRQ call
         LDY #$00         
     .ELSE ; JMP $EA31/$EA81
         JMP TOP_KERNAL_IRQ              ; Use normal Kernal C64 IRQ exit code if Kernal is ON 
