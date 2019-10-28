@@ -4,13 +4,11 @@ SOURCE_PATH ?= ./src
 DEMOS_PATH ?= ./demos
 GRAPHICS_PATH ?= ./graphics
 SID_PATH ?= ./sid
+BUILD_PATH ?= ./build
+
+
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 RAS_SPLT_ASM_FILES=$(SOURCE_PATH)/raster_split.s $(GRAPHICS_PATH)/graphics.s
-
-
-ASMTEST=$(SOURCE_PATH)/irq_test.s $(GRAPHICS_PATH)/graphics.s
-
-BUILD_PATH ?= ./build
 
 
 MYCCFLAGS=-t c64 -O -Cl
