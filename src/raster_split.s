@@ -329,8 +329,7 @@ IRQTOP:
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF  
  
-
-TOP_EXIT_IRQ:                               ; Exit IRQ code.
+; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
 
     .IF .NOT .DEFINED(USE_KERNAL)
@@ -495,9 +494,8 @@ IRQBOTTOM:
     .IFDEF DEBUG 
         DEC VIC_BORDERCOLOR             ; Show rastertime usage for debug.
     .ENDIF
-    
-;-------------------
-EXIT_IRQ:                               ; Exit IRQ code.
+
+; Exit IRQ code.
     LSR VIC_IRR                         ; Acknowledge raster IRQ
 
     .IF .NOT .DEFINED(USE_KERNAL)
