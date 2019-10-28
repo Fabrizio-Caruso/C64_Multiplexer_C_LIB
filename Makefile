@@ -384,7 +384,12 @@ raster_split_c128_debug:
 	rm $(GRAPHICS_PATH)/*.o 
 
 
-debug: many_sprites_debug sin_scroller_debug raster_split_debug raster_split_c128_debug
+debug: \
+	many_sprites_debug \
+	sin_scroller_debug \
+	raster_split_debug \
+	raster_split_c128_debug
+
 
 
 
