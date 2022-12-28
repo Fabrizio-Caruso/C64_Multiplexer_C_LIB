@@ -65,8 +65,10 @@ const char yValues[] = {
 
 const char MESSAGE[12] = "HAPPYNEWYEAR";
 
+const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
-#define Y_OFFSET 60
+#define X_OFFSET 46
+#define Y_OFFSET 55
 
 /******************/
 int main()
@@ -74,6 +76,7 @@ int main()
     unsigned char XX = 0;
     unsigned char XX2 = 100;
     unsigned char i;
+    unsigned char j;
 
     // Only use clrscr() before when the kernal is still active
     clrscr();  
@@ -109,29 +112,34 @@ int main()
         // SPRF[i]= GFX_START_INDEX+i+1-36;
 
     // }
+   
     
-
-    
-    for(i=0;i<5;++i)
-    {
-        SPRX[i]=40+i*22;
-        SPRY[i]=90;
-    }
-    for(i=0;i<3;++i)
-    {
-        SPRX[i+5]=40+i*22;
-        SPRY[i+5]=120;
-    }    
-    for(i=0;i<4;++i)
-    {
-        SPRX[i+8]=40+i*22;
-        SPRY[i+8]=150;
-    }
+    // for(i=0;i<5;++i)
+    // {
+        // SPRX[i]=40+i*22;
+        // SPRY[i]=90+i*4;
+    // }
+    // for(i=0;i<3;++i)
+    // {
+        // SPRX[i+5]=40+i*22;
+        // SPRY[i+5]=120+i*4;
+    // }    
+    // for(i=0;i<4;++i)
+    // {
+        // SPRX[i+8]=40+i*22;
+        // SPRY[i+8]=150*i*4;
+    // }
     
     SPRX[NUMSPRITES-1]=120;
     SPRX[NUMSPRITES-3]=40;
     SPRX[NUMSPRITES-2]=100;
     SPRX[NUMSPRITES-4]=60;   
+
+    SPRY[NUMSPRITES-5]=90;
+    SPRY[NUMSPRITES-6]=60;  
+
+    SPRY[NUMSPRITES-7]=160;
+    SPRY[NUMSPRITES-8]=190;  
     
     while(1) 
     {
@@ -142,22 +150,36 @@ int main()
             SPRY[NUMSPRITES-3]=XX2;
             SPRY[NUMSPRITES-4]=255-XX2;
             
+            SPRX[NUMSPRITES-5]=XX2;
+            SPRX[NUMSPRITES-6]=255-XX2;
+
+            SPRX[NUMSPRITES-7]=XX;
+            SPRX[NUMSPRITES-8]=255-XX;
 
             for(i=0;i<5;++i)
             {
-                SPRX[i]=40+i*22;
-                SPRY[i]=Y_OFFSET+yValues[XX];
+                SPRX[i]=X_OFFSET+i*22;
+                SPRY[i]=i*8+Y_OFFSET+yValues[XX];
             }
             for(i=0;i<3;++i)
             {
-                SPRX[i+5]=40+i*22;
-                SPRY[i+5]=Y_OFFSET+30+yValues[XX];;
+                SPRX[i+5]=X_OFFSET+i*22;
+                SPRY[i+5]=i*8+Y_OFFSET+40+yValues[XX];;
             }    
             for(i=0;i<4;++i)
             {
-                SPRX[i+8]=40+i*22;
-                SPRY[i+8]=Y_OFFSET+60+yValues[XX];;
+                SPRX[i+8]=X_OFFSET+i*22;
+                SPRY[i+8]=i*8+Y_OFFSET+80+yValues[XX];;
             }            
+
+            if(!(XX&7))
+            {
+                ++j;
+                for(i=0;i<12;++i)
+                {
+                    SPRC[i] = 2+((XX+i+j)&7);        
+                }
+            }
 
 
             ++XX;

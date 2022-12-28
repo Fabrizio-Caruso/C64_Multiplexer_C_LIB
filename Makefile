@@ -78,7 +78,7 @@ many_sprites:
 
 many_flakes: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=24 -D_NUMBER_OF_SPRITES_=24 -D_SPRITE_SEPARATION_=25 \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22 -D_SPRITE_SEPARATION_=30 \
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/snow/many_sprites_test.c \
 	$(SNOW_ASM_FILES) \
