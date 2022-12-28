@@ -107,29 +107,8 @@ int main()
 
         SPRC[i] = 1;        
     }
-    // for(i=36;i<NUMSPRITES;++i)
-    // {
-        // SPRF[i]= GFX_START_INDEX+i+1-36;
-
-    // }
-   
     
-    // for(i=0;i<5;++i)
-    // {
-        // SPRX[i]=40+i*22;
-        // SPRY[i]=90+i*4;
-    // }
-    // for(i=0;i<3;++i)
-    // {
-        // SPRX[i+5]=40+i*22;
-        // SPRY[i+5]=120+i*4;
-    // }    
-    // for(i=0;i<4;++i)
-    // {
-        // SPRX[i+8]=40+i*22;
-        // SPRY[i+8]=150*i*4;
-    // }
-    
+    // Position snow flakes
     SPRX[NUMSPRITES-1]=120;
     SPRX[NUMSPRITES-3]=40;
     SPRX[NUMSPRITES-2]=100;
