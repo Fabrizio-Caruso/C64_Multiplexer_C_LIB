@@ -8,6 +8,8 @@ BUILD_PATH ?= ./build
 
 
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
+SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
+
 RAS_SPLT_ASM_FILES=$(SOURCE_PATH)/raster_split.s $(GRAPHICS_PATH)/graphics.s
 
 
@@ -56,7 +58,7 @@ some_sprites:
 	--asm-define MAXSPR=26 -D_NUMBER_OF_SPRITES_=26 -D_SPRITE_SEPARATION_=24 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/some_sprites.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -68,11 +70,23 @@ many_sprites:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/many_sprites.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o  
-    
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o  
+
+
+many_flakes: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define MAXSPR=24 -D_NUMBER_OF_SPRITES_=24 -D_SPRITE_SEPARATION_=25 \
+	--asm-define FAST_MODE=1 \
+	$(DEMOS_PATH)/snow/many_sprites_test.c \
+	$(SNOW_ASM_FILES) \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o  
+
     
 too_many_sprites: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
@@ -80,7 +94,7 @@ too_many_sprites:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/too_many_sprites.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o    
@@ -94,7 +108,7 @@ many_sprites_c128:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/many_sprites_c128.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
@@ -114,7 +128,7 @@ sin_scroller:
 	--asm-define MAXSPR=16 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -126,7 +140,7 @@ sin_scroller_multicolor:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_multicolor.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -138,7 +152,7 @@ sin_scroller_expand_x:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_expand_x.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o    
@@ -150,7 +164,7 @@ sin_scroller_multicolor_expand_x:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_multicolor_expand_x.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 
@@ -162,7 +176,7 @@ sin_scroller_expand_y:
 	--asm-define FAST_MODE=1 \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_expand_y.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o   
@@ -176,7 +190,7 @@ sin_scroller_music:
 	$(SID_PATH)/sid.s \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_music.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -191,7 +205,7 @@ sin_scroller_c128:
 	--asm-define FAST_MODE=1 \
 	$(GEN_MPLX_ASM_FILES) \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
-	-o $(BUILD_PATH)/sin_scroller_c128.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o
@@ -206,7 +220,7 @@ sin_scroller_music_c128:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(SID_PATH)/sid_at_2400.s \
 	$(GEN_MPLX_ASM_FILES) \
-	-o $(BUILD_PATH)/sin_scroller_music_c128.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(SID_PATH)/*.o
@@ -238,7 +252,7 @@ raster_split:
 	--asm-define STANDARD_IRQ=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
-	-o $(BUILD_PATH)/raster_split.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
@@ -251,7 +265,7 @@ raster_split_no_input_c128:
 	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
-	-o $(BUILD_PATH)/raster_split_c128_no_input.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o     
@@ -264,7 +278,7 @@ raster_split_c128:
 	--asm-define STANDARD_IRQ=1 \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
-	-o $(BUILD_PATH)/raster_split_c128.prg
+	-o $(BUILD_PATH)/$@.prg
 	rm $(DEMOS_PATH)/raster_split/*.o
 	rm $(SOURCE_PATH)/*.o
 	rm $(GRAPHICS_PATH)/*.o 
@@ -282,7 +296,7 @@ raster_split_basic:
 	$(CC65_PATH)ca65$(EXEEXT) -DBASIC -DBASE=0xC000 -D__C64__ \
 	$(SOURCE_PATH)/raster_split.s \
 	-o $(BUILD_PATH)/raster_split_basic.o
-	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/raster_split_basic.o --target none \
+	$(CC65_PATH)$(MYCL65) $(BUILD_PATH)/$@.o --target none \
 	--start-addr 0xC000 \
 	-o $(BUILD_PATH)/raster_split_basic.prg
 
