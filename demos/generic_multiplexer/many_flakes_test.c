@@ -77,7 +77,7 @@ const char YEAR[14] =   "HAPPY NEW YEAR";
 const char WRITTEN[15] = "WRITTEN IN C BY";
 
 #define X_OFFSET 46
-#define Y_OFFSET 55
+#define Y_OFFSET 50
 
 // $D018 = 53272
 // -----------------
@@ -94,16 +94,19 @@ void init_udg(void)
 #define SCREEN 0x0400
 #define COLOR  0xD800
 
+#define SEPARATION 40
+
 /******************/
 int main()
 {    
-    unsigned char XX = 0;
+    unsigned char XX = 1;
     unsigned char XX2 = 100;
     unsigned char i;
     unsigned char j;
     unsigned char h;
     unsigned short k;
     unsigned short star_loc;
+    unsigned char flip;
 
     // Only use clrscr() before when the kernal is still active
     // clrscr();  
@@ -246,12 +249,12 @@ int main()
             for(i=0;i<3;++i)
             {
                 SPRX[i+5]=X_OFFSET+i*22;
-                SPRY[i+5]=i*8+Y_OFFSET+40+yValues[XX];;
+                SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
             }    
             for(i=0;i<4;++i)
             {
                 SPRX[i+8]=X_OFFSET+i*22;
-                SPRY[i+8]=i*8+Y_OFFSET+80+yValues[XX];;
+                SPRY[i+8]=i*8+Y_OFFSET+2*SEPARATION+yValues[XX];;
             }            
 
             if(!(XX&31))
@@ -266,6 +269,38 @@ int main()
                 for(h=0;h<14;++h)
                 {
                     POKE(0xD800+13+40+h,2+(j&1));
+                }
+                
+            }
+            if(!(XX))
+            {
+                if(flip)
+                {
+                    SPRF[ 5]=GFX_START_INDEX + 32;
+                    SPRF[ 6]=GFX_START_INDEX + 32;
+                    SPRF[ 7]=GFX_START_INDEX + 32;
+                    
+                    SPRF[ 8]=GFX_START_INDEX + 'Z' - 'A' + 25; // 2
+                    SPRF[ 9]=GFX_START_INDEX + 'Z' - 'A' + 23; // 0
+                    SPRF[10]=GFX_START_INDEX + 'Z' - 'A' + 25; // 2
+                    SPRF[11]=GFX_START_INDEX + 'Z' - 'A' + 26; // 3
+                    // SPRF[ 8]=GFX_START_INDEX + '2' - 'A' + 1;
+                    // SPRF[ 9]=GFX_START_INDEX + '0' - 'A' + 1;
+                    // SPRF[10]=GFX_START_INDEX + '2' - 'A' + 1;
+                    // SPRF[11]=GFX_START_INDEX + '3' - 'A' + 1;
+                    flip = 0;
+                }
+                else
+                {
+                    SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';
+                    SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
+                    SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
+                    
+                    SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
+                    SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
+                    SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
+                    SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
+                    flip = 1;
                 }
             }
 
