@@ -1,4 +1,4 @@
-#include <conio.h>
+// #include <conio.h>
 #include <stdlib.h>
 #include <peekpoke.h>
 /*******************
@@ -73,6 +73,8 @@ const char MESSAGE[12] = "HAPPYNEWYEAR";
 const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 const char AUTHOR[15] = "FABRIZIO CARUSO";
+const char YEAR[14] =   "HAPPY NEW YEAR";
+const char WRITTEN[15] = "WRITTEN IN C BY";
 
 #define X_OFFSET 46
 #define Y_OFFSET 55
@@ -89,7 +91,8 @@ void init_udg(void)
 }
 
 
-
+#define SCREEN 0x0400
+#define COLOR  0xD800
 
 /******************/
 int main()
@@ -98,11 +101,17 @@ int main()
     unsigned char XX2 = 100;
     unsigned char i;
     unsigned char j;
+    unsigned char h;
     unsigned short k;
     unsigned short star_loc;
 
     // Only use clrscr() before when the kernal is still active
-    clrscr();  
+    // clrscr();  
+    for(k=0;k<1000;++k)
+    {
+        POKE(SCREEN+k,32);
+        POKE(COLOR+k,0);
+    }
     
     INITSPRITES();
     INITRASTER();
@@ -112,30 +121,48 @@ int main()
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
     
-    for(k=0;k<40;++k)
+    for(k=0;k<50;++k)
     {
         star_loc = rand()%1000;
-        POKE(0x0400+star_loc,0);
-        POKE(0xD800+star_loc,1);
+        POKE(SCREEN+star_loc,0); // big flashing star
+        POKE(COLOR+star_loc,1);
     }
     for(k=0;k<30;++k)
     {
         star_loc = rand()%1000;
-        POKE(0x0400+star_loc,28);
-        POKE(0xD800+star_loc,1);
+        POKE(SCREEN+star_loc,28); // big fixed star
+        POKE(COLOR+star_loc,1);
+    }
+    for(k=0;k<50;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,27); // small flashing star
+        POKE(COLOR+star_loc,1);
     }
     for(k=0;k<30;++k)
     {
         star_loc = rand()%1000;
-        POKE(0x0400+star_loc,27);
-        POKE(0xD800+star_loc,1);
+        POKE(SCREEN+star_loc,29); // small fixed star
+        POKE(COLOR+star_loc,1);
     }
 
+
+    for(k=0;k<15;++k)
+    {
+        POKE(0x0400+1000-80-15-1+k,WRITTEN[k]-'A'+1);
+        POKE(0xD800+1000-80-15-1+k,1);
+    }
     
     for(k=0;k<15;++k)
     {
-        POKE(0x0400+1000-40-16+k,AUTHOR[k]-'A'+1);
-        POKE(0xD800+1000-40-16+k,1);
+        POKE(0x0400+1000-40-15-1+k,AUTHOR[k]-'A'+1);
+        POKE(0xD800+1000-40-15-1+k,3);
+    }
+    
+    for(k=0;k<14;++k)
+    {
+        POKE(0x0400+13+40+k,YEAR[k]-'A'+1);
+        POKE(0xD800+13+40+k,2);
     }
     
     // for(i=0;i<200;++i)
@@ -235,6 +262,11 @@ int main()
                     SPRC[i] = 2+((XX+i+j)&7);        
                 }
                 POKE(0x2000+3,0x28+16*(j&1));
+                POKE(0x2000+3+27*8,8*(j&1));
+                for(h=0;h<14;++h)
+                {
+                    POKE(0xD800+13+40+h,2+(j&1));
+                }
             }
 
 
