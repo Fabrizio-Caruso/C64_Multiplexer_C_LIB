@@ -65,11 +65,14 @@ const char yValues[] = {
 #else
     #define GFX_START 0x3000U
 #endif
+
 #define GFX_START_INDEX (GFX_START/0x40U)
 
 const char MESSAGE[12] = "HAPPYNEWYEAR";
 
 const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+
+const char AUTHOR[15] = "FABRIZIO CARUSO";
 
 #define X_OFFSET 46
 #define Y_OFFSET 55
@@ -95,6 +98,8 @@ int main()
     unsigned char XX2 = 100;
     unsigned char i;
     unsigned char j;
+    unsigned short k;
+    unsigned short star_loc;
 
     // Only use clrscr() before when the kernal is still active
     clrscr();  
@@ -107,15 +112,42 @@ int main()
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
     
-    for(i=0;i<200;++i)
+    for(k=0;k<40;++k)
     {
-        POKE(0x0400+i,i);
+        star_loc = rand()%1000;
+        POKE(0x0400+star_loc,0);
+        POKE(0xD800+star_loc,1);
+    }
+    for(k=0;k<30;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(0x0400+star_loc,28);
+        POKE(0xD800+star_loc,1);
+    }
+    for(k=0;k<30;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(0x0400+star_loc,27);
+        POKE(0xD800+star_loc,1);
+    }
+
+    
+    for(k=0;k<15;++k)
+    {
+        POKE(0x0400+1000-40-16+k,AUTHOR[k]-'A'+1);
+        POKE(0xD800+1000-40-16+k,1);
     }
     
-    for(i=0;i<200;++i)
-    {
-        POKE(0x2000+i,255);
-    }    
+    // for(i=0;i<200;++i)
+    // {
+        // POKE(0x0400+i,i);
+    // }
+    
+    //POKE(0x2000+3,0x38);
+    // for(k=0;i<1000;++i)
+    // {
+        // POKE(0x2000+i,255);
+    // }    
     
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
@@ -195,13 +227,14 @@ int main()
                 SPRY[i+8]=i*8+Y_OFFSET+80+yValues[XX];;
             }            
 
-            if(!(XX&31  ))
+            if(!(XX&31))
             {
                 ++j;
                 for(i=0;i<12;++i)
                 {
                     SPRC[i] = 2+((XX+i+j)&7);        
                 }
+                POKE(0x2000+3,0x28+16*(j&1));
             }
 
 
