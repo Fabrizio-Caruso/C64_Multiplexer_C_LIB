@@ -9,6 +9,8 @@ BUILD_PATH ?= ./build
 
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
+SNOW_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg.s
+
 
 RAS_SPLT_ASM_FILES=$(SOURCE_PATH)/raster_split.s $(GRAPHICS_PATH)/graphics.s
 
@@ -24,6 +26,7 @@ EXPANDYCFG=--asm-define EXPANDY=1 -DEXPAND_Y
 MYCFG=--config ./cfg/c64_multiplexer_gfx_at_2000.cfg 
 MYC128CFG=--config ./cfg/c128_multiplexer_gfx_at_3000.cfg 
 MYSIDCFG=--config ./cfg/c64_multiplexer_sid_at_1000_gfx_at_2000.cfg 
+MYSIDCFG_ALT=--config ./cfg/c64_multiplexer_sid_at_1000_sprites_at_2800.cfg 
 MYSIDC128CFG=--config ./cfg/c128_multiplexer_sid_at_2400_gfx_at_3000.cfg 
 
 
@@ -76,16 +79,36 @@ many_sprites:
 	rm -rf $(GRAPHICS_PATH)/*.o  
 
 
+# SID AT $1000, SID_SIZE: $1000, GFX AT $2000, GFX_SIZE: $2000
 many_flakes: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
-	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22 -D_SPRITE_SEPARATION_=30 \
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG) \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=20 -D_SPRITE_SEPARATION_=30 \
 	--asm-define FAST_MODE=1 \
-	$(DEMOS_PATH)/snow/many_sprites_test.c \
+	--asm-define MUSIC_CODE=1 \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
 	$(SNOW_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
 	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm -rf $(SOURCE_PATH)/*.o
 	rm -rf $(GRAPHICS_PATH)/*.o  
+
+# SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
+many_flakes_alt: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=20 -m mapfile -D_SPRITE_SEPARATION_=30 \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	-DSPRITES_AT_2800 \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
+	$(SNOW_UDG_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
+
 
     
 too_many_sprites: 

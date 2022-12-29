@@ -57,11 +57,15 @@ const char yValues[] = {
 };
 
 #if defined(__C64__)
-    #define GFX_START 0x2000
+    #if defined(SPRITES_AT_2800)
+        #define GFX_START 0x2800U
+    #else
+        #define GFX_START 0x2000U
+    #endif
 #else
-    #define GFX_START 0x3000
+    #define GFX_START 0x3000U
 #endif
-#define GFX_START_INDEX (GFX_START/0x40)
+#define GFX_START_INDEX (GFX_START/0x40U)
 
 const char MESSAGE[12] = "HAPPYNEWYEAR";
 
@@ -69,6 +73,20 @@ const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 #define X_OFFSET 46
 #define Y_OFFSET 55
+
+// $D018 = 53272
+// -----------------
+void init_udg(void)
+{
+    POKE(56576u,3);
+	POKE(0xD018,PEEK(0xD018)|8);
+	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
+    // POKE(0xD018,PEEK(0xD018)&0xF0);
+	POKE(648,192);
+}
+
+
+
 
 /******************/
 int main()
@@ -84,8 +102,21 @@ int main()
     INITSPRITES();
     INITRASTER();
     
+    init_udg();
+    
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
+    
+    for(i=0;i<200;++i)
+    {
+        POKE(0x0400+i,i);
+    }
+    
+    for(i=0;i<200;++i)
+    {
+        POKE(0x2000+i,255);
+    }    
+    
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
@@ -100,6 +131,20 @@ int main()
 
         SPRC[i] = 2+i;        
     }    
+    
+    // SPRF[0] = 112;
+    // SPRF[1] = 113;
+    // SPRF[2] = 114;
+    // SPRF[3] = 115;
+    // SPRF[4] = 116;
+    
+        // SPRF[0] = 128;
+        // SPRF[1] = 129;
+        // SPRF[2] = 130;
+        // SPRF[3] = 131;
+        // SPRF[4] = 132;
+    
+    
     for(i=12;i<NUMSPRITES;++i)
     {
         // SPRF[i] = GFX_START_INDEX+1+i+21*(i>=(26));
@@ -116,9 +161,8 @@ int main()
 
     SPRY[NUMSPRITES-5]=90;
     SPRY[NUMSPRITES-6]=60;  
-
-    SPRY[NUMSPRITES-7]=160;
-    SPRY[NUMSPRITES-8]=190;  
+    SPRY[NUMSPRITES-7]=140;
+    SPRY[NUMSPRITES-8]=170;  
     
     while(1) 
     {
@@ -151,7 +195,7 @@ int main()
                 SPRY[i+8]=i*8+Y_OFFSET+80+yValues[XX];;
             }            
 
-            if(!(XX&7))
+            if(!(XX&31  ))
             {
                 ++j;
                 for(i=0;i<12;++i)
