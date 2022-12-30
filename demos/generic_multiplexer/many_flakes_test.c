@@ -145,13 +145,13 @@ int main()
     unsigned short star_loc;
     unsigned char flip = 1;
     unsigned char comet_flash;
-    unsigned char comet_move = 1;
+    // unsigned char comet_move = 1;
     unsigned char comet_x = COMET_X;
     unsigned char comet_y = COMET_Y;
     unsigned short comet_pos;
     unsigned short old_comet_pos;
     unsigned char below_0;
-    unsigned char below_1;
+    // unsigned char below_1;
 
     // Only use clrscr() before when the kernal is still active
     // clrscr();  
@@ -411,32 +411,32 @@ int main()
                 SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
-            if(!(XX&63))
+            if(!(XX&3))
             {
-                if(comet_move)
+                // if(comet_move)
+                // {
+                old_comet_pos = comet_x+40U*comet_y;
+
+                // POKE(SCREEN+comet_pos,below_0);
+                // POKE(COLOR+comet_pos,1);
+                --comet_y;
+                ++comet_x;
+                if((comet_x>38)||(comet_y<3))
                 {
-                    old_comet_pos = comet_x+40U*comet_y;
-
-                    // POKE(SCREEN+comet_pos,below_0);
-                    // POKE(COLOR+comet_pos,1);
-                    --comet_y;
-                    ++comet_x;
-                    if((comet_x>38)||(comet_y<3))
-                    {
-                        comet_x = COMET_X;
-                        comet_y = COMET_Y;
-                    }
-                    comet_pos = comet_x+40U*comet_y;
-                    below_0 = PEEK(SCREEN+comet_pos);
-
-                    // below_0 = PEEK(SCREEN+comet_pos);
-                    POKE(SCREEN+comet_pos,33);
-                    POKE(COLOR+comet_pos,1);
-                    
-                    POKE(SCREEN+old_comet_pos,below_0);
-                    POKE(COLOR+old_comet_pos,1);
-                    // comet_move = 0;
+                    comet_x = COMET_X;
+                    comet_y = COMET_Y;
                 }
+                comet_pos = comet_x+40U*comet_y;
+                below_0 = PEEK(SCREEN+comet_pos);
+
+                // below_0 = PEEK(SCREEN+comet_pos);
+                POKE(SCREEN+comet_pos,33);
+                POKE(COLOR+comet_pos,1);
+                
+                POKE(SCREEN+old_comet_pos,below_0);
+                POKE(COLOR+old_comet_pos,1);
+                // comet_move = 0;
+                // }
                 // else
                 // {
                     // POKE(SCREEN+comet_pos,below_0);
