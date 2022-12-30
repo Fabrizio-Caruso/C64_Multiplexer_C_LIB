@@ -140,7 +140,7 @@ void color_change(void)
 }
 
 #define COMET_X 0
-#define COMET_Y 20
+#define COMET_Y 22
 
 void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
 {
