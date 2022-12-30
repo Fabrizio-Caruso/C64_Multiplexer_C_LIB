@@ -102,6 +102,8 @@ void init_udg(void)
 
 #define SEPARATION 40   
 
+#define HAPPYNEWYEAR_OFFSET (SCREEN+6)
+
 /******************/
 int main()
 {    
@@ -154,7 +156,7 @@ int main()
         POKE(SCREEN+star_loc,29); // small fixed star
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<50;++k)
+    for(k=0;k<60;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,30); // small/big flashing star
@@ -165,20 +167,97 @@ int main()
 
     for(k=0;k<15;++k)
     {
-        POKE(0x0400+1000-80-15-1+k,WRITTEN[k]-'A'+1);
-        POKE(0xD800+1000-80-15-1+k,1);
+        POKE(SCREEN+1000-80-15-1+k,WRITTEN[k]-'A'+1);
+        POKE(COLOR+1000-80-15-1+k,1);
     }
     
     for(k=0;k<15;++k)
     {
-        POKE(0x0400+1000-40-15-1+k,AUTHOR[k]-'A'+1);
-        POKE(0xD800+1000-40-15-1+k,3);
+        POKE(SCREEN+1000-40-15-1+k,AUTHOR[k]-'A'+1);
+        POKE(COLOR+1000-40-15-1+k,3);
     }
     
-    for(k=0;k<14;++k)
+    // for(k=0;k<14;++k)
+    // {
+        // POKE(SCREEN+13+40+k,YEAR[k]-'A'+1);
+        // POKE(COLOR+13+40+k,2);
+    // }
+    
+    // H
+    POKE(HAPPYNEWYEAR_OFFSET      ,'9'+10); 
+    POKE(HAPPYNEWYEAR_OFFSET+1    ,'9'+11);
+    POKE(HAPPYNEWYEAR_OFFSET+40   ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_OFFSET+40+1 ,'9'+12);
+
+    // A
+    POKE(HAPPYNEWYEAR_OFFSET+2    ,'9'+ 1);
+    POKE(HAPPYNEWYEAR_OFFSET+3    ,'9'+ 2);
+    POKE(HAPPYNEWYEAR_OFFSET+40+2 ,'9'+ 3);
+    POKE(HAPPYNEWYEAR_OFFSET+40+3 ,'9'+ 4);
+
+    // P
+    POKE(HAPPYNEWYEAR_OFFSET+4    ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_OFFSET+5    ,'9'+17);
+    POKE(HAPPYNEWYEAR_OFFSET+40+4 ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_OFFSET+40+5 ,'9'+18);
+
+    // P
+    POKE(HAPPYNEWYEAR_OFFSET+6    ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_OFFSET+7    ,'9'+17);
+    POKE(HAPPYNEWYEAR_OFFSET+40+6 ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_OFFSET+40+7 ,'9'+18);
+    
+    // Y
+    POKE(HAPPYNEWYEAR_OFFSET+8    ,'9'+30);
+    POKE(HAPPYNEWYEAR_OFFSET+9    ,'9'+28);
+    POKE(HAPPYNEWYEAR_OFFSET+40+8 ,'9'+23);
+    POKE(HAPPYNEWYEAR_OFFSET+40+9 ,'9'+24);    
+    
+    // N
+    POKE(HAPPYNEWYEAR_OFFSET+12   ,'9'+13);
+    POKE(HAPPYNEWYEAR_OFFSET+13   ,'9'+14);
+    POKE(HAPPYNEWYEAR_OFFSET+40+12,'9'+15);
+    POKE(HAPPYNEWYEAR_OFFSET+40+13,'9'+16); 
+
+    // E
+    POKE(HAPPYNEWYEAR_OFFSET+14   ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_OFFSET+15   ,'9'+ 6);
+    POKE(HAPPYNEWYEAR_OFFSET+40+14,'9'+ 7);
+    POKE(HAPPYNEWYEAR_OFFSET+40+15,'9'+ 8); 
+
+    // W
+    POKE(HAPPYNEWYEAR_OFFSET+16   ,'9'+10);
+    POKE(HAPPYNEWYEAR_OFFSET+17   ,'9'+25);
+    POKE(HAPPYNEWYEAR_OFFSET+40+16,'9'+26);
+    POKE(HAPPYNEWYEAR_OFFSET+40+17,'9'+27); 
+
+    // Y
+    POKE(HAPPYNEWYEAR_OFFSET+20   ,'9'+30);
+    POKE(HAPPYNEWYEAR_OFFSET+21   ,'9'+28);
+    POKE(HAPPYNEWYEAR_OFFSET+40+20,'9'+23);
+    POKE(HAPPYNEWYEAR_OFFSET+40+21,'9'+24);  
+
+    // E
+    POKE(HAPPYNEWYEAR_OFFSET+22   ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_OFFSET+23   ,'9'+ 6);
+    POKE(HAPPYNEWYEAR_OFFSET+40+22,'9'+ 7);
+    POKE(HAPPYNEWYEAR_OFFSET+40+23,'9'+ 8); 
+    
+    // A
+    POKE(HAPPYNEWYEAR_OFFSET+24   ,'9'+ 1);
+    POKE(HAPPYNEWYEAR_OFFSET+25   ,'9'+ 2);
+    POKE(HAPPYNEWYEAR_OFFSET+40+24,'9'+ 3);
+    POKE(HAPPYNEWYEAR_OFFSET+40+25,'9'+ 4);
+
+    // R
+    POKE(HAPPYNEWYEAR_OFFSET+26   ,'9'+ 19);
+    POKE(HAPPYNEWYEAR_OFFSET+27   ,'9'+ 20);
+    POKE(HAPPYNEWYEAR_OFFSET+40+26,'9'+ 21);
+    POKE(HAPPYNEWYEAR_OFFSET+40+27,'9'+ 22);
+
+    for(i=0;i<80;++i)
     {
-        POKE(0x0400+13+40+k,YEAR[k]-'A'+1);
-        POKE(0xD800+13+40+k,2);
+        POKE(COLOR+i,2);
     }
     
     // for(i=0;i<200;++i)
@@ -207,17 +286,7 @@ int main()
         SPRC[i] = 2+i;        
     }    
     
-    // SPRF[0] = 112;
-    // SPRF[1] = 113;
-    // SPRF[2] = 114;
-    // SPRF[3] = 115;
-    // SPRF[4] = 116;
-    
-        // SPRF[0] = 128;
-        // SPRF[1] = 129;
-        // SPRF[2] = 130;
-        // SPRF[3] = 131;
-        // SPRF[4] = 132;
+
     
     
     for(i=12;i<NUMSPRITES;++i)
@@ -289,9 +358,9 @@ int main()
                 }
                 POKE(0x2000+3,0x28+16*(j&1));
                 POKE(0x2000+3+27*8,8*(j&1));
-                for(h=0;h<14;++h)
+                for(h=0;h<80;++h)
                 {
-                    POKE(0xD800+13+40+h,2+(j&3));
+                    POKE(COLOR+h,2+(j&3));
                 }
                 
                 POKE(0x2000+2+30*8,STAR_0[j&3]);
