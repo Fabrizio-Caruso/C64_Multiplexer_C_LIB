@@ -75,8 +75,14 @@ const char MESSAGE[12] = "HAPPYNEWYEAR";
 const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 const char AUTHOR[15] = "FABRIZIO CARUSO";
-const char YEAR[14] =   "HAPPY NEW YEAR";
+const char TEXT1[15] =  "LOGIC CODE IN C";
+const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
+const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
+const char TEXT4[17] =  "FAST MODE ENABLED";
+
 const char WRITTEN[15] = "WRITTEN IN C BY";
+
+const char YEAR[14] =   "HAPPY NEW YEAR";
 
 const unsigned char STAR_0[4] = {0x00,0x10,0x10,0x00};
 const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
@@ -91,13 +97,13 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 
 #define SEPARATION 40   
 
-#define HAPPYNEWYEAR_OFFSET (SCREEN+6)
+#define HAPPYNEWYEAR_POS (SCREEN+6)
 #define MOON_OFFSET (40*2+36)
 
 
 static unsigned char j;
 static unsigned char h;
-
+static unsigned char restored_text_row[35];
 
 // $D018 = 53272
 // -----------------
@@ -106,7 +112,6 @@ void init_udg(void)
     POKE(56576u,3);
 	POKE(0xD018,PEEK(0xD018)|8);
 	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
-    // POKE(0xD018,PEEK(0xD018)&0xF0);
 	POKE(648,192);
 }
 
@@ -134,8 +139,30 @@ void color_change(void)
     }  
 }
 
-#define COMET_X 7
-#define COMET_Y 22
+#define COMET_X 0
+#define COMET_Y 20
+
+void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
+{
+    unsigned char k;
+    
+    for(k=0;k<len;++k)
+    {
+        POKE(SCREEN+offset+k,str[k]-'A'+1);
+        POKE(COLOR+offset+k,col);
+    }
+}
+
+void restore_text_row(void)
+{
+    unsigned char i;
+    
+    for(i=0;i<35;++i)
+    {
+        POKE(SCREEN+120+i,restored_text_row[i]);
+        POKE(COLOR+120+i,1);
+    }
+}
 
 /******************/
 int main()
@@ -152,7 +179,9 @@ int main()
     unsigned char comet_y = COMET_Y;
     unsigned short comet_pos;
     unsigned short old_comet_pos;
-    unsigned char below_0;
+    unsigned char below;
+    unsigned char text_counter = 0;
+    
     // unsigned char below_1;
 
     // Only use clrscr() before when the kernal is still active
@@ -217,99 +246,88 @@ int main()
         POKE(COLOR+star_loc,1);
     }
 
-
-    for(k=0;k<15;++k)
+    for(i=0;i<35;++i)
     {
-        POKE(SCREEN+1000-80-15-1+k,WRITTEN[k]-'A'+1);
-        POKE(COLOR+1000-80-15-1+k,1);
+        restored_text_row[i]=PEEK(SCREEN+120+i);
     }
     
+    print(WRITTEN, 15, 1000-40-15-1,1);
     
-    for(k=0;k<15;++k)
-    {
-        POKE(SCREEN+1000-40-15-1+k,AUTHOR[k]-'A'+1);
-        POKE(COLOR+1000-40-15-1+k,3);
-    }
-    
-    // for(k=0;k<14;++k)
-    // {
-        // POKE(SCREEN+13+40+k,YEAR[k]-'A'+1);
-        // POKE(COLOR+13+40+k,2);
-    // }
+    print(AUTHOR, 15, 1000-15-1,3);
     
     color_change();
     
     // H
-    POKE(HAPPYNEWYEAR_OFFSET      ,'9'+10); 
-    POKE(HAPPYNEWYEAR_OFFSET+1    ,'9'+11);
-    POKE(HAPPYNEWYEAR_OFFSET+40   ,'9'+ 9);
-    POKE(HAPPYNEWYEAR_OFFSET+40+1 ,'9'+12);
+    POKE(HAPPYNEWYEAR_POS      ,'9'+10); 
+    POKE(HAPPYNEWYEAR_POS+1    ,'9'+11);
+    POKE(HAPPYNEWYEAR_POS+40   ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_POS+40+1 ,'9'+12);
 
     // A
-    POKE(HAPPYNEWYEAR_OFFSET+2    ,'9'+ 1);
-    POKE(HAPPYNEWYEAR_OFFSET+3    ,'9'+ 2);
-    POKE(HAPPYNEWYEAR_OFFSET+40+2 ,'9'+ 3);
-    POKE(HAPPYNEWYEAR_OFFSET+40+3 ,'9'+ 4);
+    POKE(HAPPYNEWYEAR_POS+2    ,'9'+ 1);
+    POKE(HAPPYNEWYEAR_POS+3    ,'9'+ 2);
+    POKE(HAPPYNEWYEAR_POS+40+2 ,'9'+ 3);
+    POKE(HAPPYNEWYEAR_POS+40+3 ,'9'+ 4);
 
     // P
-    POKE(HAPPYNEWYEAR_OFFSET+4    ,'9'+ 5);
-    POKE(HAPPYNEWYEAR_OFFSET+5    ,'9'+17);
-    POKE(HAPPYNEWYEAR_OFFSET+40+4 ,'9'+ 9);
-    POKE(HAPPYNEWYEAR_OFFSET+40+5 ,'9'+18);
+    POKE(HAPPYNEWYEAR_POS+4    ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_POS+5    ,'9'+17);
+    POKE(HAPPYNEWYEAR_POS+40+4 ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_POS+40+5 ,'9'+18);
 
     // P
-    POKE(HAPPYNEWYEAR_OFFSET+6    ,'9'+ 5);
-    POKE(HAPPYNEWYEAR_OFFSET+7    ,'9'+17);
-    POKE(HAPPYNEWYEAR_OFFSET+40+6 ,'9'+ 9);
-    POKE(HAPPYNEWYEAR_OFFSET+40+7 ,'9'+18);
+    POKE(HAPPYNEWYEAR_POS+6    ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_POS+7    ,'9'+17);
+    POKE(HAPPYNEWYEAR_POS+40+6 ,'9'+ 9);
+    POKE(HAPPYNEWYEAR_POS+40+7 ,'9'+18);
     
     // Y
-    POKE(HAPPYNEWYEAR_OFFSET+8    ,'9'+30);
-    POKE(HAPPYNEWYEAR_OFFSET+9    ,'9'+28);
-    POKE(HAPPYNEWYEAR_OFFSET+40+8 ,'9'+23);
-    POKE(HAPPYNEWYEAR_OFFSET+40+9 ,'9'+24);    
+    POKE(HAPPYNEWYEAR_POS+8    ,'9'+30);
+    POKE(HAPPYNEWYEAR_POS+9    ,'9'+28);
+    POKE(HAPPYNEWYEAR_POS+40+8 ,'9'+23);
+    POKE(HAPPYNEWYEAR_POS+40+9 ,'9'+24);    
     
     // N
-    POKE(HAPPYNEWYEAR_OFFSET+12   ,'9'+13);
-    POKE(HAPPYNEWYEAR_OFFSET+13   ,'9'+14);
-    POKE(HAPPYNEWYEAR_OFFSET+40+12,'9'+15);
-    POKE(HAPPYNEWYEAR_OFFSET+40+13,'9'+16); 
+    POKE(HAPPYNEWYEAR_POS+12   ,'9'+13);
+    POKE(HAPPYNEWYEAR_POS+13   ,'9'+14);
+    POKE(HAPPYNEWYEAR_POS+40+12,'9'+15);
+    POKE(HAPPYNEWYEAR_POS+40+13,'9'+16); 
 
     // E
-    POKE(HAPPYNEWYEAR_OFFSET+14   ,'9'+ 5);
-    POKE(HAPPYNEWYEAR_OFFSET+15   ,'9'+ 6);
-    POKE(HAPPYNEWYEAR_OFFSET+40+14,'9'+ 7);
-    POKE(HAPPYNEWYEAR_OFFSET+40+15,'9'+ 8); 
+    POKE(HAPPYNEWYEAR_POS+14   ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_POS+15   ,'9'+ 6);
+    POKE(HAPPYNEWYEAR_POS+40+14,'9'+ 7);
+    POKE(HAPPYNEWYEAR_POS+40+15,'9'+ 8); 
 
     // W
-    POKE(HAPPYNEWYEAR_OFFSET+16   ,'9'+10);
-    POKE(HAPPYNEWYEAR_OFFSET+17   ,'9'+25);
-    POKE(HAPPYNEWYEAR_OFFSET+40+16,'9'+26);
-    POKE(HAPPYNEWYEAR_OFFSET+40+17,'9'+27); 
+    POKE(HAPPYNEWYEAR_POS+16   ,'9'+10);
+    POKE(HAPPYNEWYEAR_POS+17   ,'9'+25);
+    POKE(HAPPYNEWYEAR_POS+40+16,'9'+26);
+    POKE(HAPPYNEWYEAR_POS+40+17,'9'+27); 
 
     // Y
-    POKE(HAPPYNEWYEAR_OFFSET+20   ,'9'+30);
-    POKE(HAPPYNEWYEAR_OFFSET+21   ,'9'+28);
-    POKE(HAPPYNEWYEAR_OFFSET+40+20,'9'+23);
-    POKE(HAPPYNEWYEAR_OFFSET+40+21,'9'+24);  
+    POKE(HAPPYNEWYEAR_POS+20   ,'9'+30);
+    POKE(HAPPYNEWYEAR_POS+21   ,'9'+28);
+    POKE(HAPPYNEWYEAR_POS+40+20,'9'+23);
+    POKE(HAPPYNEWYEAR_POS+40+21,'9'+24);  
 
     // E
-    POKE(HAPPYNEWYEAR_OFFSET+22   ,'9'+ 5);
-    POKE(HAPPYNEWYEAR_OFFSET+23   ,'9'+ 6);
-    POKE(HAPPYNEWYEAR_OFFSET+40+22,'9'+ 7);
-    POKE(HAPPYNEWYEAR_OFFSET+40+23,'9'+ 8); 
+    POKE(HAPPYNEWYEAR_POS+22   ,'9'+ 5);
+    POKE(HAPPYNEWYEAR_POS+23   ,'9'+ 6);
+    POKE(HAPPYNEWYEAR_POS+40+22,'9'+ 7);
+    POKE(HAPPYNEWYEAR_POS+40+23,'9'+ 8); 
     
     // A
-    POKE(HAPPYNEWYEAR_OFFSET+24   ,'9'+ 1);
-    POKE(HAPPYNEWYEAR_OFFSET+25   ,'9'+ 2);
-    POKE(HAPPYNEWYEAR_OFFSET+40+24,'9'+ 3);
-    POKE(HAPPYNEWYEAR_OFFSET+40+25,'9'+ 4);
+    POKE(HAPPYNEWYEAR_POS+24   ,'9'+ 1);
+    POKE(HAPPYNEWYEAR_POS+25   ,'9'+ 2);
+    POKE(HAPPYNEWYEAR_POS+40+24,'9'+ 3);
+    POKE(HAPPYNEWYEAR_POS+40+25,'9'+ 4);
 
     // R
-    POKE(HAPPYNEWYEAR_OFFSET+26   ,'9'+ 19);
-    POKE(HAPPYNEWYEAR_OFFSET+27   ,'9'+ 20);
-    POKE(HAPPYNEWYEAR_OFFSET+40+26,'9'+ 21);
-    POKE(HAPPYNEWYEAR_OFFSET+40+27,'9'+ 22);
+    POKE(HAPPYNEWYEAR_POS+26   ,'9'+ 19);
+    POKE(HAPPYNEWYEAR_POS+27   ,'9'+ 20);
+    POKE(HAPPYNEWYEAR_POS+40+26,'9'+ 21);
+    POKE(HAPPYNEWYEAR_POS+40+27,'9'+ 22);
 
 
     for(i=1;i<4;++i)
@@ -320,30 +338,7 @@ int main()
             POKE(COLOR+MOON_OFFSET+i+40*j,1);
         }
     }
-    // for(i=0;i<80;++i)
-    // {
-        // POKE(COLOR+i,2);
-    // }
-    
-    // for(i=0;i<200;++i)
-    // {
-        // POKE(0x0400+i,i);
-    // }
-    
-    //POKE(SHAPE+3,0x38);
-    // for(k=0;i<1000;++i)
-    // {
-        // POKE(SHAPE+i,255);
-    // }    
-    
-    // POKE(SCREEN+240+20,33);
-    // POKE(COLOR+240+20,1);
 
-    // POKE(SCREEN+240+22,34);
-    // POKE(COLOR+240+22,1);
-
-    // POKE(SCREEN+280+22,35);
-    // POKE(COLOR+280+22,1);
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
@@ -428,24 +423,24 @@ int main()
                 // {
 
                 old_comet_pos = comet_x+40U*comet_y;
-                // below_0 = PEEK(SCREEN+old_comet_pos);
+                // below = PEEK(SCREEN+old_comet_pos);
 
-                // POKE(SCREEN+comet_pos,below_0);
+                // POKE(SCREEN+comet_pos,below);
                 // POKE(COLOR+comet_pos,1);
                 --comet_y;
                 ++comet_x;
                 if((comet_x>36)||(comet_y<4))
                 {
-                    comet_x = COMET_X+(rand()&15);
+                    comet_x = COMET_X+(rand()&31);
                     comet_y = COMET_Y;
                 }
                 comet_pos = comet_x+40U*comet_y;
-                // below_0 = PEEK(SCREEN+comet_pos);
+                // below = PEEK(SCREEN+comet_pos);
 
-                POKE(SCREEN+old_comet_pos,below_0);
+                POKE(SCREEN+old_comet_pos,below);
                 POKE(COLOR+old_comet_pos,1);
 
-                below_0 = PEEK(SCREEN+comet_pos);
+                below = PEEK(SCREEN+comet_pos);
                 POKE(SCREEN+comet_pos,33);
                 POKE(COLOR+comet_pos,1);
                 
@@ -455,7 +450,7 @@ int main()
                 // }
                 // else
                 // {
-                    // POKE(SCREEN+comet_pos,below_0);
+                    // POKE(SCREEN+comet_pos,below);
                     // --comet_y;
                     // ++comet_x;
                     // if((comet_x>38)||(comet_y<3))
@@ -464,7 +459,7 @@ int main()
                         // comet_y = COMET_Y;
                     // }
                     // comet_pos = comet_x+40U*comet_y;
-                    // below_0 = PEEK(SCREEN+comet_pos);
+                    // below = PEEK(SCREEN+comet_pos);
                     // POKE(SCREEN+comet_pos,33);
                     // POKE(COLOR+comet_pos,1);
                     // comet_move = 1;
@@ -509,6 +504,29 @@ int main()
             }
             if(!(XX))
             {
+                if(text_counter==0)
+                {
+                    restore_text_row();
+                    print(TEXT1, 15,120+6,5);
+                }
+                else if(text_counter==1)
+                {
+                   restore_text_row();
+                   print(TEXT2, 28,120+6,11);
+                }
+                else if(text_counter==2)
+                {
+                    restore_text_row();
+                    print(TEXT3, 29,120+6,12);
+                }
+                else
+                {
+                    restore_text_row();
+                    // print(TEXT4, 17,120,8);
+                }
+                ++text_counter;
+                text_counter%=4;
+                    
                 if(flip)
                 {
                     SPRF[ 5]=GFX_START_INDEX + 32;
