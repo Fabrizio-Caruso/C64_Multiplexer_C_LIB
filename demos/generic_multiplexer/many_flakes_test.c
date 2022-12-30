@@ -134,7 +134,7 @@ void color_change(void)
     }  
 }
 
-#define COMET_X 10
+#define COMET_X 7
 #define COMET_Y 22
 
 /******************/
@@ -434,9 +434,9 @@ int main()
                 // POKE(COLOR+comet_pos,1);
                 --comet_y;
                 ++comet_x;
-                if((comet_x>38)||(comet_y<3))
+                if((comet_x>36)||(comet_y<4))
                 {
-                    comet_x = COMET_X;
+                    comet_x = COMET_X+(rand()&15);
                     comet_y = COMET_Y;
                 }
                 comet_pos = comet_x+40U*comet_y;
