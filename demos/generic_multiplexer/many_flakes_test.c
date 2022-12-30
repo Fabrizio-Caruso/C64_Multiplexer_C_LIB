@@ -87,6 +87,7 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 
 #define SCREEN 0x0400
 #define COLOR  0xD800
+#define SHAPE  0x2000
 
 #define SEPARATION 40   
 
@@ -306,10 +307,10 @@ int main()
         // POKE(0x0400+i,i);
     // }
     
-    //POKE(0x2000+3,0x38);
+    //POKE(SHAPE+3,0x38);
     // for(k=0;i<1000;++i)
     // {
-        // POKE(0x2000+i,255);
+        // POKE(SHAPE+i,255);
     // }    
     
     
@@ -397,14 +398,14 @@ int main()
                 {
                     SPRC[i] = 2+((XX+i+j)&7);        
                 }
-                POKE(0x2000+3,0x28+16*(j&1));
-                POKE(0x2000+3+27*8,8*(j&1));
+                POKE(SHAPE+3,0x28+16*(j&1));
+                POKE(SHAPE+3+27*8,8*(j&1));
                 
                 color_change();
                 
-                POKE(0x2000+2+30*8,STAR_0[j&3]);
-                POKE(0x2000+3+30*8,STAR_1[j&3]);
-                POKE(0x2000+4+30*8,STAR_0[j&3]);
+                POKE(SHAPE+2+30*8,STAR_0[j&3]);
+                POKE(SHAPE+3+30*8,STAR_1[j&3]);
+                POKE(SHAPE+4+30*8,STAR_0[j&3]);
                 
                 
             }
