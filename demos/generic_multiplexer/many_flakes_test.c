@@ -345,7 +345,7 @@ int main()
             }
             for(i=0;i<4;++i)
             {
-                SPRX[i+8]=X_OFFSET+i*22;
+                SPRX[i+8]=X_OFFSET+i*(22+4-4*flip);
                 SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
@@ -360,7 +360,7 @@ int main()
                 POKE(0x2000+3+27*8,8*(j&1));
                 for(h=0;h<80;++h)
                 {
-                    POKE(COLOR+h,2+(j&3));
+                    POKE(COLOR+h,3+(j&7));
                 }
                 
                 POKE(0x2000+2+30*8,STAR_0[j&3]);
