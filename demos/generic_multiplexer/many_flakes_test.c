@@ -85,6 +85,17 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 #define X_OFFSET 46
 #define Y_OFFSET 50
 
+#define SCREEN 0x0400
+#define COLOR  0xD800
+
+#define SEPARATION 40   
+
+#define HAPPYNEWYEAR_OFFSET (SCREEN+6)
+
+static unsigned char j;
+static unsigned char h;
+
+
 // $D018 = 53272
 // -----------------
 void init_udg(void)
@@ -96,13 +107,30 @@ void init_udg(void)
 	POKE(648,192);
 }
 
+void color_change(void)
+{
+    for(h=0;h<10;++h)
+    {
+        
+        POKE(COLOR+6+h,3+(j&7));
+        POKE(COLOR+40+6+h,3+(j&7));
+    }
 
-#define SCREEN 0x0400
-#define COLOR  0xD800
+    for(h=0;h<6;++h)
+    {
+        
+        POKE(COLOR+18+h,3+(j&7));
+        POKE(COLOR+40+18+h,3+(j&7));
+    }
+    
+    for(h=0;h<8;++h)
+    {
+        
+        POKE(COLOR+26+h,3+(j&7));
+        POKE(COLOR+40+26+h,3+(j&7));
+    }  
+}
 
-#define SEPARATION 40   
-
-#define HAPPYNEWYEAR_OFFSET (SCREEN+6)
 
 /******************/
 int main()
@@ -110,8 +138,6 @@ int main()
     unsigned char XX = 1;
     unsigned char XX2 = 100;
     unsigned char i;
-    unsigned char j;
-    unsigned char h;
     unsigned short k;
     unsigned short star_loc;
     unsigned char flip = 1;
@@ -132,7 +158,7 @@ int main()
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
     
-    for(k=0;k<50;++k)
+    for(k=0;k<55;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,0); // big flashing star
@@ -144,7 +170,7 @@ int main()
         POKE(SCREEN+star_loc,28); // big fixed star
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<50;++k)
+    for(k=0;k<55;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,27); // small flashing star
@@ -156,13 +182,25 @@ int main()
         POKE(SCREEN+star_loc,29); // small fixed star
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<60;++k)
+    for(k=0;k<70;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,30); // small/big flashing star
         POKE(COLOR+star_loc,1);
     }
 
+    for(k=0;k<20;++k)
+    {
+        star_loc = rand()%80;
+        POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
+        POKE(COLOR+star_loc,1);
+    }
+    for(k=0;k<20;++k)
+    {
+        star_loc = rand()%80;
+        POKE(SCREEN+star_loc,27); // small flashing star (top 2 rows)
+        POKE(COLOR+star_loc,1);
+    }
 
 
     for(k=0;k<15;++k)
@@ -170,6 +208,7 @@ int main()
         POKE(SCREEN+1000-80-15-1+k,WRITTEN[k]-'A'+1);
         POKE(COLOR+1000-80-15-1+k,1);
     }
+    
     
     for(k=0;k<15;++k)
     {
@@ -182,6 +221,8 @@ int main()
         // POKE(SCREEN+13+40+k,YEAR[k]-'A'+1);
         // POKE(COLOR+13+40+k,2);
     // }
+    
+    color_change();
     
     // H
     POKE(HAPPYNEWYEAR_OFFSET      ,'9'+10); 
@@ -255,10 +296,10 @@ int main()
     POKE(HAPPYNEWYEAR_OFFSET+40+26,'9'+ 21);
     POKE(HAPPYNEWYEAR_OFFSET+40+27,'9'+ 22);
 
-    for(i=0;i<80;++i)
-    {
-        POKE(COLOR+i,2);
-    }
+    // for(i=0;i<80;++i)
+    // {
+        // POKE(COLOR+i,2);
+    // }
     
     // for(i=0;i<200;++i)
     // {
@@ -358,10 +399,8 @@ int main()
                 }
                 POKE(0x2000+3,0x28+16*(j&1));
                 POKE(0x2000+3+27*8,8*(j&1));
-                for(h=0;h<80;++h)
-                {
-                    POKE(COLOR+h,3+(j&7));
-                }
+                
+                color_change();
                 
                 POKE(0x2000+2+30*8,STAR_0[j&3]);
                 POKE(0x2000+3+30*8,STAR_1[j&3]);
