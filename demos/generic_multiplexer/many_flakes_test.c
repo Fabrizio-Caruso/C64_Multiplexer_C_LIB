@@ -132,6 +132,8 @@ void color_change(void)
     }  
 }
 
+#define COMET_X 10
+#define COMET_Y 22
 
 /******************/
 int main()
@@ -142,6 +144,14 @@ int main()
     unsigned short k;
     unsigned short star_loc;
     unsigned char flip = 1;
+    unsigned char comet_flash;
+    unsigned char comet_move = 1;
+    unsigned char comet_x = COMET_X;
+    unsigned char comet_y = COMET_Y;
+    unsigned short comet_pos;
+    unsigned short old_comet_pos;
+    unsigned char below_0;
+    unsigned char below_1;
 
     // Only use clrscr() before when the kernal is still active
     // clrscr();  
@@ -190,16 +200,18 @@ int main()
         POKE(COLOR+star_loc,1);
     }
 
-    for(k=0;k<30;++k)
-    {
-        star_loc = rand()%80;
-        POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
-        POKE(COLOR+star_loc,1);
-    }
-    for(k=0;k<30;++k)
+
+    for(k=0;k<40;++k)
     {
         star_loc = rand()%80;
         POKE(SCREEN+star_loc,27); // small flashing star (top 2 rows)
+        POKE(COLOR+star_loc,1);
+    }
+
+    for(k=0;k<40;++k)
+    {
+        star_loc = rand()%80;
+        POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
         POKE(COLOR+star_loc,1);
     }
 
@@ -313,6 +325,14 @@ int main()
         // POKE(SHAPE+i,255);
     // }    
     
+    // POKE(SCREEN+240+20,33);
+    // POKE(COLOR+240+20,1);
+
+    // POKE(SCREEN+240+22,34);
+    // POKE(COLOR+240+22,1);
+
+    // POKE(SCREEN+280+22,35);
+    // POKE(COLOR+280+22,1);
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
@@ -391,6 +411,68 @@ int main()
                 SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
+            if(!(XX&63))
+            {
+                if(comet_move)
+                {
+                    old_comet_pos = comet_x+40U*comet_y;
+
+                    // POKE(SCREEN+comet_pos,below_0);
+                    // POKE(COLOR+comet_pos,1);
+                    --comet_y;
+                    ++comet_x;
+                    if((comet_x>38)||(comet_y<3))
+                    {
+                        comet_x = COMET_X;
+                        comet_y = COMET_Y;
+                    }
+                    comet_pos = comet_x+40U*comet_y;
+                    below_0 = PEEK(SCREEN+comet_pos);
+
+                    // below_0 = PEEK(SCREEN+comet_pos);
+                    POKE(SCREEN+comet_pos,33);
+                    POKE(COLOR+comet_pos,1);
+                    
+                    POKE(SCREEN+old_comet_pos,below_0);
+                    POKE(COLOR+old_comet_pos,1);
+                    // comet_move = 0;
+                }
+                // else
+                // {
+                    // POKE(SCREEN+comet_pos,below_0);
+                    // --comet_y;
+                    // ++comet_x;
+                    // if((comet_x>38)||(comet_y<3))
+                    // {
+                        // comet_x = COMET_X;
+                        // comet_y = COMET_Y;
+                    // }
+                    // comet_pos = comet_x+40U*comet_y;
+                    // below_0 = PEEK(SCREEN+comet_pos);
+                    // POKE(SCREEN+comet_pos,33);
+                    // POKE(COLOR+comet_pos,1);
+                    // comet_move = 1;
+                // }
+            }
+
+            // Flash comet
+            if(!(XX&1))
+            {
+                if(comet_flash)
+                {
+                    POKE(SHAPE+33*8+1,0);
+                    POKE(SHAPE+33*8,0);
+                    comet_flash = 0;
+                }
+                else
+                {
+                    POKE(SHAPE+33*8+1,3);
+                    POKE(SHAPE+33*8,3);
+                    comet_flash = 1;
+                }
+            }
+            
+            // Animate small/big stars
             if(!(XX&31))
             {
                 ++j;
