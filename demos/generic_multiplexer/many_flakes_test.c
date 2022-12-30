@@ -189,13 +189,13 @@ int main()
         POKE(COLOR+star_loc,1);
     }
 
-    for(k=0;k<20;++k)
+    for(k=0;k<30;++k)
     {
         star_loc = rand()%80;
         POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<20;++k)
+    for(k=0;k<30;++k)
     {
         star_loc = rand()%80;
         POKE(SCREEN+star_loc,27); // small flashing star (top 2 rows)
