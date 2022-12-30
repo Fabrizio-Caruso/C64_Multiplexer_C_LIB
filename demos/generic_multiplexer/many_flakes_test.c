@@ -11,6 +11,8 @@ extern unsigned char SPRX[];
 extern unsigned char SPRY[];
 extern unsigned char SPRC[];
 extern unsigned char SPRF[];
+extern unsigned char SPREX[];
+
 extern unsigned char NUMSPRITES;
 extern unsigned char SPRUPDATEFLAG;
 extern unsigned char SPRIRQCOUNTER;
@@ -76,6 +78,10 @@ const char AUTHOR[15] = "FABRIZIO CARUSO";
 const char YEAR[14] =   "HAPPY NEW YEAR";
 const char WRITTEN[15] = "WRITTEN IN C BY";
 
+const unsigned char STAR_0[4] = {0x00,0x10,0x10,0x00};
+const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
+// const star STAR_0[4] = {};
+
 #define X_OFFSET 46
 #define Y_OFFSET 50
 
@@ -94,7 +100,7 @@ void init_udg(void)
 #define SCREEN 0x0400
 #define COLOR  0xD800
 
-#define SEPARATION 40
+#define SEPARATION 40   
 
 /******************/
 int main()
@@ -106,7 +112,7 @@ int main()
     unsigned char h;
     unsigned short k;
     unsigned short star_loc;
-    unsigned char flip;
+    unsigned char flip = 1;
 
     // Only use clrscr() before when the kernal is still active
     // clrscr();  
@@ -148,6 +154,13 @@ int main()
         POKE(SCREEN+star_loc,29); // small fixed star
         POKE(COLOR+star_loc,1);
     }
+    for(k=0;k<50;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,30); // small/big flashing star
+        POKE(COLOR+star_loc,1);
+    }
+
 
 
     for(k=0;k<15;++k)
@@ -246,15 +259,25 @@ int main()
                 SPRX[i]=X_OFFSET+i*22;
                 SPRY[i]=i*8+Y_OFFSET+yValues[XX];
             }
-            for(i=0;i<3;++i)
+            if(flip)
             {
-                SPRX[i+5]=X_OFFSET+i*22;
-                SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
-            }    
+                for(i=0;i<3;++i)
+                {
+                    SPRX[i+5]=X_OFFSET+i*22;
+                    SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
+                }    
+            }
+            else
+            {
+                for(i=0;i<3;++i)
+                {
+                    SPRY[i+5]=255;
+                }
+            }
             for(i=0;i<4;++i)
             {
                 SPRX[i+8]=X_OFFSET+i*22;
-                SPRY[i+8]=i*8+Y_OFFSET+2*SEPARATION+yValues[XX];;
+                SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
             if(!(XX&31))
@@ -268,8 +291,13 @@ int main()
                 POKE(0x2000+3+27*8,8*(j&1));
                 for(h=0;h<14;++h)
                 {
-                    POKE(0xD800+13+40+h,2+(j&1));
+                    POKE(0xD800+13+40+h,2+(j&3));
                 }
+                
+                POKE(0x2000+2+30*8,STAR_0[j&3]);
+                POKE(0x2000+3+30*8,STAR_1[j&3]);
+                POKE(0x2000+4+30*8,STAR_0[j&3]);
+                
                 
             }
             if(!(XX))
@@ -280,14 +308,14 @@ int main()
                     SPRF[ 6]=GFX_START_INDEX + 32;
                     SPRF[ 7]=GFX_START_INDEX + 32;
                     
-                    SPRF[ 8]=GFX_START_INDEX + 'Z' - 'A' + 25; // 2
-                    SPRF[ 9]=GFX_START_INDEX + 'Z' - 'A' + 23; // 0
-                    SPRF[10]=GFX_START_INDEX + 'Z' - 'A' + 25; // 2
-                    SPRF[11]=GFX_START_INDEX + 'Z' - 'A' + 26; // 3
-                    // SPRF[ 8]=GFX_START_INDEX + '2' - 'A' + 1;
-                    // SPRF[ 9]=GFX_START_INDEX + '0' - 'A' + 1;
-                    // SPRF[10]=GFX_START_INDEX + '2' - 'A' + 1;
-                    // SPRF[11]=GFX_START_INDEX + '3' - 'A' + 1;
+                    SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
+                    SPRF[ 9]=GFX_START_INDEX + '0'; // 0
+                    SPRF[10]=GFX_START_INDEX + '2'; // 2
+                    SPRF[11]=GFX_START_INDEX + '3'; // 3
+                    SPREX[ 8]=1;
+                    SPREX[ 9]=1;
+                    SPREX[10]=1;
+                    SPREX[11]=1;                    
                     flip = 0;
                 }
                 else
@@ -300,6 +328,10 @@ int main()
                     SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
                     SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
                     SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
+                    SPREX[ 8]=0;
+                    SPREX[ 9]=0;
+                    SPREX[10]=0;
+                    SPREX[11]=0; 
                     flip = 1;
                 }
             }
