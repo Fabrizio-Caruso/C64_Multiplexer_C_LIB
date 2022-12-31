@@ -16,7 +16,7 @@ https://cadaver.github.io/rants/sprite.html
 FEATURES
 - Freely moving multiplexed sprites (up to 36), i.e., generic sprite multiplexer 
 - Simple C interface provided by some shared variables (see INSTRUCTIONS.txt in the "doc" directory)
-- Support for C64, C128 in both 128 in 64 mode
+- Support for C64, C128 in both 128 and in 64 mode
 - Fast 2mhz mode support for the C128 in both 128 and 64 mode: it runs on average at 1.3mhz (PAL) by enabling the fast mode on the borders
 - Optionally multiplexed monochromatic/multicolor bit
 - Optionally multiplexed x-expand bit
