@@ -177,12 +177,19 @@ int main()
     unsigned short star_loc;
     unsigned char flip = 1;
     unsigned char comet_flash;
-    // unsigned char comet_move = 1;
     unsigned char comet_x = COMET_X;
     unsigned char comet_y = COMET_Y;
     unsigned short comet_pos;
     unsigned comet_counter = 0;
     unsigned short old_comet_pos;
+    
+    // unsigned char comet2_flash;
+    unsigned char comet2_x = COMET_X+3;
+    unsigned char comet2_y = COMET_Y-2;
+    unsigned short comet2_pos;
+    unsigned comet2_counter = 0;
+    unsigned short old_comet2_pos;
+    
     unsigned char below;
     unsigned char text_counter = 0;
     
@@ -216,7 +223,7 @@ int main()
         POKE(SCREEN+star_loc,28); // big fixed star
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<55;++k)
+    for(k=0;k<60;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,27); // small flashing star
@@ -228,7 +235,7 @@ int main()
         POKE(SCREEN+star_loc,29); // small fixed star
         POKE(COLOR+star_loc,1);
     }
-    for(k=0;k<70;++k)
+    for(k=0;k<75;++k)
     {
         star_loc = rand()%1000;
         POKE(SCREEN+star_loc,30); // small/big flashing star
@@ -441,9 +448,7 @@ int main()
                         comet_counter = rand()&31;
                     }
                     comet_pos = comet_x+40U*comet_y;
-                    // below = PEEK(SCREEN+comet_pos);
 
-                
                     POKE(SCREEN+old_comet_pos,below);
                     POKE(COLOR+old_comet_pos,1);
 
@@ -452,10 +457,43 @@ int main()
                     {
                         POKE(SCREEN+comet_pos,33);
                         POKE(COLOR+comet_pos,1);
-                    }
-                    
+                    } 
                 }
             }
+
+            if(!(XX&1))
+            {
+                if(comet2_counter)
+                {
+                    --comet2_counter;
+                }
+                if(!comet2_counter)
+                {
+
+                    old_comet2_pos = comet2_x+40U*comet2_y;
+
+                    --comet2_y;
+                    ++comet2_x;
+                    if((comet2_x>36)||(comet2_y<4))
+                    {
+                        comet2_x = COMET_X+(rand()&31);
+                        comet2_y = COMET_Y;
+                        comet2_counter = rand()&63;
+                    }
+                    comet2_pos = comet2_x+40U*comet2_y;
+
+                    POKE(SCREEN+old_comet2_pos,below);
+                    POKE(COLOR+old_comet2_pos,1);
+
+                    below = PEEK(SCREEN+comet2_pos);
+                    if(!comet2_counter)
+                    {
+                        POKE(SCREEN+comet2_pos,33);
+                        POKE(COLOR+comet2_pos,1);
+                    } 
+                }
+            }
+
 
             // Flash comet
             if(!(XX&1))
