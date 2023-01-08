@@ -10,7 +10,7 @@ BUILD_PATH ?= ./build
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
 SNOW_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg.s
-
+COMMODORE_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/commodore_graphics_udg.s
 
 RAS_SPLT_ASM_FILES=$(SOURCE_PATH)/raster_split.s $(GRAPHICS_PATH)/graphics.s
 
@@ -110,6 +110,22 @@ many_flakes:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
+# SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
+# -m mapfile
+commodore: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
+	--asm-define MAXSPR=28 -D_NUMBER_OF_SPRITES_=28  -D_SPRITE_SEPARATION_=30 \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	-DSPRITES_AT_2800 \
+	$(DEMOS_PATH)/generic_multiplexer/commodore_test.c \
+	$(COMMODORE_UDG_ASM_FILES) \
+	$(SID_PATH)/Commodore_64.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
 
     
 too_many_sprites: 
@@ -119,9 +135,9 @@ too_many_sprites:
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o    
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o    
 
 
 # -- MANY_SPRITES TESTS C128
