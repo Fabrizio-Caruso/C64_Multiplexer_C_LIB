@@ -114,7 +114,7 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 
 static unsigned char j;
 static unsigned char h;
-static unsigned char restored_text_row[35];
+// static unsigned char restored_text_row[35];
 
 // $D018 = 53272
 // -----------------
@@ -228,7 +228,7 @@ void init_sprites(void)
 		SPRF[i+18] = GFX_START_INDEX + 63;
 	}
 	SPRF[27] = GFX_START_INDEX + 63;
-	SPRC[27] = 1;
+	SPRC[27] = 6;
 	
 	message_sprites();
 }
@@ -239,7 +239,6 @@ void init_sprites(void)
 int main()
 {    
     unsigned char XX = 1;
-    unsigned char XX2 = 100;
     unsigned char i;
     unsigned short k;
     // unsigned short star_loc;
@@ -397,10 +396,16 @@ int main()
 					SPRX[i+18]=X_OFFSET+i*16;
 					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX]/2;
 				}   
+				
+				if(XX==127)
+				{
+					commodore_sprites();
+				}
 			}
 			else
 			{
-				
+
+
 				for(i=0;i<9;++i)
 				{
 					SPRX[i]=X_OFFSET+i*16+(XX&15);
@@ -410,14 +415,14 @@ int main()
 				for(i=0;i<9;++i)
 				{
 					
-					if((flip)&&i>1)
-					{
-						SPRX[i+9]=X_OFFSET+i*16+8;
-					}
-					else
-					{
+					// if((flip)&&i>1)
+					// {
+						// SPRX[i+9]=X_OFFSET+i*16+8;
+					// }
+					// else
+					// {
 						SPRX[i+9]=X_OFFSET+i*16;
-					}					
+					// }					
 					
 					// SPRX[i+9]=X_OFFSET+i*16;
 					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues[XX]/2;
@@ -428,21 +433,17 @@ int main()
 					SPRX[i+18]=X_OFFSET+i*16-(XX&15);
 					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX]/2;
 				}  
+				
+				if(XX==255)
+				{
+					message_sprites();
+				}
 			}
 
             if(!(XX&63))
             {
 				
-				if(flip)
-				{
-					commodore_sprites();
-					flip=0;
-				}
-				else
-				{
-					message_sprites();
-					flip=1;
-				}
+
 				
                 if(text_counter==0)
                 {
