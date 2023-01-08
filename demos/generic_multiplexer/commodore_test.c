@@ -82,6 +82,7 @@ const char yValue2[] = SINUS(2);
 
 const char COMMODORE_MESSAGE[9] = "COMMODORE";
 const char SPRITE_MESSAGE[9]    = "28SPRITES";
+const char MULTIPLEX_MESSAGE[9]    = "MULTIPLEX";
 
 #define NUMBER_OF_COLORS 14
 const unsigned char COLORS[NUMBER_OF_COLORS] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
@@ -116,9 +117,11 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 #define HAPPYNEWYEAR_POS (SCREEN+6)
 #define MOON_OFFSET (40*2+36)
 
-
+static unsigned char counter;
 static unsigned char j;
 static unsigned char h;
+static unsigned char sprite_text;
+
 // static unsigned char restored_text_row[35];
 
 // $D018 = 53272
@@ -192,6 +195,7 @@ void commodore_sprites(void)
     {
 
 		SPRF[i+9] = GFX_START_INDEX + COMMODORE_MESSAGE[i] - 'A' + 1;
+		sprite_text = 0;
 
         SPRC[i+9] = 12;        
     } 
@@ -213,18 +217,36 @@ void message_sprites(void)
     for(i=0;i<9;++i)
     {
 
-		SPRF[i+9] = GFX_START_INDEX + SPRITE_MESSAGE[i] - 'A' + 1;
-
+		if(counter&1)
+		{
+			SPRF[i+9] = GFX_START_INDEX + SPRITE_MESSAGE[i] - 'A' + 1;
+			sprite_text = 1;
+		}
+		else
+		{
+			SPRF[i+9] = GFX_START_INDEX + MULTIPLEX_MESSAGE[i] - 'A' + 1;
+			sprite_text = 0;
+		}
+		
         SPRC[i+9] =  COLORS[i%NUMBER_OF_COLORS];  ;        
     }
-	for(i=0;i<9;++i)
+
+	// if(!(counter&1))
+	// {
+		for(i=0;i<9;++i)
+		{
+			SPRF[i] = GFX_START_INDEX + 63;
+			SPRF[i+18] = GFX_START_INDEX + 63;
+		}
+
+	// }
+	if(counter&1)
 	{
-		SPRF[i] = GFX_START_INDEX + 63;
-		SPRF[i+18] = GFX_START_INDEX + 63;
-	}	
-	SPRF[9] = GFX_START_INDEX +'2';
-	SPRF[10] = GFX_START_INDEX +'8';
-	
+		SPRF[9] = GFX_START_INDEX +'2';
+		SPRF[10] = GFX_START_INDEX +'8';
+	}
+	++counter;
+
 }
 
 
@@ -253,11 +275,10 @@ void init_sprites(void)
 /******************/
 int main()
 {    
-    unsigned char XX = 1;
+    unsigned char XX = 10;
     unsigned char i;
     unsigned short k;
     // unsigned short star_loc;
-    unsigned char flip = 1;
     
     unsigned char text_counter = 0;
     
@@ -396,7 +417,7 @@ int main()
 
 				for(i=0;i<9;++i)
 				{
-					if((flip)&&i>1)
+					if((sprite_text)&&i>1)
 					{
 						SPRX[i+9]=X_OFFSET+i*16+8;
 					}
