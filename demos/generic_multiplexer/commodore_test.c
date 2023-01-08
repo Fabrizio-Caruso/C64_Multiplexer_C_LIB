@@ -101,13 +101,14 @@ const char WRITTEN[15] = "WRITTEN IN C BY";
 
 // const char YEAR[14] =   "HAPPY NEW YEAR";
 
-const unsigned char STAR_0[8] = {0x00,0x10,0x10,0x10,0x10,0x10,0x10,0x00};
-const unsigned char STAR_1[8] = {0x10,0x28,0x38,0x7C,0x38,0x38,0x28,0x10};
-const unsigned char STAR_2[8] = {0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x00};
+const unsigned char STAR_3[8] = {0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00};
+const unsigned char STAR_2[8] = {0x00,0x00,0x00,0x10,0x38,0x00,0x00,0x00};
+const unsigned char STAR_1[8] = {0x00,0x10,0x10,0x10,0x7C,0x10,0x10,0x00};
+const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x38,0x28,0x10};
 // const star STAR_0[4] = {};
 
 #define X_OFFSET 22
-#define Y_OFFSET 38
+#define Y_OFFSET 40
 
 #define SCREEN 0x0400
 #define COLOR  0xD800
@@ -175,6 +176,21 @@ void print(const char *str, unsigned char len, unsigned short offset, unsigned c
     }
 }
 
+void color_text(unsigned char len, unsigned short offset, unsigned char col)
+{
+    unsigned short k;
+    
+    for(k=COLOR+offset;k<COLOR+offset+len;++k)
+    {
+        // if(str[k]!=' ')
+        // {
+            // POKE(SCREEN+offset+k,str[k]-'A'+1);
+            POKE(k,col);
+        // }
+    }
+}
+
+
 #define TEXT_POSITION 840
 
 
@@ -190,6 +206,26 @@ void restore_text_row(void)
 }
 
 
+void color_commodore_sprites(void)
+{
+	unsigned char i;
+	
+    for(i=0;i<9;++i)
+    {
+        SPRC[i+9] = 11+(i&1);    
+	}
+}
+
+void yellow_commodore_sprites(void)
+{
+	unsigned char i;
+	
+    for(i=0;i<9;++i)
+    {
+        SPRC[i+9] = 7;    
+	}
+}
+
 
 void commodore_sprites(void)
 {
@@ -201,8 +237,10 @@ void commodore_sprites(void)
 		SPRF[i+9] = GFX_START_INDEX + COMMODORE_MESSAGE[i] - 'A' + 1;
 		sprite_text = 0;
 
-        SPRC[i+9] = 11+(i&1);        
+        // SPRC[i+9] = 11+(i&1);        
     } 
+	
+	color_commodore_sprites();
 	
 	for(i=0;i<9;++i)
 	{
@@ -235,15 +273,12 @@ void message_sprites(void)
         SPRC[i+9] =  COLORS[i%NUMBER_OF_COLORS];  ;        
     }
 
-	// if(!(counter&1))
-	// {
-		for(i=0;i<9;++i)
-		{
-			SPRF[i] = GFX_START_INDEX + 63;
-			SPRF[i+18] = GFX_START_INDEX + 63;
-		}
+	for(i=0;i<9;++i)
+	{
+		SPRF[i] = GFX_START_INDEX + 63;
+		SPRF[i+18] = GFX_START_INDEX + 63;
+	}
 
-	// }
 	if(counter&1)
 	{
 		SPRF[9] = GFX_START_INDEX +'2';
@@ -284,8 +319,10 @@ int main()
     unsigned char XX = 10;
     unsigned char i;
     unsigned short k;
+	// unsigned char aux;
     // unsigned short star_loc;
     unsigned char text_counter = 0;
+	// unsigned char yellow;
 	
     // unsigned char below_1;
 
@@ -305,51 +342,6 @@ int main()
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
     
-    // for(k=0;k<55;++k)
-    // {
-        // star_loc = rand()%1000;
-        // POKE(SCREEN+star_loc,0); // big flashing star
-        // POKE(COLOR+star_loc,1);
-    // }
-    // for(k=0;k<30;++k)
-    // {
-        // star_loc = rand()%1000;
-        // POKE(SCREEN+star_loc,28); // big fixed star
-        // POKE(COLOR+star_loc,1);
-    // }
-    // for(k=0;k<60;++k)
-    // {
-        // star_loc = rand()%1000;
-        // POKE(SCREEN+star_loc,27); // small flashing star
-        // POKE(COLOR+star_loc,1);
-    // }
-    // for(k=0;k<30;++k)
-    // {
-        // star_loc = rand()%1000;
-        // POKE(SCREEN+star_loc,29); // small fixed star
-        // POKE(COLOR+star_loc,1);
-    // }
-    // for(k=0;k<75;++k)
-    // {
-        // star_loc = rand()%1000;
-        // POKE(SCREEN+star_loc,30); // small/big flashing star
-        // POKE(COLOR+star_loc,1);
-    // }
-
-
-    // for(k=0;k<40;++k)
-    // {
-        // star_loc = rand()%80;
-        // POKE(SCREEN+star_loc,27); // small flashing star (top 2 rows)
-        // POKE(COLOR+star_loc,1);
-    // }
-
-    // for(k=0;k<40;++k)
-    // {
-        // star_loc = rand()%80;
-        // POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
-        // POKE(COLOR+star_loc,1);
-    // }
 
     for(i=0;i<40;++i)
     {
@@ -378,37 +370,42 @@ int main()
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
-
     SPRY[NUMSPRITES-1]=220;
-
 
     while(1) 
     {
         if (MULTIPLEX_DONE) 
 		{
-            SPRX[NUMSPRITES-1]=XX;
+            SPRX[NUMSPRITES-1]=XX+100;
 			SPRY[NUMSPRITES-1]=SPRITE_Y_OFFSET+yValues[XX];
             
 			// Animate small/big stars
             if(!(XX&15))
             {
                 ++j;
+				POKE(SHAPE+0+30*8,STAR_3[j&7]);
+
                 POKE(SHAPE+1+30*8,STAR_2[j&7]);
           
-                POKE(SHAPE+2+30*8,STAR_0[j&7]);
-                POKE(SHAPE+3+30*8,STAR_1[j&7]);
-                POKE(SHAPE+4+30*8,STAR_0[j&7]);
+                POKE(SHAPE+2+30*8,STAR_1[j&7]);
+                POKE(SHAPE+3+30*8,STAR_0[j&7]);
+                POKE(SHAPE+4+30*8,STAR_1[j&7]);
 
                 POKE(SHAPE+5+30*8,STAR_2[j&7]);
+				POKE(SHAPE+6+30*8,STAR_3[j&7]);
+				// POKE(SHAPE+7+30*8,STAR_3[j&7]);
+
+
+
             }
 
 			
-			if(XX<128) // Sprite/Multiplex message
+			if(XX<128) // 28 sprites/multiplex message
 			{
 				for(i=0;i<9;++i)
 				{
 					SPRX[i]=X_OFFSET+i*16;
-					SPRY[i]=i*4+Y_OFFSET+yValues[XX];
+					SPRY[i]=i*4+Y_OFFSET+yValues[XX]+4*(i&1);
 				}
 
 				for(i=0;i<9;++i)
@@ -427,7 +424,7 @@ int main()
 				for(i=0;i<9;++i)
 				{
 					SPRX[i+18]=X_OFFSET+i*16;
-					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX];
+					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX]+4*(i&1);;
 				}   
 				
 				if(XX==127)
@@ -449,6 +446,7 @@ int main()
 					SPRX[i+9]=X_OFFSET+i*16;
 
 					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
+					
 				}            
 
 				for(i=0;i<9;++i)
@@ -456,6 +454,17 @@ int main()
 					SPRX[i+18]=X_OFFSET+i*16-(XX&15);
 					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX];
 				}  
+				
+				if(!(XX&15))
+				{
+					yellow_commodore_sprites();
+					// yellow=1;
+				}
+				else if((XX&15)==1)
+				{
+					commodore_sprites();
+					// yellow=0;
+				}
 				
 				if(XX==255)
 				{
@@ -468,13 +477,13 @@ int main()
 				
                 if((text_counter&3)==0)
                 {
-                    restore_text_row();
-                    print(TEXT1, 15,TEXT_POSITION+6,5);
+					restore_text_row();
+					print(TEXT1, 15,TEXT_POSITION+12,5);
                 }
                 else if((text_counter&3)==1)
                 {
-                   restore_text_row();
-                   print(TEXT2, 28,TEXT_POSITION+6,11);
+				   restore_text_row();
+				   print(TEXT2, 28,TEXT_POSITION+6,11);
                 }
                 else if((text_counter&3)==2)
                 {
@@ -487,17 +496,20 @@ int main()
                     // print(TEXT4, 17,120,8);
                 }
                 ++text_counter;
-				// if(text_counter>15)
-				// {
-					// POKE(SHAPE+1+30*8,0);
-          
-					// POKE(SHAPE+2+30*8,0);
-					// POKE(SHAPE+3+30*8,0);
-					// POKE(SHAPE+4+30*8,0);
-
-					// POKE(SHAPE+5+30*8,0);
-				// }
-                // text_counter%=4;
+			}
+			else
+			{
+                if((text_counter&3)==1)
+				{
+					if(!(XX&3))
+					{
+						color_text(15,TEXT_POSITION+12,7);
+					}
+					else if((XX&3)==1)
+					{
+						color_text(15,TEXT_POSITION+12,5);
+					}
+				}
 			}
 
 			
