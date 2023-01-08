@@ -66,7 +66,7 @@ extern unsigned short SPRITE_GFX;
 // Pre-calculated sinus values
 const char yValues[] = SINUS(2);
 
-const char yValue2[] = SINUS(2);
+const char yValues2[] = SINUS(4);
 
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
@@ -101,8 +101,9 @@ const char WRITTEN[15] = "WRITTEN IN C BY";
 
 // const char YEAR[14] =   "HAPPY NEW YEAR";
 
-const unsigned char STAR_0[4] = {0x00,0x10,0x10,0x00};
-const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
+const unsigned char STAR_0[8] = {0x00,0x10,0x10,0x10,0x10,0x10,0x10,0x00};
+const unsigned char STAR_1[8] = {0x10,0x28,0x38,0x7C,0x38,0x38,0x28,0x10};
+const unsigned char STAR_2[8] = {0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x00};
 // const star STAR_0[4] = {};
 
 #define X_OFFSET 22
@@ -119,8 +120,9 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 
 static unsigned char counter;
 static unsigned char j;
-static unsigned char h;
 static unsigned char sprite_text;
+static unsigned char restored_text_row[40];
+
 
 // static unsigned char restored_text_row[35];
 
@@ -134,29 +136,29 @@ void init_udg(void)
 	POKE(648,192);
 }
 
-void color_change(void)
-{
-    for(h=0;h<10;++h)
-    {
+// void color_change(void)
+// {
+    // for(h=0;h<10;++h)
+    // {
         
-        POKE(COLOR+6+h,3+(j&7));
-        POKE(COLOR+40+6+h,3+(j&7));
-    }
+        // POKE(COLOR+6+h,3+(j&7));
+        // POKE(COLOR+40+6+h,3+(j&7));
+    // }
 
-    for(h=0;h<6;++h)
-    {
+    // for(h=0;h<6;++h)
+    // {
         
-        POKE(COLOR+18+h,3+(j&7));
-        POKE(COLOR+40+18+h,3+(j&7));
-    }
+        // POKE(COLOR+18+h,3+(j&7));
+        // POKE(COLOR+40+18+h,3+(j&7));
+    // }
     
-    for(h=0;h<8;++h)
-    {
+    // for(h=0;h<8;++h)
+    // {
         
-        POKE(COLOR+26+h,3+(j&7));
-        POKE(COLOR+40+26+h,3+(j&7));
-    }  
-}
+        // POKE(COLOR+26+h,3+(j&7));
+        // POKE(COLOR+40+26+h,3+(j&7));
+    // }  
+// }
 
 
 void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
@@ -175,16 +177,18 @@ void print(const char *str, unsigned char len, unsigned short offset, unsigned c
 
 #define TEXT_POSITION 840
 
+
 void restore_text_row(void)
 {
     unsigned char i;
     
-    for(i=0;i<35;++i)
+    for(i=0;i<40;++i)
     {
-        POKE(SCREEN+TEXT_POSITION+i,32);
-        POKE(COLOR+TEXT_POSITION+i,1);
+        POKE(SCREEN+TEXT_POSITION+i,restored_text_row[i]);
+        POKE(COLOR+TEXT_POSITION+i,11);
     }
 }
+
 
 
 void commodore_sprites(void)
@@ -197,7 +201,7 @@ void commodore_sprites(void)
 		SPRF[i+9] = GFX_START_INDEX + COMMODORE_MESSAGE[i] - 'A' + 1;
 		sprite_text = 0;
 
-        SPRC[i+9] = 12;        
+        SPRC[i+9] = 11+(i&1);        
     } 
 	
 	for(i=0;i<9;++i)
@@ -270,6 +274,8 @@ void init_sprites(void)
 	message_sprites();
 }
 
+#define COMET_X 0
+#define COMET_Y 20
 
 #define SPRITE_Y_OFFSET 188
 /******************/
@@ -279,9 +285,8 @@ int main()
     unsigned char i;
     unsigned short k;
     // unsigned short star_loc;
-    
     unsigned char text_counter = 0;
-    
+	
     // unsigned char below_1;
 
     // Only use clrscr() before when the kernal is still active
@@ -346,68 +351,59 @@ int main()
         // POKE(COLOR+star_loc,1);
     // }
 
-    // for(i=0;i<35;++i)
-    // {
-        // restored_text_row[i]=PEEK(SCREEN+120+i);
-    // }
+    for(i=0;i<40;++i)
+    {
+		for(j=0;j<25;++j)
+		{
+			if((i+j)&1)
+			{
+				POKE(SCREEN+i+j*40,30); // small/big flashing star (top 2 rows)
+				POKE(COLOR+i+j*40,11+(i&1));
+			}
+		}
+    }
     
     print(WRITTEN, 15, 1000-40-15-1,1);
     
     print(AUTHOR, 15, 1000-15-1,3);
     
-    color_change();
+    // color_change();
     
-
+    for(i=0;i<40;++i)
+    {
+        restored_text_row[i]=PEEK(SCREEN+TEXT_POSITION+i);
+    }
+	
 	init_sprites();
     
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
-    // SPRF[i] = GFX_START_INDEX + 'H' - 'A' + 1;
-    
 
-   
-    
-
-    
-    
-    // for(i=19;i<NUMSPRITES;++i)
-    // {
-        // SPRF[i]= GFX_START_INDEX+63;
-
-        // SPRC[i] = 1;        
-    // }
-    
-    // Position snow flakes
     SPRY[NUMSPRITES-1]=220;
-    // SPRX[NUMSPRITES-3]=40;
-    // SPRY[NUMSPRITES-2]=220;
-    // SPRX[NUMSPRITES-4]=60;   
 
-    // SPRY[NUMSPRITES-5]=90;
-    // SPRY[NUMSPRITES-6]=60;  
-    // SPRY[NUMSPRITES-7]=140;
-    // SPRY[NUMSPRITES-8]=170;  
 
-                
-	// SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';
-	// SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
-	// SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
-	
-	// SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
-	// SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
-	// SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
-	// SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
-
-                
-    
     while(1) 
     {
         if (MULTIPLEX_DONE) 
 		{
             SPRX[NUMSPRITES-1]=XX;
-			SPRY[NUMSPRITES-1]=SPRITE_Y_OFFSET+yValue2[XX];
+			SPRY[NUMSPRITES-1]=SPRITE_Y_OFFSET+yValues[XX];
+            
+			// Animate small/big stars
+            if(!(XX&15))
+            {
+                ++j;
+                POKE(SHAPE+1+30*8,STAR_2[j&7]);
+          
+                POKE(SHAPE+2+30*8,STAR_0[j&7]);
+                POKE(SHAPE+3+30*8,STAR_1[j&7]);
+                POKE(SHAPE+4+30*8,STAR_0[j&7]);
 
-			if(XX<128)
+                POKE(SHAPE+5+30*8,STAR_2[j&7]);
+            }
+
+			
+			if(XX<128) // Sprite/Multiplex message
 			{
 				for(i=0;i<9;++i)
 				{
@@ -439,36 +435,26 @@ int main()
 					commodore_sprites();
 				}
 			}
-			else
+			else // Commodore message
 			{
-
-
 				for(i=0;i<9;++i)
 				{
 					SPRX[i]=X_OFFSET+i*16+(XX&15);
-					SPRY[i]=i*4+Y_OFFSET+yValues[XX];
+					SPRY[i]=i*4+Y_OFFSET+yValues2[XX];
 				}
 
 				for(i=0;i<9;++i)
 				{
 					
-					// if((flip)&&i>1)
-					// {
-						// SPRX[i+9]=X_OFFSET+i*16+8;
-					// }
-					// else
-					// {
-						SPRX[i+9]=X_OFFSET+i*16;
-					// }					
-					
-					// SPRX[i+9]=X_OFFSET+i*16;
-					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues[XX];
+					SPRX[i+9]=X_OFFSET+i*16;
+
+					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
 				}            
 
 				for(i=0;i<9;++i)
 				{
 					SPRX[i+18]=X_OFFSET+i*16-(XX&15);
-					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX];
+					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX];
 				}  
 				
 				if(XX==255)
@@ -480,19 +466,17 @@ int main()
             if(!(XX&63))
             {
 				
-
-				
-                if(text_counter==0)
+                if((text_counter&3)==0)
                 {
                     restore_text_row();
                     print(TEXT1, 15,TEXT_POSITION+6,5);
                 }
-                else if(text_counter==1)
+                else if((text_counter&3)==1)
                 {
                    restore_text_row();
                    print(TEXT2, 28,TEXT_POSITION+6,11);
                 }
-                else if(text_counter==2)
+                else if((text_counter&3)==2)
                 {
                     restore_text_row();
                     print(TEXT3, 29,TEXT_POSITION+6,12);
@@ -503,10 +487,20 @@ int main()
                     // print(TEXT4, 17,120,8);
                 }
                 ++text_counter;
-                text_counter%=4;
+				// if(text_counter>15)
+				// {
+					// POKE(SHAPE+1+30*8,0);
+          
+					// POKE(SHAPE+2+30*8,0);
+					// POKE(SHAPE+3+30*8,0);
+					// POKE(SHAPE+4+30*8,0);
+
+					// POKE(SHAPE+5+30*8,0);
+				// }
+                // text_counter%=4;
 			}
 
-
+			
             MULTIPLEX_DONE = 0;
             SPRUPDATEFLAG = 1;
 			
