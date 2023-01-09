@@ -64,9 +64,11 @@ extern unsigned short SPRITE_GFX;
 
 /******************/
 // Pre-calculated sinus values
-const char yValues[] = SINUS(2);
+const char yValues1[] = SINUS(1);
 
-const char yValues2[] = SINUS(4);
+const char yValues2[] = SINUS(2);
+
+const char yValues4[] = SINUS(4);
 
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
@@ -93,7 +95,7 @@ const unsigned char COLORS[NUMBER_OF_COLORS] = {2,3,4,5,6,7,8,9,10,11,12,13,14,1
 
 const char AUTHOR[15] = "FABRIZIO CARUSO";
 const char TEXT1[15] =  "LOGIC CODE IN C";
-const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
+const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER ";
 const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
 const char TEXT4[17] =  "FAST MODE ENABLED";
 
@@ -102,9 +104,9 @@ const char WRITTEN[15] = "WRITTEN IN C BY";
 // const char YEAR[14] =   "HAPPY NEW YEAR";
 
 const unsigned char STAR_3[8] = {0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00};
-const unsigned char STAR_2[8] = {0x00,0x00,0x00,0x10,0x38,0x00,0x00,0x00};
-const unsigned char STAR_1[8] = {0x00,0x10,0x10,0x10,0x7C,0x10,0x10,0x00};
-const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x38,0x28,0x10};
+const unsigned char STAR_2[8] = {0x00,0x00,0x00,0x10,0x38,0x10,0x00,0x00};
+const unsigned char STAR_1[8] = {0x00,0x10,0x10,0x10,0x7C,0x10,0x10,0x10};
+const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x7C,0x38,0x28};
 // const star STAR_0[4] = {};
 
 #define X_OFFSET 22
@@ -326,6 +328,9 @@ int main()
 	
     // unsigned char below_1;
 
+	unsigned char variation = 0;
+	
+
     // Only use clrscr() before when the kernal is still active
     // clrscr();  
     for(k=0;k<1000;++k)
@@ -377,23 +382,23 @@ int main()
         if (MULTIPLEX_DONE) 
 		{
             SPRX[NUMSPRITES-1]=XX+100;
-			SPRY[NUMSPRITES-1]=SPRITE_Y_OFFSET+yValues[XX];
+			SPRY[NUMSPRITES-1]=SPRITE_Y_OFFSET+yValues2[XX];
             
 			// Animate small/big stars
             if(!(XX&15))
             {
                 ++j;
-				POKE(SHAPE+0+30*8,STAR_3[j&7]);
+				k= SHAPE+30*8;
+				POKE(k,STAR_3[j&7]);
 
-                POKE(SHAPE+1+30*8,STAR_2[j&7]);
+                POKE(k+1,STAR_2[j&7]);
           
-                POKE(SHAPE+2+30*8,STAR_1[j&7]);
-                POKE(SHAPE+3+30*8,STAR_0[j&7]);
-                POKE(SHAPE+4+30*8,STAR_1[j&7]);
+                POKE(k+2,STAR_1[j&7]);
+                POKE(k+3,STAR_0[j&7]);
+                POKE(k+4,STAR_1[j&7]);
 
-                POKE(SHAPE+5+30*8,STAR_2[j&7]);
-				POKE(SHAPE+6+30*8,STAR_3[j&7]);
-				// POKE(SHAPE+7+30*8,STAR_3[j&7]);
+                POKE(k+5,STAR_2[j&7]);
+				POKE(k+6,STAR_3[j&7]);
 
 
 
@@ -405,7 +410,7 @@ int main()
 				for(i=0;i<9;++i)
 				{
 					SPRX[i]=X_OFFSET+i*16;
-					SPRY[i]=i*4+Y_OFFSET+yValues[XX]+4*(i&1);
+					SPRY[i]=i*4+Y_OFFSET+yValues2[XX]+4*(i&1);
 				}
 
 				for(i=0;i<9;++i)
@@ -418,13 +423,13 @@ int main()
 					{
 						SPRX[i+9]=X_OFFSET+i*16;
 					}
-					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues[XX];
+					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
 				}            
 
 				for(i=0;i<9;++i)
 				{
 					SPRX[i+18]=X_OFFSET+i*16;
-					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues[XX]+4*(i&1);;
+					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX]+4*(i&1);
 				}   
 				
 				if(XX==127)
@@ -434,26 +439,53 @@ int main()
 			}
 			else // Commodore message
 			{
-				for(i=0;i<9;++i)
+				switch(variation&1)
 				{
-					SPRX[i]=X_OFFSET+i*16+(XX&15);
-					SPRY[i]=i*4+Y_OFFSET+yValues2[XX];
+					case 0:
+						for(i=0;i<9;++i)
+						{
+							SPRX[i]=X_OFFSET+i*16+(XX&15);
+							SPRY[i]=i*4+Y_OFFSET+yValues4[XX];
+						}
+
+						for(i=0;i<9;++i)
+						{
+							
+							SPRX[i+9]=X_OFFSET+i*16;
+
+							SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues4[XX];
+							
+						}            
+
+						for(i=0;i<9;++i)
+						{
+							SPRX[i+18]=X_OFFSET+i*16-(XX&15);
+							SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues4[XX];
+						}  
+						break;
+					
+					default:
+						for(i=0;i<9;++i)
+						{
+							SPRX[i]=X_OFFSET+i*16+(XX&15);
+							SPRY[i]=i*4+Y_OFFSET;
+						}
+
+						for(i=0;i<9;++i)
+						{
+							
+							SPRX[i+9]=i*16+yValues1[XX];
+
+							SPRY[i+9]=i*4+Y_OFFSET+SEPARATION;
+							
+						}            
+
+						for(i=0;i<9;++i)
+						{
+							SPRX[i+18]=X_OFFSET+i*16-(XX&15);
+							SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION;
+						}  
 				}
-
-				for(i=0;i<9;++i)
-				{
-					
-					SPRX[i+9]=X_OFFSET+i*16;
-
-					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
-					
-				}            
-
-				for(i=0;i<9;++i)
-				{
-					SPRX[i+18]=X_OFFSET+i*16-(XX&15);
-					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX];
-				}  
 				
 				if(!(XX&15))
 				{
@@ -474,41 +506,58 @@ int main()
 
             if(!(XX&63))
             {
-				
-                if((text_counter&3)==0)
-                {
-					restore_text_row();
-					print(TEXT1, 15,TEXT_POSITION+12,5);
-                }
-                else if((text_counter&3)==1)
-                {
-				   restore_text_row();
-				   print(TEXT2, 28,TEXT_POSITION+6,11);
-                }
-                else if((text_counter&3)==2)
-                {
-                    restore_text_row();
-                    print(TEXT3, 29,TEXT_POSITION+6,12);
-                }
-                else
-                {
-                    restore_text_row();
-                    // print(TEXT4, 17,120,8);
-                }
+				switch (text_counter&3)
+				{
+					case 0:
+					
+						restore_text_row();
+						print(TEXT1, 15,TEXT_POSITION+12,5);
+						break;
+					
+					case 1:
+					
+					    restore_text_row();
+					    print(TEXT2, 29,TEXT_POSITION+6,10);
+					    break;
+					case 2:
+					{
+						restore_text_row();
+						print(TEXT3, 29,TEXT_POSITION+6,10);
+						break;
+					}
+					default:
+					{
+						restore_text_row();
+					}
+				}
                 ++text_counter;
 			}
 			else
 			{
-                if((text_counter&3)==1)
+				switch (text_counter&3)
 				{
-					if(!(XX&3))
-					{
-						color_text(15,TEXT_POSITION+12,7);
-					}
-					else if((XX&3)==1)
-					{
-						color_text(15,TEXT_POSITION+12,5);
-					}
+					case 1:
+					
+						if(!(XX&3))
+						{
+							color_text(15,TEXT_POSITION+12,7);
+						}
+						else if((XX&3)==1)
+						{
+							color_text(15,TEXT_POSITION+12,5);
+						}
+						break;
+					case 2:
+					case 3:
+						if(!(XX&7))
+						{
+							color_text(29,TEXT_POSITION+6,7);
+						}
+						else if((XX&3)==1)
+						{
+							color_text(29,TEXT_POSITION+6,4);
+						}
+						
 				}
 			}
 
@@ -517,6 +566,10 @@ int main()
             SPRUPDATEFLAG = 1;
 			
 			++XX;
+			if(XX==0)
+			{
+				++variation;
+			}
         }
     }
     return 0;
