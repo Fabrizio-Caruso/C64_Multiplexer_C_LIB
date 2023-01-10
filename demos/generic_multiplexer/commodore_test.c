@@ -545,7 +545,7 @@ int main()
 					case 1:
 					
 					    restore_text_row();
-					    print(TEXT2, 29,TEXT_POSITION+6,10);
+					    print(TEXT2, 29,TEXT_POSITION+6,4);
 					    break;
 					case 2:
 					{
@@ -576,14 +576,23 @@ int main()
 						}
 						break;
 					case 2:
+						if(!(XX&7))
+						{
+							color_text(29,TEXT_POSITION+6,7);
+						}
+						else if((XX&7)==1)
+						{
+							color_text(29,TEXT_POSITION+6,4);
+						}
+						break;
 					case 3:
 						if(!(XX&7))
 						{
 							color_text(29,TEXT_POSITION+6,7);
 						}
-						else if((XX&3)==1)
+						else if((XX&7)==1)
 						{
-							color_text(29,TEXT_POSITION+6,4);
+							color_text(29,TEXT_POSITION+6,10);
 						}
 						
 				}
