@@ -70,6 +70,8 @@ const char yValues2[] = SINUS(2);
 
 const char yValues4[] = SINUS(4);
 
+const char yValues8[] = SINUS(8);
+
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
         #define GFX_START 0x2800U
@@ -110,7 +112,9 @@ const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x7C,0x38,0x28};
 // const star STAR_0[4] = {};
 
 #define X_OFFSET 22
-#define Y_OFFSET 40
+#define Y_OFFSET 47
+
+#define SPRITE_Y_OFFSET ((Y_OFFSET)+148)
 
 #define SCREEN 0x0400
 #define COLOR  0xD800
@@ -118,8 +122,10 @@ const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x7C,0x38,0x28};
 
 #define SEPARATION 50   
 
-#define HAPPYNEWYEAR_POS (SCREEN+6)
 #define MOON_OFFSET (40*2+36)
+
+#define TEXT_POSITION 840
+
 
 static unsigned char counter;
 static unsigned char j;
@@ -193,7 +199,6 @@ void color_text(unsigned char len, unsigned short offset, unsigned char col)
 }
 
 
-#define TEXT_POSITION 840
 
 
 void restore_text_row(void)
@@ -272,7 +277,7 @@ void message_sprites(void)
 			sprite_text = 0;
 		}
 		
-        SPRC[i+9] =  COLORS[i%NUMBER_OF_COLORS];  ;        
+        SPRC[i+9] =  COLORS[(i+9)%NUMBER_OF_COLORS];  ;        
     }
 
 	for(i=0;i<9;++i)
@@ -311,10 +316,7 @@ void init_sprites(void)
 	message_sprites();
 }
 
-#define COMET_X 0
-#define COMET_Y 20
 
-#define SPRITE_Y_OFFSET 188
 /******************/
 int main()
 {    
@@ -391,57 +393,83 @@ int main()
 				k= SHAPE+30*8;
 				POKE(k,STAR_3[j&7]);
 
-                POKE(k+1,STAR_2[j&7]);
+                POKE(++k,STAR_2[j&7]);
           
-                POKE(k+2,STAR_1[j&7]);
-                POKE(k+3,STAR_0[j&7]);
-                POKE(k+4,STAR_1[j&7]);
+                POKE(++k,STAR_1[j&7]);
+                POKE(++k,STAR_0[j&7]);
+                POKE(++k,STAR_1[j&7]);
 
-                POKE(k+5,STAR_2[j&7]);
-				POKE(k+6,STAR_3[j&7]);
-
-
-
+                POKE(++k,STAR_2[j&7]);
+				POKE(++k,STAR_3[j&7]);
             }
-
 			
-			if(XX<128) // 28 sprites/multiplex message
+			if(!(variation&1)) // 28 sprites/multiplex message
 			{
-				for(i=0;i<9;++i)
-				{
-					SPRX[i]=X_OFFSET+i*16;
-					SPRY[i]=i*4+Y_OFFSET+yValues2[XX]+4*(i&1);
+                switch(variation&3)
+                {
+                    case 0:
+                        for(i=0;i<9;++i)
+                        {
+                            SPRX[i]=X_OFFSET+i*16;
+                            SPRY[i]=i*4+Y_OFFSET+yValues2[XX]+4*(i&1);
+                        }
+
+                        for(i=0;i<9;++i)
+                        {
+                            if((sprite_text)&&i>1)
+                            {
+                                SPRX[i+9]=X_OFFSET+i*16+8;
+                            }
+                            else
+                            {
+                                SPRX[i+9]=X_OFFSET+i*16;
+                            }
+                            SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
+                        }            
+
+                        for(i=0;i<9;++i)
+                        {
+                            SPRX[i+18]=X_OFFSET+i*16;
+                            SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX]+4*(i&1);
+                        }   
+                        break;
+                    default:
+                        for(i=0;i<9;++i)
+                        {
+                            SPRX[i]=i*16+yValues1[XX];;
+                            SPRY[i]=i*4+Y_OFFSET;
+                        }
+
+                        for(i=0;i<9;++i)
+                        {
+                            if((sprite_text)&&i>1)
+                            {
+                                SPRX[i+9]=i*16+8+yValues1[XX];
+                            }
+                            else
+                            {
+                                SPRX[i+9]=i*16+yValues1[XX];
+                            }
+                            SPRY[i+9]=i*4+Y_OFFSET+SEPARATION;
+                        }            
+
+                        for(i=0;i<9;++i)
+                        {
+                            SPRX[i+18]=i*16+yValues1[XX];;
+                            SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION;
+                        }   
+                        break;
 				}
-
-				for(i=0;i<9;++i)
-				{
-					if((sprite_text)&&i>1)
-					{
-						SPRX[i+9]=X_OFFSET+i*16+8;
-					}
-					else
-					{
-						SPRX[i+9]=X_OFFSET+i*16;
-					}
-					SPRY[i+9]=i*4+Y_OFFSET+SEPARATION+yValues2[XX];
-				}            
-
-				for(i=0;i<9;++i)
-				{
-					SPRX[i+18]=X_OFFSET+i*16;
-					SPRY[i+18]=i*4+Y_OFFSET+2*SEPARATION+yValues2[XX]+4*(i&1);
-				}   
-				
-				if(XX==127)
+				if(XX==255)
 				{
 					commodore_sprites();
 				}
 			}
 			else // Commodore message
 			{
-				switch(variation&1)
+				switch(variation&3)
 				{
-					case 0:
+					case 1:
 						for(i=0;i<9;++i)
 						{
 							SPRX[i]=X_OFFSET+i*16+(XX&15);
