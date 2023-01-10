@@ -285,6 +285,23 @@ void init_sprites(void)
 	message_sprites();
 }
 
+void color_screen(unsigned char color)
+{
+    unsigned char i;
+	unsigned char j;
+
+    for(i=0;i<40;++i)
+    {
+		for(j=0;j<25;++j)
+		{
+			if((i+j)&1)
+			{
+				POKE(COLOR+i+j*40,color+(i&1));
+			}
+		}
+    }
+}
+
 void fill_screen_with_even_stars(void)
 {
     unsigned char i;
@@ -403,7 +420,7 @@ int main()
                 POKE(++k,STAR_2[i]);
 				POKE(++k,STAR_3[i]);
 				
-				if(variation>3)
+				if((variation&7)>=4)
 				{
 				k= SHAPE+31*8;
 				i=(j+4)&7;
@@ -621,6 +638,28 @@ int main()
 			if(XX==0)
 			{
 				++variation;
+				if((variation&7)==4)
+				{
+					color_screen(14);
+					print_author();
+				}
+				else if(!(variation&7))
+				{
+					color_screen(11);
+					print_author();
+					k= SHAPE+31*8;
+					i=(j+4)&7;
+					POKE(k,0);
+
+					POKE(++k,0);
+			  
+					POKE(++k,0);
+					POKE(++k,0);
+					POKE(++k,0);
+
+					POKE(++k,0);
+					POKE(++k,0);
+				}
 			}
         }
     }
