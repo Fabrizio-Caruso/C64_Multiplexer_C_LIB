@@ -128,7 +128,7 @@ const unsigned char STAR_0[8] = {0x10,0x28,0x38,0x7C,0xFE,0x7C,0x38,0x28};
 
 
 static unsigned char counter;
-static unsigned char j;
+// static unsigned char j;
 static unsigned char sprite_text;
 static unsigned char restored_text_row[40];
 
@@ -144,30 +144,6 @@ void init_udg(void)
 	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
 	POKE(648,192);
 }
-
-// void color_change(void)
-// {
-    // for(h=0;h<10;++h)
-    // {
-        
-        // POKE(COLOR+6+h,3+(j&7));
-        // POKE(COLOR+40+6+h,3+(j&7));
-    // }
-
-    // for(h=0;h<6;++h)
-    // {
-        
-        // POKE(COLOR+18+h,3+(j&7));
-        // POKE(COLOR+40+18+h,3+(j&7));
-    // }
-    
-    // for(h=0;h<8;++h)
-    // {
-        
-        // POKE(COLOR+26+h,3+(j&7));
-        // POKE(COLOR+40+26+h,3+(j&7));
-    // }  
-// }
 
 
 void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
@@ -190,15 +166,9 @@ void color_text(unsigned char len, unsigned short offset, unsigned char col)
     
     for(k=COLOR+offset;k<COLOR+offset+len;++k)
     {
-        // if(str[k]!=' ')
-        // {
-            // POKE(SCREEN+offset+k,str[k]-'A'+1);
-            POKE(k,col);
-        // }
+		POKE(k,col);
     }
 }
-
-
 
 
 void restore_text_row(void)
@@ -262,7 +232,6 @@ void message_sprites(void)
 {
 	unsigned char i;
 	
-
     for(i=0;i<9;++i)
     {
 
@@ -316,12 +285,55 @@ void init_sprites(void)
 	message_sprites();
 }
 
+void fill_screen_with_even_stars(void)
+{
+    unsigned char i;
+	unsigned char j;
+
+    for(i=0;i<40;++i)
+    {
+		for(j=0;j<25;++j)
+		{
+			if((i+j)&1)
+			{
+				POKE(SCREEN+i+j*40,30); // small/big flashing star (top 2 rows)
+				POKE(COLOR+i+j*40,11+(i&1));
+			}
+		}
+    }
+}
+
+void fill_screen_with_odd_stars(void)
+{
+    unsigned char i;
+	unsigned char j;
+
+    for(i=0;i<40;++i)
+    {
+		for(j=0;j<25;++j)
+		{
+			if(!((i+j)&1))
+			{
+				POKE(SCREEN+i+j*40,31); // small/big flashing star (top 2 rows)
+				POKE(COLOR+i+j*40,11+(i&1));
+			}
+		}
+    }
+}
+
+
+void print_author(void)
+{
+    print(WRITTEN, 15, 1000-40-15,1);
+    print(AUTHOR, 15, 1000-15,3);
+}
 
 /******************/
 int main()
 {    
     unsigned char XX = 10;
     unsigned char i;
+	unsigned char j;
     unsigned short k;
 	// unsigned char aux;
     // unsigned short star_loc;
@@ -348,23 +360,11 @@ int main()
     
     POKE(0xd020, 0x00);
     POKE(0xd021, 0x00);    
+	
+	fill_screen_with_even_stars();
+	fill_screen_with_odd_stars();
     
-
-    for(i=0;i<40;++i)
-    {
-		for(j=0;j<25;++j)
-		{
-			if((i+j)&1)
-			{
-				POKE(SCREEN+i+j*40,30); // small/big flashing star (top 2 rows)
-				POKE(COLOR+i+j*40,11+(i&1));
-			}
-		}
-    }
-    
-    print(WRITTEN, 15, 1000-40-15-1,1);
-    
-    print(AUTHOR, 15, 1000-15-1,3);
+	print_author();
     
     // color_change();
     
@@ -390,17 +390,34 @@ int main()
             if(!(XX&15))
             {
                 ++j;
+				i=j&7;
 				k= SHAPE+30*8;
-				POKE(k,STAR_3[j&7]);
+				POKE(k,STAR_3[i]);
 
-                POKE(++k,STAR_2[j&7]);
+                POKE(++k,STAR_2[i]);
           
-                POKE(++k,STAR_1[j&7]);
-                POKE(++k,STAR_0[j&7]);
-                POKE(++k,STAR_1[j&7]);
+                POKE(++k,STAR_1[i]);
+                POKE(++k,STAR_0[i]);
+                POKE(++k,STAR_1[i]);
 
-                POKE(++k,STAR_2[j&7]);
-				POKE(++k,STAR_3[j&7]);
+                POKE(++k,STAR_2[i]);
+				POKE(++k,STAR_3[i]);
+				
+				if(variation>3)
+				{
+				k= SHAPE+31*8;
+				i=(j+4)&7;
+				POKE(k,STAR_3[i]);
+
+                POKE(++k,STAR_2[i]);
+          
+                POKE(++k,STAR_1[i]);
+                POKE(++k,STAR_0[i]);
+                POKE(++k,STAR_1[i]);
+
+                POKE(++k,STAR_2[i]);
+				POKE(++k,STAR_3[i]);
+				}
             }
 			
 			if(!(variation&1)) // 28 sprites/multiplex message
@@ -518,12 +535,10 @@ int main()
 				if(!(XX&15))
 				{
 					yellow_commodore_sprites();
-					// yellow=1;
 				}
 				else if((XX&15)==1)
 				{
 					commodore_sprites();
-					// yellow=0;
 				}
 				
 				if(XX==255)
