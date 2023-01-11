@@ -70,7 +70,7 @@ const char yValues2[] = SINUS(2);
 
 const char yValues4[] = SINUS(4);
 
-const char yValues8[] = SINUS(8);
+// const char yValues8[] = SINUS(8);
 
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
@@ -420,7 +420,7 @@ int main()
                 POKE(++k,STAR_2[i]);
 				POKE(++k,STAR_3[i]);
 				
-				if((variation&7)>=4)
+				if((variation&7)>=5)
 				{
 				k= SHAPE+31*8;
 				i=(j+4)&7;
@@ -638,7 +638,7 @@ int main()
 			if(XX==0)
 			{
 				++variation;
-				if((variation&7)==4)
+				if((variation&7)==3)
 				{
 					color_screen(14);
 					print_author();
