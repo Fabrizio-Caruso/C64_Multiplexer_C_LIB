@@ -48,13 +48,16 @@ extern unsigned char MULTIPLEX_DONE;
 #endif
 #define GFX_START_INDEX (GFX_START/0x40)
 
+#define NUMBER_OF_COLORS 12
+const unsigned char COLOR[NUMBER_OF_COLORS] = {2,3,4,5,7,9,10,11,12,13,14,15};
+
 int main()
 {    
 
     unsigned char i = 0;
     unsigned char j;
     #if defined(NO_INPUT)
-        unsigned short k;
+        // unsigned short k;
     #else
         unsigned char ch;
     #endif
@@ -62,11 +65,14 @@ int main()
     // POKE(0xd020, 0x00);
     // POKE(0xd021, 0x00);
     clrscr();
-    
+
+	
     #if !defined(NO_INPUT)
         gotoxy(1,1);cprintf("press a key to start");
         cgetc();
         clrscr();
+	#else
+		clrscr();
     #endif
         
     INITSPRITES();
@@ -80,34 +86,36 @@ int main()
     for(j=0;j<8;++j)
     {
         SPRX[j]= X_SPACING*((j&7)+X_OFFSET);
-        gotoxy(1,j); cprintf("SPRX: %02u",SPRX[j]);
+        // gotoxy(1,j); cprintf("SPRX: %02u",SPRX[j]);
         
         SPRY[j]= 0x60-j*6;
-        gotoxy(16,j); cprintf("SPRY: %02u",SPRY[j]);
+        // gotoxy(16,j); cprintf("SPRY: %02u",SPRY[j]);
         
         SPRF[j]= GFX_START_INDEX+j;
-        gotoxy(30,j); cprintf("SPRF: %02u",SPRF[j]);  
+        // gotoxy(30,j); cprintf("SPRF: %02u",SPRF[j]);  
 
-        SPRC[j]= j&0xFD;        
+        SPRC[j]= COLOR[j];        
     }
 
     for(j=0;j<8;++j)
     {
         SPRX[j+8]= X_SPACING*((j&7)+X_OFFSET);
-        gotoxy(1,j+8); cprintf("SPRX: %02u",SPRX[j+8]);
+        // gotoxy(1,j+8); cprintf("SPRX: %02u",SPRX[j+8]);
         
         SPRY[j+8]= 0xA0+j*6;
-        gotoxy(16,j+8); cprintf("SPRY: %02u",SPRY[j+8]);
+        // gotoxy(16,j+8); cprintf("SPRY: %02u",SPRY[j+8]);
         
         SPRF[j+8]= GFX_START_INDEX+0x08+j;
-        gotoxy(30,j+8); cprintf("SPRF: %02u",SPRF[j+8]);        
+        // gotoxy(30,j+8); cprintf("SPRF: %02u",SPRF[j+8]);   
+        
+		SPRC[j+8]= COLOR[j];        
     }    
     
     while(1) 
     {
         for(j=0;j<16;++j)
         {
-            SPRC[j]= SPRF[(j+1)&15];
+            // SPRC[j]= SPRF[COLOR[(j+1)&15]];
             SPRF[j]= SPRF[(j+1)&15];
         }  
         ++i;
@@ -118,7 +126,22 @@ int main()
             --SPRX[1];
             ++SPRX[9];           
         #else
-            for(k=0;k<7400;++k){};
+            --SPRX[0];
+            ++SPRX[1];
+            --SPRX[2];
+            ++SPRX[3];
+            --SPRX[4];
+            ++SPRX[5];
+            --SPRX[6];
+            ++SPRX[7]; 
+            --SPRX[8];
+            ++SPRX[9];
+            --SPRX[10];
+            ++SPRX[11];
+            --SPRX[12];
+            ++SPRX[13];
+            --SPRX[14];
+            ++SPRX[15]; 
         #endif
     }
     // Never fall here...

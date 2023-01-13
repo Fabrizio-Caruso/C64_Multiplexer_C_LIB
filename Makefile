@@ -290,25 +290,38 @@ raster_split:
 	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
 	--asm-define STANDARD_IRQ=1 \
+	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o     
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o     
  
+free_sprite:
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYCFG) \
+	--asm-define USE_KERNAL=1 \
+	--asm-define STANDARD_IRQ=1 \
+	--asm-define FREE_SPRITES=1 \
+	-DFREE_SPRITES=1 \
+	$(DEMOS_PATH)/raster_split/free_sprite_test.c \
+	$(RAS_SPLT_ASM_FILES) \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o  
+
 
 raster_split_no_input_c128:
 	$(CC65_PATH)$(MYCL65) $(MYC128CCFLAGS) $(MYC128CFG) \
 	--asm-define USE_KERNAL=1 \
 	--asm-define MAXSPR=16 \
-	-DNO_INPUT \
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o     
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o     
 
 
 raster_split_c128:
@@ -319,9 +332,9 @@ raster_split_c128:
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o 
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
 raster_split_tests: \
