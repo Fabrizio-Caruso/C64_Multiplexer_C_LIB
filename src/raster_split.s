@@ -196,119 +196,63 @@ IRQTOP:
 
     LDA SPRY
     STA VIC_SPR0_Y                     ; to the bottom to prevent
-    .IF FREE_SPRITES<7
     LDA SPRY+$01
     STA VIC_SPR1_Y                      ; weird effects when sprite
-    .ENDIF
-    .IF FREE_SPRITES<6    
     LDA SPRY+$02
-    .ENDIF
     STA VIC_SPR2_Y                      ; moves lower than what it
-    .IF FREE_SPRITES<5    
     LDA SPRY+$03
     STA VIC_SPR3_Y                      ; previously was
-    .ENDIF
-    .IF FREE_SPRITES<4
     LDA SPRY+$04
     STA VIC_SPR4_Y
-    .ENDIF
-    .IF FREE_SPRITES<3
     LDA SPRY+$05
     STA VIC_SPR5_Y
-    .ENDIF
-    .IF FREE_SPRITES<2
     LDA SPRY+$06
     STA VIC_SPR6_Y    
-    .ENDIF
-    ; .IF FREE_SPRITES<1
     LDA SPRY+$07
     STA VIC_SPR7_Y   
-    ;.ENDIF
     
     handle_x $0
-    .IF FREE_SPRITES<7
     handle_x $1
-    .ENDIF    
-    .IF FREE_SPRITES<6    
     handle_x $2
-    .ENDIF
-    .IF FREE_SPRITES<5    
     handle_x $3
-    .ENDIF
-    .IF FREE_SPRITES<4
     handle_x $4
-    .ENDIF
-    .IF FREE_SPRITES<3
     handle_x $5
-    .ENDIF
-    .IF FREE_SPRITES<2
     handle_x $6
-    .ENDIF
-    ;.IF FREE_SPRITES<1     
     handle_x $7
-    ;.ENDIF
 
     LDX SPRF                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
-    .IF FREE_SPRITES<7    
     LDX SPRF+$01
     STX SCREEN_RAM+$03F9              ; Set sprite frame pointer to actual sprite register
-    .ENDIF
-    .IF FREE_SPRITES<6    
     LDX SPRF+$02
     STX SCREEN_RAM+$03FA              ; Set sprite frame pointer to actual sprite register
-    .ENDIF
-    .IF FREE_SPRITES<5
     LDX SPRF+$03
-    .ENDIF
     STX SCREEN_RAM+$03FB              ; Set sprite frame pointer to actual sprite register
-    .IF FREE_SPRITES<4
     LDX SPRF+$04
     STX SCREEN_RAM+$03FC              ; Set sprite frame pointer to actual sprite register
-    .ENDIF
-    .IF FREE_SPRITES<3
     LDX SPRF+$05
     STX SCREEN_RAM+$03FD              ; Set sprite frame pointer to actual sprite register
-    .ENDIF
-    .IF FREE_SPRITES<2
     LDX SPRF+$06
     STX SCREEN_RAM+$03FE              ; Set sprite frame pointer to actual sprite register
-    .ENDIF
-    ;.IF FREE_SPRITES<1 
     LDX SPRF+$07
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
-    ;.ENDIF
     
     LDA SPRC
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
-    .IF FREE_SPRITES<7    
     LDA SPRC+$01    
     STA VIC_SPR1_COLOR
-    .ENDIF
-    .IF FREE_SPRITES<6
     LDA SPRC+$02
     STA VIC_SPR2_COLOR                ; Set sprite color to actual sprite color register
-    .ENDIF
-    .IF FREE_SPRITES<5    
     LDA SPRC+$03    
     STA VIC_SPR3_COLOR
-    .ENDIF
-    .IF FREE_SPRITES<4
     LDA SPRC+$04
     STA VIC_SPR4_COLOR                ; Set sprite color to actual sprite color register
-    .ENDIF
-    .IF FREE_SPRITES<3
     LDA SPRC+$05
     STA VIC_SPR5_COLOR
-    .ENDIF
-    .IF FREE_SPRITES<2
     LDA SPRC+$06
     STA VIC_SPR6_COLOR                ; Set sprite color to actual sprite color register    
-    .ENDIF
-    ;.IF FREE_SPRITES<1
     LDA SPRC+$07
     STA VIC_SPR7_COLOR
-    ;.ENDIF
     
     LDA #<IRQBOTTOM                          ; If we just displayed last sprite, load low byte of sort IRQ vector
     .IFDEF USE_KERNAL
@@ -360,8 +304,10 @@ IRQBOTTOM:
         STY BOTTOM_STORE_Y                     ; for kernal OFF only
     .ENDIF
 
+    .IF FREE_SPRITES<8    
     LDA SPRY+$08
     STA VIC_SPR0_Y                      ; weird effects when sprite
+	.ENDIF
     .IF FREE_SPRITES<7    
     LDA SPRY+$09
     STA VIC_SPR1_Y                      ; moves lower than what it
@@ -391,7 +337,9 @@ IRQBOTTOM:
     STA VIC_SPR7_Y                     ; to the bottom to prevent
     .ENDIF
     
+    .IF FREE_SPRITES<8    	
     handle_x $8
+	.ENDIF
     .IF FREE_SPRITES<7    
     handle_x $9
     .ENDIF
@@ -414,8 +362,10 @@ IRQBOTTOM:
     handle_x $F
     .ENDIF
 
+    .IF FREE_SPRITES<8    
     LDX SPRF+$08                         ; Physical sprite number x 1
     STX SCREEN_RAM+$03F8              ; Set sprite frame pointer to actual sprite register
+	.ENDIF
     .IF FREE_SPRITES<7    
     LDX SPRF+$09
     STX SCREEN_RAM+$03F9              ; Set sprite frame pointer to actual sprite register
@@ -444,10 +394,12 @@ IRQBOTTOM:
     LDX SPRF+$0F
     STX SCREEN_RAM+$03FF              ; Set sprite frame pointer to actual sprite register
     .ENDIF
-    
+
+    .IF FREE_SPRITES<8        
     LDA SPRC+$08 
     STA VIC_SPR0_COLOR                ; Set sprite color to actual sprite color register
-    .IF FREE_SPRITES<7    
+    .ENDIF
+	.IF FREE_SPRITES<7    
     LDA SPRC+$09    
     STA VIC_SPR1_COLOR
     .ENDIF
