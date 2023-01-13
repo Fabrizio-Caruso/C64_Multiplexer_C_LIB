@@ -99,7 +99,7 @@ int main()
         SPRC[j]= COLOR[j];        
     }
 
-    for(j=0;j<6;++j)
+    for(j=0;j<7;++j)
     {
 		ch=cgetc();
         SPRX[j+7+1]= X_SPACING*((j&7)+X_OFFSET);
@@ -118,25 +118,31 @@ int main()
     }
 
 	ch=cgetc();
-	SPRX[14] = X_SPACING*7+X_OFFSET;
-    SPRY[14]= 0xA0+7*6;	
-	SPRC[14]= COLOR[7];        
-	SPRF[14]= GFX_START_INDEX+0x07+7;
-	POKE(53280U,0U);
+	SPRX[7] = 100;
+	SPRY[7] = 128;
+	SPRC[7] = 0;
+	SPRF[7] = GFX_START_INDEX;
 
-	ch=cgetc();
-	SPRX[0] = X_SPACING*7+X_OFFSET;
-    SPRY[0]= 0x60-7*6;	
-	SPRC[0]= COLOR[7];        
-	SPRF[0]= GFX_START_INDEX+0x07+7;
-	POKE(53280U,1U);
+	// ch=cgetc();
+	// SPRX[14] = X_SPACING*7+X_OFFSET;
+    // SPRY[14]= 0xA0+7*6;	
+	// SPRC[14]= COLOR[7];        
+	// SPRF[14]= GFX_START_INDEX+0x07+7;
+	// POKE(53280U,0U);
+
+	// ch=cgetc();
+	// SPRX[0] = X_SPACING*7+X_OFFSET;
+    // SPRY[0]= 0x60-7*6;	
+	// SPRC[0]= COLOR[7];        
+	// SPRF[0]= GFX_START_INDEX+0x07+7;
+	// POKE(53280U,1U);
 	
-	ch=cgetc();
-	SPRX[14] = X_SPACING*7+X_OFFSET;
-    SPRY[14]= 0xA0+7*6;	
-	SPRC[14]= COLOR[7];        
-	SPRF[14]= GFX_START_INDEX+0x07+7;
-	POKE(53280U,0U);	
+	// ch=cgetc();
+	// SPRX[14] = X_SPACING*7+X_OFFSET;
+    // SPRY[14]= 0xA0+7*6;	
+	// SPRC[14]= COLOR[7];        
+	// SPRF[14]= GFX_START_INDEX+0x07+7;
+	// POKE(53280U,0U);	
 	
     while(1) 
     { 
@@ -146,7 +152,9 @@ int main()
             --SPRX[0];
             ++SPRX[8];
             --SPRX[1];
-            ++SPRX[9];           
+            ++SPRX[9]; 
+			++SPRX[7];
+			++SPRY[7];
         #else
             --SPRX[0];
             ++SPRX[1];
