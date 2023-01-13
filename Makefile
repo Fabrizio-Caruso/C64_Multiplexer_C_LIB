@@ -62,9 +62,9 @@ some_sprites:
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
 
 
 many_sprites: 
@@ -149,9 +149,9 @@ many_sprites_c128:
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o     
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o     
    
 
 many_sprites_tests: \
@@ -169,9 +169,9 @@ sin_scroller:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
 
 
 sin_scroller_multicolor:
@@ -181,9 +181,9 @@ sin_scroller_multicolor:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
 
     
 sin_scroller_expand_x:
@@ -193,9 +193,9 @@ sin_scroller_expand_x:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o    
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o    
 
 
 sin_scroller_multicolor_expand_x:
@@ -205,9 +205,9 @@ sin_scroller_multicolor_expand_x:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o 
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
 
     
 sin_scroller_expand_y:
@@ -217,9 +217,9 @@ sin_scroller_expand_y:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o   
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o   
 
 
 sin_scroller_music:
@@ -231,10 +231,10 @@ sin_scroller_music:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-	rm $(SID_PATH)/*.o        
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
+	rm -rf $(SID_PATH)/*.o        
 
 
 # -- SIN SCROLLER TESTS C128   
@@ -246,9 +246,9 @@ sin_scroller_c128:
 	$(GEN_MPLX_ASM_FILES) \
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
 
 
 sin_scroller_music_c128:
@@ -261,10 +261,10 @@ sin_scroller_music_c128:
 	$(SID_PATH)/sid_at_2400.s \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/$@.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(SID_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o   
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(SID_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o   
 
 
 sin_scroller_tests: \
@@ -277,10 +277,17 @@ sin_scroller_tests: \
 	sin_scroller_c128 \
 	sin_scroller_music_c128
 
+commodore_tests: \
+	commodore
+	
+many_flakes_tests: \
+	many_flakes
 
 generic_multiplexer_tests: \
 	many_sprites_tests \
-	sin_scroller_tests 
+	sin_scroller_tests \
+	commodore_tests \
+	many_flakes_tests
 
 
 ####################################################
@@ -384,10 +391,10 @@ many_sprites_debug:
 	$(DEMOS_PATH)/many_sprites.s \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/many_sprites_debug.prg
-	rm $(DEMOS_PATH)/many_sprites.s
-	rm $(DEMOS_PATH)/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
+	rm -rf $(DEMOS_PATH)/many_sprites.s
+	rm -rf $(DEMOS_PATH)/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
     
 
 many_sprites_c128_debug: 
@@ -399,9 +406,9 @@ many_sprites_c128_debug:
 	$(DEMOS_PATH)/generic_multiplexer/many_sprites_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/many_sprites_c128_debug.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o    
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o    
     
  
 sin_scroller_debug:
@@ -415,10 +422,10 @@ sin_scroller_debug:
 	$(DEMOS_PATH)/generic_multiplexer/sin_scroller_test.c \
 	$(GEN_MPLX_ASM_FILES) \
 	-o $(BUILD_PATH)/sin_scroller_debug.prg
-	rm $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o
-	rm $(SID_PATH)/*.o    
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o
+	rm -rf $(SID_PATH)/*.o    
 
 
 raster_split_debug:
@@ -430,9 +437,9 @@ raster_split_debug:
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
 	-o $(BUILD_PATH)/raster_split_debug.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o   
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o   
 
 
 raster_split_c128_debug:
@@ -444,9 +451,9 @@ raster_split_c128_debug:
 	$(DEMOS_PATH)/raster_split/raster_split_test.c \
 	$(RAS_SPLT_ASM_FILES) \
 	-o $(BUILD_PATH)/raster_split_c128_debug.prg
-	rm $(DEMOS_PATH)/raster_split/*.o
-	rm $(SOURCE_PATH)/*.o
-	rm $(GRAPHICS_PATH)/*.o 
+	rm -rf $(DEMOS_PATH)/raster_split/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
 debug: \
