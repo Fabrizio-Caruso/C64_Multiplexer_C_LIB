@@ -110,6 +110,35 @@ many_flakes:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
+many_flakes_2023: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
+	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	-DSPRITES_AT_2800 -DYEAR=2023 \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
+	$(SNOW_UDG_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
+
+many_flakes_2024: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
+	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
+	--asm-define FAST_MODE=1 \
+	--asm-define MUSIC_CODE=1 \
+	-DSPRITES_AT_2800 -DYEAR=2024 \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
+	$(SNOW_UDG_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
 # -m mapfile
 commodore: 
@@ -361,9 +390,9 @@ raster_split_basic:
 	-o $(BUILD_PATH)/raster_split_basic.prg
 
 
-# - Start: SYS49152 (try twice?)
+# - Start: SYS49152 (try twice) TODO: Why twice?
 # - Enable all sprites: POKE 53269,255  
-# - Sprite data in $2000 (Monitor: f 2000 203F ff)
+# - Sprite shape data in $2000 (Monitor: f 2000 203F ff)
 basic_tests: \
 	raster_split_basic
 

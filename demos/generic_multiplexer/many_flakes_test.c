@@ -167,6 +167,14 @@ void restore_text_row(void)
     }
 }
 
+#if !defined(YEAR_LOW)
+	#define YEAR_LOW '4'
+#endif
+
+#if !defined(YEAR_HIGH)
+	#define YEAR_HIGH '2'
+#endif
+
 /******************/
 int main()
 {    
@@ -358,8 +366,6 @@ int main()
 
     for(i=0;i<12;++i)
     {
-        // SPRF[i] = GFX_START_INDEX+1+i+21*(i>=(26));
-        // SPRF[i]= GFX_START_INDEX+i;
         SPRF[i] = GFX_START_INDEX + MESSAGE[i] - 'A' + 1;
 
         SPRC[i] = 2+i;        
@@ -370,7 +376,6 @@ int main()
     
     for(i=12;i<NUMSPRITES;++i)
     {
-        // SPRF[i] = GFX_START_INDEX+1+i+21*(i>=(26));
         SPRF[i]= GFX_START_INDEX+62+(i&1);
 
         SPRC[i] = 1;        
@@ -512,6 +517,7 @@ int main()
                 }
             }
             
+			
             // Animate small/big stars
             if(!(XX&31))
             {
@@ -564,8 +570,8 @@ int main()
                     
                     SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
                     SPRF[ 9]=GFX_START_INDEX + '0'; // 0
-                    SPRF[10]=GFX_START_INDEX + '2'; // 2
-                    SPRF[11]=GFX_START_INDEX + '3'; // 3
+                    SPRF[10]=GFX_START_INDEX + YEAR_HIGH; // 2
+                    SPRF[11]=GFX_START_INDEX + YEAR_LOW; // 3
                     SPREX[ 8]=1;
                     SPREX[ 9]=1;
                     SPREX[10]=1;
