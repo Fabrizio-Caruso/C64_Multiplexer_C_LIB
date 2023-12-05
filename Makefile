@@ -10,6 +10,8 @@ BUILD_PATH ?= ./build
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
 SNOW_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg.s
+SNOW_UDG_ASM_FILES2=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg2.s
+
 COMMODORE_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/commodore_graphics_udg.s
 
 RAS_SPLT_ASM_FILES=$(SOURCE_PATH)/raster_split.s $(GRAPHICS_PATH)/graphics.s
@@ -110,14 +112,14 @@ many_flakes:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
-many_flakes_2023: 
+many_flakes2: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
 	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
-	-DSPRITES_AT_2800 -DYEAR=2023 \
+	-DSPRITES_AT_2800 \
 	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
-	$(SNOW_UDG_ASM_FILES) \
+	$(SNOW_UDG_ASM_FILES2) \
 	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
 	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
@@ -125,19 +127,6 @@ many_flakes_2023:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
-many_flakes_2024: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
-	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
-	--asm-define FAST_MODE=1 \
-	--asm-define MUSIC_CODE=1 \
-	-DSPRITES_AT_2800 -DYEAR=2024 \
-	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
-	$(SNOW_UDG_ASM_FILES) \
-	$(SID_PATH)/sid_Xmas.s \
-	-o $(BUILD_PATH)/$@.prg
-	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm -rf $(SOURCE_PATH)/*.o
-	rm -rf $(GRAPHICS_PATH)/*.o 
 
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
 # -m mapfile
