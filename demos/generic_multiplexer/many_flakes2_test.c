@@ -13,6 +13,8 @@ extern unsigned char SPRC[];
 extern unsigned char SPRF[];
 extern unsigned char SPREX[];
 
+extern unsigned char SPRM[];
+
 extern unsigned char NUMSPRITES;
 extern unsigned char SPRUPDATEFLAG;
 extern unsigned char SPRIRQCOUNTER;
@@ -23,40 +25,84 @@ extern unsigned short SPRITE_GFX;
 #pragma zpsym ("MULTIPLEX_DONE")
 /******************/
 // Pre-calculated sinus values
-const char yValues[] = {
-    32, 35, 38, 41, 44, 47, 49, 52, 
-    54, 56, 58, 60, 61, 62, 63, 63, 
-    64, 63, 63, 62, 61, 60, 58, 56, 
-    54, 52, 49, 47, 44, 41, 38, 35, 
-    32, 28, 25, 22, 19, 16, 14, 11, 
-    9, 7, 5, 3, 2, 1, 0, 0, 
-    0, 0, 0, 1, 2, 3, 5, 7, 
-    9, 11, 14, 16, 19, 22, 25, 28,
-    32, 35, 38, 41, 44, 47, 49, 52, 
-    54, 56, 58, 60, 61, 62, 63, 63, 
-    64, 63, 63, 62, 61, 60, 58, 56, 
-    54, 52, 49, 47, 44, 41, 38, 35, 
-    32, 28, 25, 22, 19, 16, 14, 11, 
-    9, 7, 5, 3, 2, 1, 0, 0, 
-    0, 0, 0, 1, 2, 3, 5, 7, 
-    9, 11, 14, 16, 19, 22, 25, 28,
-    32, 35, 38, 41, 44, 47, 49, 52, 
-    54, 56, 58, 60, 61, 62, 63, 63, 
-    64, 63, 63, 62, 61, 60, 58, 56, 
-    54, 52, 49, 47, 44, 41, 38, 35, 
-    32, 28, 25, 22, 19, 16, 14, 11, 
-    9, 7, 5, 3, 2, 1, 0, 0, 
-    0, 0, 0, 1, 2, 3, 5, 7, 
-    9, 11, 14, 16, 19, 22, 25, 28,
-    32, 35, 38, 41, 44, 47, 49, 52, 
-    54, 56, 58, 60, 61, 62, 63, 63, 
-    64, 63, 63, 62, 61, 60, 58, 56, 
-    54, 52, 49, 47, 44, 41, 38, 35, 
-    32, 28, 25, 22, 19, 16, 14, 11, 
-    9, 7, 5, 3, 2, 1, 0, 0, 
-    0, 0, 0, 1, 2, 3, 5, 7, 
-    9, 11, 14, 16, 19, 22, 25, 28
-};
+// const char yValues[] = {
+    // 32, 35, 38, 41, 44, 47, 49, 52, 
+    // 54, 56, 58, 60, 61, 62, 63, 63, 
+    // 64, 63, 63, 62, 61, 60, 58, 56, 
+    // 54, 52, 49, 47, 44, 41, 38, 35, 
+    // 32, 28, 25, 22, 19, 16, 14, 11, 
+    // 9, 7, 5, 3, 2, 1, 0, 0, 
+    // 0, 0, 0, 1, 2, 3, 5, 7, 
+    // 9, 11, 14, 16, 19, 22, 25, 28,
+    // 32, 35, 38, 41, 44, 47, 49, 52, 
+    // 54, 56, 58, 60, 61, 62, 63, 63, 
+    // 64, 63, 63, 62, 61, 60, 58, 56, 
+    // 54, 52, 49, 47, 44, 41, 38, 35, 
+    // 32, 28, 25, 22, 19, 16, 14, 11, 
+    // 9, 7, 5, 3, 2, 1, 0, 0, 
+    // 0, 0, 0, 1, 2, 3, 5, 7, 
+    // 9, 11, 14, 16, 19, 22, 25, 28,
+    // 32, 35, 38, 41, 44, 47, 49, 52, 
+    // 54, 56, 58, 60, 61, 62, 63, 63, 
+    // 64, 63, 63, 62, 61, 60, 58, 56, 
+    // 54, 52, 49, 47, 44, 41, 38, 35, 
+    // 32, 28, 25, 22, 19, 16, 14, 11, 
+    // 9, 7, 5, 3, 2, 1, 0, 0, 
+    // 0, 0, 0, 1, 2, 3, 5, 7, 
+    // 9, 11, 14, 16, 19, 22, 25, 28,
+    // 32, 35, 38, 41, 44, 47, 49, 52, 
+    // 54, 56, 58, 60, 61, 62, 63, 63, 
+    // 64, 63, 63, 62, 61, 60, 58, 56, 
+    // 54, 52, 49, 47, 44, 41, 38, 35, 
+    // 32, 28, 25, 22, 19, 16, 14, 11, 
+    // 9, 7, 5, 3, 2, 1, 0, 0, 
+    // 0, 0, 0, 1, 2, 3, 5, 7, 
+    // 9, 11, 14, 16, 19, 22, 25, 28
+// };
+
+#define SINUS(F) \
+{ \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+}
+
+// Pre-calculated sinus values
+const char yValues[] = SINUS(1);
+
+const char xValues[] = SINUS(2);
+
+// const char yValues4[] = SINUS(4);
+
 
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
@@ -270,6 +316,11 @@ int main()
         restored_text_row[i]=PEEK(SCREEN+120+i);
     }
     
+	for(k=COLOR+160;k<COLOR+960;++k)
+	{
+		POKE(k,1);
+	}
+	
     print(WRITTEN, 15, 1000-40-15-1,1);
     
     print(AUTHOR, 15, 1000-15-1,3);
@@ -371,8 +422,7 @@ int main()
         SPRC[i] = 2+i;        
     }    
     
-
-    
+   
     
     for(i=12;i<NUMSPRITES;++i)
     {
@@ -381,6 +431,22 @@ int main()
         SPRC[i] = 1;        
     }
     
+	// hot air balloon
+	SPRF[NUMSPRITES-2] = GFX_START_INDEX + '9' + 1;
+	SPRF[NUMSPRITES-4] = GFX_START_INDEX + '9' + 1;
+	
+	// commodore logo
+	SPRF[NUMSPRITES-3] = GFX_START_INDEX + '9' + 2;
+	SPRF[NUMSPRITES-1] = GFX_START_INDEX + '9' + 2;
+		
+	
+	SPRC[NUMSPRITES-2] = 3;
+
+	SPRC[NUMSPRITES-4] = 2;
+
+	SPRC[NUMSPRITES-1] = 4;
+	SPRC[NUMSPRITES-3] = 5;
+	
     // Position snow flakes
     SPRX[NUMSPRITES-1]=120;
     SPRX[NUMSPRITES-3]=40;
@@ -392,14 +458,29 @@ int main()
     SPRY[NUMSPRITES-7]=140;
     SPRY[NUMSPRITES-8]=170;  
     
+	for(i=0;i<NUMSPRITES-8;++i)
+	{
+		SPRM[i]=1;
+	}
+	for(i=NUMSPRITES-8;i<NUMSPRITES;++i)
+	{
+		SPRM[i]=0;
+	}
+	POKE(0xD025,2);
+	POKE(0xD026,3);
+	
+	
     while(1) 
     {
         if (MULTIPLEX_DONE) {
             SPRY[NUMSPRITES-1]=XX;
             SPRY[NUMSPRITES-2]=255-XX;
+			SPRX[NUMSPRITES-2] = 100-10+xValues[XX2];
+
 
             SPRY[NUMSPRITES-3]=XX2;
             SPRY[NUMSPRITES-4]=255-XX2;
+			SPRX[NUMSPRITES-4] = 60-10+xValues[XX2+20];
             
             SPRX[NUMSPRITES-5]=XX2;
             SPRX[NUMSPRITES-6]=255-XX2;
@@ -455,13 +536,13 @@ int main()
                     comet_pos = comet_x+40U*comet_y;
 
                     POKE(SCREEN+old_comet_pos,below);
-                    POKE(COLOR+old_comet_pos,1);
+                    // POKE(COLOR+old_comet_pos,1);
 
                     below = PEEK(SCREEN+comet_pos);
                     if(!comet_counter)
                     {
                         POKE(SCREEN+comet_pos,33);
-                        POKE(COLOR+comet_pos,1);
+                        // POKE(COLOR+comet_pos,1);
                     } 
                 }
             }
@@ -488,13 +569,13 @@ int main()
                     comet2_pos = comet2_x+40U*comet2_y;
 
                     POKE(SCREEN+old_comet2_pos,below);
-                    POKE(COLOR+old_comet2_pos,1);
+                    // POKE(COLOR+old_comet2_pos,1);
 
                     below = PEEK(SCREEN+comet2_pos);
                     if(!comet2_counter)
                     {
                         POKE(SCREEN+comet2_pos,33);
-                        POKE(COLOR+comet2_pos,1);
+                        // POKE(COLOR+comet2_pos,1);
                     } 
                 }
             }
@@ -524,7 +605,9 @@ int main()
                 ++j;
                 for(i=0;i<12;++i)
                 {
-                    SPRC[i] = 2+((XX+i+j)&7);        
+                    SPRC[i] = 5+((XX+i+j)&7);        
+					// POKE(0xD025,2);
+					// POKE(0xD026,);
                 }
                 POKE(SHAPE+3,0x28+16*(j&1));
                 POKE(SHAPE+3+27*8,8*(j&1));

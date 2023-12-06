@@ -117,8 +117,9 @@ many_flakes2:
 	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
 	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
+	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
-	$(DEMOS_PATH)/generic_multiplexer/many_flakes_test.c \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes2_test.c \
 	$(SNOW_UDG_ASM_FILES2) \
 	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
