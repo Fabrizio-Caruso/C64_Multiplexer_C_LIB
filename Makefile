@@ -115,7 +115,6 @@ many_flakes:
 many_flakes2: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
 	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
-	--asm-define FAST_MODE=1 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \

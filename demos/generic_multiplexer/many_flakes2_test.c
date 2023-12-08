@@ -221,6 +221,11 @@ void restore_text_row(void)
 	#define YEAR_HIGH '2'
 #endif
 
+#define HOT_AIR_BALLOON ('9' + 1)
+#define COMMODORE_LOGO ('9' + 2)
+
+#define BEFANA (- 'A' + 1 + 'Z' + 1)
+
 /******************/
 int main()
 {    
@@ -432,22 +437,22 @@ int main()
     }
     
 	// hot air balloon
-	SPRF[NUMSPRITES-2] = GFX_START_INDEX + '9' + 1;
-	SPRF[NUMSPRITES-4] = GFX_START_INDEX + '9' + 1;
+	SPRF[NUMSPRITES-2] = GFX_START_INDEX + HOT_AIR_BALLOON;
+	SPRF[NUMSPRITES-4] = GFX_START_INDEX + HOT_AIR_BALLOON;
 	
 	// commodore logo
-	SPRF[NUMSPRITES-3] = GFX_START_INDEX + '9' + 2;
-	SPRF[NUMSPRITES-1] = GFX_START_INDEX + '9' + 2;
+	SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
+	SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
 		
 	
 	SPRC[NUMSPRITES-2] = 3;
 
 	SPRC[NUMSPRITES-4] = 2;
 
-	SPRC[NUMSPRITES-1] = 4;
-	SPRC[NUMSPRITES-3] = 5;
+	SPRC[NUMSPRITES-7] = 4;
+	SPRC[NUMSPRITES-5] = 5;
 	
-    // Position snow flakes
+    // Position snow flakes, commodore logos and hot air balloons
     SPRX[NUMSPRITES-1]=120;
     SPRX[NUMSPRITES-3]=40;
     SPRX[NUMSPRITES-2]=100;
@@ -455,7 +460,7 @@ int main()
 
     SPRY[NUMSPRITES-5]=90;
     SPRY[NUMSPRITES-6]=60;  
-    SPRY[NUMSPRITES-7]=140;
+    SPRY[NUMSPRITES-7]=200;
     SPRY[NUMSPRITES-8]=170;  
     
 	for(i=0;i<NUMSPRITES-8;++i)
@@ -480,12 +485,12 @@ int main()
 
             SPRY[NUMSPRITES-3]=XX2;
             SPRY[NUMSPRITES-4]=255-XX2;
-			SPRX[NUMSPRITES-4] = 60-10+xValues[XX2+20];
+			SPRX[NUMSPRITES-4] = 60-10+xValues[XX2+20]; // TODO
             
-            SPRX[NUMSPRITES-5]=XX2;
+            SPRX[NUMSPRITES-5]=XX2; //SPRY[NUMSPRITES-5]=80+xValues[XX2];
             SPRX[NUMSPRITES-6]=255-XX2;
 
-            SPRX[NUMSPRITES-7]=XX;
+            SPRX[NUMSPRITES-7]=XX; //SPRY[NUMSPRITES-7]=130+xValues[XX2];
             SPRX[NUMSPRITES-8]=255-XX;
 
             for(i=0;i<5;++i)
@@ -497,7 +502,7 @@ int main()
             {
                 for(i=0;i<3;++i)
                 {
-                    SPRX[i+5]=X_OFFSET+i*22;
+                    SPRX[i+5]=X_OFFSET+i*22; // TODO: do we need this on all cycles?
                     SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
                 }    
             }
@@ -505,12 +510,14 @@ int main()
             {
                 for(i=0;i<3;++i)
                 {
-                    SPRY[i+5]=255;
+                    SPRY[5]=55; //255;
+					SPRX[5]=XX;
+					SPRF[5]=GFX_START_INDEX + BEFANA+(XX&3);
                 }
             }
             for(i=0;i<4;++i)
             {
-                SPRX[i+8]=X_OFFSET+i*(22+4-4*flip);
+                SPRX[i+8]=X_OFFSET+i*(22+4-4*flip); // TODO: do we need this on all cycles?
                 SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
@@ -603,7 +610,22 @@ int main()
             if(!(XX&31))
             {
                 ++j;
-                for(i=0;i<12;++i)
+                for(i=0;i<5;++i)
+                {
+                    SPRC[i] = 5+((XX+i+j)&7);        
+					// POKE(0xD025,2);
+					// POKE(0xD026,);
+                }
+				if(flip)
+				{
+					for(i=5;i<8;++i)
+					{
+						SPRC[i] = 5+((XX+i+j)&7);        
+						// POKE(0xD025,2);
+						// POKE(0xD026,);
+					}
+				}
+				for(i=8;i<12;++i)
                 {
                     SPRC[i] = 5+((XX+i+j)&7);        
 					// POKE(0xD025,2);
@@ -647,9 +669,14 @@ int main()
                     
                 if(flip)
                 {
-                    SPRF[ 5]=GFX_START_INDEX + 32;
+                    // SPRF[ 5]=GFX_START_INDEX + 32;
                     SPRF[ 6]=GFX_START_INDEX + 32;
                     SPRF[ 7]=GFX_START_INDEX + 32;
+					SPRY[ 5]=40;
+					SPRF[ 5]=GFX_START_INDEX + BEFANA;
+					SPRC[ 5]=12;
+                    // SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'Z' + 2;
+                    // SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'Z' + 3;
                     
                     SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
                     SPRF[ 9]=GFX_START_INDEX + '0'; // 0
@@ -663,7 +690,9 @@ int main()
                 }
                 else
                 {
+					SPRY[ 5] = 255;
                     SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';
+					
                     SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
                     SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
                     
