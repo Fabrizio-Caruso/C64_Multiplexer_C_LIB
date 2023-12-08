@@ -249,8 +249,17 @@ int main()
     unsigned comet2_counter = 0;
     unsigned short old_comet2_pos;
     
+	
+    unsigned char comet3_x = COMET_X+4;
+    unsigned char comet3_y = COMET_Y-3;
+    unsigned short comet3_pos;
+    unsigned comet3_counter = 0;
+    unsigned short old_comet3_pos;
+	
     unsigned char below;
     unsigned char text_counter = 0;
+	
+	unsigned char XB;
     
     // unsigned char below_1;
 
@@ -474,6 +483,15 @@ int main()
 	POKE(0xD025,2);
 	POKE(0xD026,3);
 	
+	for(i=0;i<5;++i)
+	{
+		SPRX[i]=X_OFFSET+i*22;
+	}
+
+	for(i=0;i<4;++i)
+	{
+		SPRX[i+8]=X_OFFSET+i*(22+4-4*flip);
+	}  
 	
     while(1) 
     {
@@ -495,7 +513,6 @@ int main()
 
             for(i=0;i<5;++i)
             {
-                SPRX[i]=X_OFFSET+i*22;
                 SPRY[i]=i*8+Y_OFFSET+yValues[XX];
             }
             if(flip)
@@ -508,16 +525,20 @@ int main()
             }
             else
             {
-                for(i=0;i<3;++i)
-                {
-                    SPRY[5]=55; //255;
-					SPRX[5]=XX;
-					SPRF[5]=GFX_START_INDEX + BEFANA+(XX&3);
-                }
+                // for(i=0;i<3;++i)
+                // {
+					if(XX&1)
+					{
+						++XB;
+						SPRY[5]=55; //255;
+						SPRX[5]=XB;
+						SPRF[5]=GFX_START_INDEX + BEFANA+(XB&3);
+					}
+                // }
             }
+
             for(i=0;i<4;++i)
             {
-                SPRX[i+8]=X_OFFSET+i*(22+4-4*flip); // TODO: do we need this on all cycles?
                 SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
             }            
 
@@ -569,22 +590,56 @@ int main()
                     ++comet2_x;
                     if((comet2_x>36)||(comet2_y<4))
                     {
-                        comet2_x = COMET_X+(rand()&31);
+						do
+						{
+							comet2_x = COMET_X+(rand()&31);
+						}
+						while(comet2_x==comet_x);
                         comet2_y = COMET_Y;
                         comet2_counter = rand()&63;
                     }
                     comet2_pos = comet2_x+40U*comet2_y;
 
                     POKE(SCREEN+old_comet2_pos,below);
-                    // POKE(COLOR+old_comet2_pos,1);
 
                     below = PEEK(SCREEN+comet2_pos);
                     if(!comet2_counter)
                     {
                         POKE(SCREEN+comet2_pos,33);
-                        // POKE(COLOR+comet2_pos,1);
                     } 
                 }
+				
+                if(comet3_counter)
+                {
+                    --comet3_counter;
+                }
+                if(!comet3_counter)
+                {
+
+                    old_comet3_pos = comet3_x+40U*comet3_y;
+
+                    --comet3_y;
+                    ++comet3_x;
+                    if((comet3_x>36)||(comet3_y<4))
+                    {
+						do
+						{
+							comet3_x = COMET_X+(rand()&31);
+						}
+						while((comet3_x==comet2_x) || (comet3_x==comet_x));
+                        comet3_y = COMET_Y;
+                        comet3_counter = rand()&63;
+                    }
+                    comet3_pos = comet3_x+40U*comet3_y;
+
+                    POKE(SCREEN+old_comet3_pos,below);
+
+                    below = PEEK(SCREEN+comet3_pos);
+                    if(!comet3_counter)
+                    {
+                        POKE(SCREEN+comet3_pos,33);
+                    } 
+                }				
             }
 
 
@@ -675,6 +730,7 @@ int main()
 					SPRY[ 5]=40;
 					SPRF[ 5]=GFX_START_INDEX + BEFANA;
 					SPRC[ 5]=12;
+					XB = 20;
                     // SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'Z' + 2;
                     // SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'Z' + 3;
                     
