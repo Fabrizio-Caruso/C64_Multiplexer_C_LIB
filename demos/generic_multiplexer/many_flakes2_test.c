@@ -96,10 +96,49 @@ extern unsigned short SPRITE_GFX;
     9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
 }
 
+
+#define SHIFTED_SINUS(F) \
+{ \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+}
+
 // Pre-calculated sinus values
 const char yValues[] = SINUS(1);
 
 const char xValues[] = SINUS(2);
+
+const char shifted_xValues[] = SHIFTED_SINUS(2);
 
 // const char yValues4[] = SINUS(4);
 
@@ -121,7 +160,7 @@ const char MESSAGE[12] = "HAPPYNEWYEAR";
 const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 const char AUTHOR[15] = "FABRIZIO CARUSO";
-const char TEXT1[15] =  "LOGIC CODE IN C";
+const char TEXT1[27] =  "ALL LOGIC CODE WRITTEN IN C";
 const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
 const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
 const char TEXT4[17] =  "FAST MODE ENABLED";
@@ -135,7 +174,7 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 // const star STAR_0[4] = {};
 
 #define X_OFFSET 46
-#define Y_OFFSET 50
+#define Y_OFFSET 58
 
 #define SCREEN 0x0400
 #define COLOR  0xD800
@@ -224,11 +263,43 @@ void restore_text_row(void)
 #define HOT_AIR_BALLOON ('9' + 1)
 #define COMMODORE_LOGO ('9' + 2)
 
-#define BEFANA (- 'A' + 1 + 'Z' + 1)
+#define BEFANA_LEFT_TO_RIGHT (- 'A' + 1 + 'Z' + 1)
+#define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
+#define BEFANA BEFANA_RIGHT_TO_LEFT
 
-/******************/
-int main()
-{    
+#define SANTA (- 'A' + 1 + 'Z' + 5)
+
+#define REINDEER (- 'A' + 1 + 'Z' + 8)
+
+#define MULTICOLOR_1 0xD025
+#define MULTICOLOR_2 0xD026
+
+
+/*
+0	$00	black
+1	$01	white
+2	$02	red
+3	$03	cyan
+4	$04	purple
+5	$05	green
+6	$06	blue
+7	$07	yellow
+8	$08	orange
+9	$09	brown
+10	$0A	pink
+11	$0B	dark grey
+12	$0C	grey
+13	$0D	light green
+14	$0E	light blue
+15	$0F	light grey 
+
+*/
+#define RED        0x02
+#define CYAN       0x03
+#define YELLOW     0x07
+#define BROWN      0x09
+#define LIGHT_GREY 0x0F
+
     unsigned char XX = 1;
     unsigned char XX2 = 100;
     unsigned char i;
@@ -260,19 +331,14 @@ int main()
     unsigned char text_counter = 0;
 	
 	unsigned char XB;
-    
-    // unsigned char below_1;
 
-    // Only use clrscr() before when the kernal is still active
-    // clrscr();  
+void init_background(void)
+{
     for(k=0;k<1000;++k)
     {
         POKE(SCREEN+k,32);
         POKE(COLOR+k,0);
     }
-    
-    INITSPRITES();
-    INITRASTER();
     
     init_udg();
     
@@ -335,7 +401,7 @@ int main()
 		POKE(k,1);
 	}
 	
-    print(WRITTEN, 15, 1000-40-15-1,1);
+    // print(WRITTEN, 15, 1000-40-15-1,1);
     
     print(AUTHOR, 15, 1000-15-1,3);
     
@@ -422,21 +488,142 @@ int main()
             POKE(COLOR+MOON_OFFSET+i+40*j,1);
         }
     }
+	
+}
 
-    
+void handle_slow_comet(void)
+{
+	if(!(XX&3))
+	{
+		if(comet_counter)
+		{
+			--comet_counter;
+		}
+		if(!comet_counter)
+		{
+
+			old_comet_pos = comet_x+40U*comet_y;
+
+			--comet_y;
+			++comet_x;
+			if((comet_x>36)||(comet_y<4))
+			{
+				do
+				{
+					comet_x = COMET_X+(rand()&31);
+				}
+				while((comet_x==comet2_x)||(comet_x==comet3_x));
+				comet_y = COMET_Y;
+				comet_counter = rand()&31;
+			}
+			comet_pos = comet_x+40U*comet_y;
+
+			POKE(SCREEN+old_comet_pos,below);
+
+			below = PEEK(SCREEN+comet_pos);
+			if(!comet_counter)
+			{
+				POKE(SCREEN+comet_pos,33);
+			} 
+		}
+	}	
+}
+
+
+void handle_fast_comets(void)
+{
+	if(!(XX&1))
+	{
+		if(comet2_counter)
+		{
+			--comet2_counter;
+		}
+		if(!comet2_counter)
+		{
+
+			old_comet2_pos = comet2_x+40U*comet2_y;
+
+			--comet2_y;
+			++comet2_x;
+			if((comet2_x>36)||(comet2_y<4))
+			{
+				do
+				{
+					comet2_x = COMET_X+(rand()&31);
+				}
+				while((comet2_x==comet_x)||(comet2_x==comet3_x));
+				comet2_y = COMET_Y;
+				comet2_counter = rand()&63;
+			}
+			comet2_pos = comet2_x+40U*comet2_y;
+
+			POKE(SCREEN+old_comet2_pos,below);
+
+			below = PEEK(SCREEN+comet2_pos);
+			if(!comet2_counter)
+			{
+				POKE(SCREEN+comet2_pos,33);
+			} 
+		}
+		
+		if(comet3_counter)
+		{
+			--comet3_counter;
+		}
+		if(!comet3_counter)
+		{
+
+			old_comet3_pos = comet3_x+40U*comet3_y;
+
+			--comet3_y;
+			++comet3_x;
+			if((comet3_x>36)||(comet3_y<4))
+			{
+				do
+				{
+					comet3_x = COMET_X+(rand()&31);
+				}
+				while((comet3_x==comet2_x) || (comet3_x==comet_x));
+				comet3_y = COMET_Y;
+				comet3_counter = rand()&63;
+			}
+			comet3_pos = comet3_x+40U*comet3_y;
+
+			POKE(SCREEN+old_comet3_pos,below);
+
+			below = PEEK(SCREEN+comet3_pos);
+			if(!comet3_counter)
+			{
+				POKE(SCREEN+comet3_pos,33);
+			} 
+		}
+		
+		if(comet_flash)
+		{
+			POKE(SHAPE+33*8+1,0);
+			POKE(SHAPE+33*8,0);
+			comet_flash = 0;
+		}
+		else
+		{
+			POKE(SHAPE+33*8+1,3);
+			POKE(SHAPE+33*8,3);
+			comet_flash = 1;
+		}		
+	}
+	
+}
+
+
+void init_sprites(void)
+{
     NUMSPRITES = _NUMBER_OF_SPRITES_;
-
-    // SPRF[i] = GFX_START_INDEX + 'H' - 'A' + 1;
-    
 
     for(i=0;i<12;++i)
     {
         SPRF[i] = GFX_START_INDEX + MESSAGE[i] - 'A' + 1;
-
         SPRC[i] = 2+i;        
     }    
-    
-   
     
     for(i=12;i<NUMSPRITES;++i)
     {
@@ -455,9 +642,7 @@ int main()
 		
 	
 	SPRC[NUMSPRITES-2] = 3;
-
 	SPRC[NUMSPRITES-4] = 2;
-
 	SPRC[NUMSPRITES-7] = 4;
 	SPRC[NUMSPRITES-5] = 5;
 	
@@ -480,8 +665,8 @@ int main()
 	{
 		SPRM[i]=0;
 	}
-	POKE(0xD025,2);
-	POKE(0xD026,3);
+	POKE(MULTICOLOR_1,2);
+	POKE(MULTICOLOR_2,3);
 	
 	for(i=0;i<5;++i)
 	{
@@ -492,278 +677,211 @@ int main()
 	{
 		SPRX[i+8]=X_OFFSET+i*(22+4-4*flip);
 	}  
+
+	for(i=0;i<3;++i)
+	{
+		SPRX[i+5]=X_OFFSET+i*22; // TODO: do we need this on all cycles?
+		// SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
+	} 
+}
+
+
+void handle_stars_and_colors(void)
+{
+	if(!(XX&31))
+	{
+		++j;
+		for(i=0;i<5;++i)
+		{
+			SPRC[i] = 5+((XX+i+j)&7);        
+		}
+		if(flip)
+		{
+			for(i=5;i<8;++i)
+			{
+				SPRC[i] = 5+((XX+i+j)&7);        
+			}
+		}
+		for(i=8;i<12;++i)
+		{
+			SPRC[i] = 5+((XX+i+j)&7);        
+		}
+		POKE(SHAPE+3,0x28+16*(j&1));
+		POKE(SHAPE+3+27*8,8*(j&1));
+		
+		color_change();
+		
+		POKE(SHAPE+2+30*8,STAR_0[j&3]);
+		POKE(SHAPE+3+30*8,STAR_1[j&3]);
+		POKE(SHAPE+4+30*8,STAR_0[j&3]);
+		
+		
+	}	
+}
+
+
+void handle_text(void)
+{
+	if(text_counter==0)
+	{
+		restore_text_row();
+		print(TEXT1, 27,120+6,5);
+	}
+	else if(text_counter==1)
+	{
+	   restore_text_row();
+	   print(TEXT2, 28,120+6,11);
+	}
+	else if(text_counter==2)
+	{
+		restore_text_row();
+		print(TEXT3, 29,120+6,12);
+	}
+	else
+	{
+		restore_text_row();
+	}
+	++text_counter;
+	text_counter%=4;
+}
+
+void handle_sprite_movement(void)
+{
+	SPRY[NUMSPRITES-1]=XX;
+	SPRY[NUMSPRITES-2]=255-XX;
+	SPRX[NUMSPRITES-2] = 100-10+xValues[XX2];
+
+
+	SPRY[NUMSPRITES-3]=XX2;
+	SPRY[NUMSPRITES-4]=255-XX2;
+	SPRX[NUMSPRITES-4] = 60-10+shifted_xValues[XX2];
+	
+	SPRX[NUMSPRITES-5]=XX2;
+	SPRX[NUMSPRITES-6]=255-XX2;
+
+	SPRX[NUMSPRITES-7]=XX;
+	SPRX[NUMSPRITES-8]=255-XX;
+
+	for(i=0;i<5;++i)
+	{
+		SPRY[i]=i*8+Y_OFFSET+yValues[XX];
+	}
+	
+	if(flip)
+	{
+		for(i=0;i<3;++i)
+		{
+			SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
+		}    
+	}
+	else
+	{
+
+		if(XX&1)
+		{
+			++XB;
+			SPRX[5]=XB;
+			SPRF[5]=GFX_START_INDEX + SANTA+(XB%3);
+			
+			SPRX[6]=XB+12;
+			SPRF[6]=GFX_START_INDEX + REINDEER+(XB%3);
+
+			SPRX[7]=162-XB;
+			SPRF[7]=GFX_START_INDEX + BEFANA+(XB&3);
+
+		}
+
+	}
+
+	for(i=0;i<4;++i)
+	{
+		SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
+	}  	
+}
+
+
+void handle_sprite_change(void)
+{
+	if(!(XX))
+	{
+		handle_text();
+			
+		if(flip)
+		{
+			SPRF[ 7]=GFX_START_INDEX + 32;
+			SPRY[ 5]=53;
+			SPRF[ 5]=GFX_START_INDEX + SANTA;
+			SPRY[ 6]=53;
+			SPRF[ 6]=GFX_START_INDEX + REINDEER;					
+			SPRY[ 7]=230;
+			SPRF[ 7]=GFX_START_INDEX + BEFANA;	
+			SPRC[ 5]=12;
+			XB = 20;
+			
+			SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
+			SPRF[ 9]=GFX_START_INDEX + '0'; // 0
+			SPRF[10]=GFX_START_INDEX + YEAR_HIGH; // 2
+			SPRF[11]=GFX_START_INDEX + YEAR_LOW; // 3
+			SPREX[ 8]=1;
+			SPREX[ 9]=1;
+			SPREX[10]=1;
+			SPREX[11]=1;                    
+			flip = 0;
+			SPRC[5]=RED;
+			SPRC[6]=YELLOW;
+			POKE(MULTICOLOR_1,BROWN);
+			POKE(MULTICOLOR_2,LIGHT_GREY);
+		}
+		else
+		{
+			SPRY[ 5] = 255;
+			SPRY[ 6] = 255;
+			SPRY[ 7] = 255;
+			SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';					
+			SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
+			SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
+			
+			SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
+			SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
+			SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
+			SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
+			SPREX[ 8]=0;
+			SPREX[ 9]=0;
+			SPREX[10]=0;
+			SPREX[11]=0; 
+			POKE(MULTICOLOR_1,RED);
+			POKE(MULTICOLOR_2,CYAN);
+			flip = 1;
+			for(i=0;i<3;++i)
+			{
+				SPRX[i+5]=X_OFFSET+i*22;
+			} 			
+		}
+	}	
+}
+
+/******************/
+int main()
+{        
+	init_background();
+    
+    INITSPRITES();
+    INITRASTER();	
+	
+	init_sprites();
 	
     while(1) 
     {
         if (MULTIPLEX_DONE) {
-            SPRY[NUMSPRITES-1]=XX;
-            SPRY[NUMSPRITES-2]=255-XX;
-			SPRX[NUMSPRITES-2] = 100-10+xValues[XX2];
+			handle_sprite_movement();
 
+			handle_slow_comet();
 
-            SPRY[NUMSPRITES-3]=XX2;
-            SPRY[NUMSPRITES-4]=255-XX2;
-			SPRX[NUMSPRITES-4] = 60-10+xValues[XX2+20]; // TODO
+			handle_fast_comets();
             
-            SPRX[NUMSPRITES-5]=XX2; //SPRY[NUMSPRITES-5]=80+xValues[XX2];
-            SPRX[NUMSPRITES-6]=255-XX2;
-
-            SPRX[NUMSPRITES-7]=XX; //SPRY[NUMSPRITES-7]=130+xValues[XX2];
-            SPRX[NUMSPRITES-8]=255-XX;
-
-            for(i=0;i<5;++i)
-            {
-                SPRY[i]=i*8+Y_OFFSET+yValues[XX];
-            }
-            if(flip)
-            {
-                for(i=0;i<3;++i)
-                {
-                    SPRX[i+5]=X_OFFSET+i*22; // TODO: do we need this on all cycles?
-                    SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
-                }    
-            }
-            else
-            {
-                // for(i=0;i<3;++i)
-                // {
-					if(XX&1)
-					{
-						++XB;
-						SPRY[5]=55; //255;
-						SPRX[5]=XB;
-						SPRF[5]=GFX_START_INDEX + BEFANA+(XB&3);
-					}
-                // }
-            }
-
-            for(i=0;i<4;++i)
-            {
-                SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
-            }            
-
-            if(!(XX&3))
-            {
-                if(comet_counter)
-                {
-                    --comet_counter;
-                }
-                if(!comet_counter)
-                {
-
-                    old_comet_pos = comet_x+40U*comet_y;
-
-                    --comet_y;
-                    ++comet_x;
-                    if((comet_x>36)||(comet_y<4))
-                    {
-                        comet_x = COMET_X+(rand()&31);
-                        comet_y = COMET_Y;
-                        comet_counter = rand()&31;
-                    }
-                    comet_pos = comet_x+40U*comet_y;
-
-                    POKE(SCREEN+old_comet_pos,below);
-                    // POKE(COLOR+old_comet_pos,1);
-
-                    below = PEEK(SCREEN+comet_pos);
-                    if(!comet_counter)
-                    {
-                        POKE(SCREEN+comet_pos,33);
-                        // POKE(COLOR+comet_pos,1);
-                    } 
-                }
-            }
-
-            if(!(XX&1))
-            {
-                if(comet2_counter)
-                {
-                    --comet2_counter;
-                }
-                if(!comet2_counter)
-                {
-
-                    old_comet2_pos = comet2_x+40U*comet2_y;
-
-                    --comet2_y;
-                    ++comet2_x;
-                    if((comet2_x>36)||(comet2_y<4))
-                    {
-						do
-						{
-							comet2_x = COMET_X+(rand()&31);
-						}
-						while(comet2_x==comet_x);
-                        comet2_y = COMET_Y;
-                        comet2_counter = rand()&63;
-                    }
-                    comet2_pos = comet2_x+40U*comet2_y;
-
-                    POKE(SCREEN+old_comet2_pos,below);
-
-                    below = PEEK(SCREEN+comet2_pos);
-                    if(!comet2_counter)
-                    {
-                        POKE(SCREEN+comet2_pos,33);
-                    } 
-                }
-				
-                if(comet3_counter)
-                {
-                    --comet3_counter;
-                }
-                if(!comet3_counter)
-                {
-
-                    old_comet3_pos = comet3_x+40U*comet3_y;
-
-                    --comet3_y;
-                    ++comet3_x;
-                    if((comet3_x>36)||(comet3_y<4))
-                    {
-						do
-						{
-							comet3_x = COMET_X+(rand()&31);
-						}
-						while((comet3_x==comet2_x) || (comet3_x==comet_x));
-                        comet3_y = COMET_Y;
-                        comet3_counter = rand()&63;
-                    }
-                    comet3_pos = comet3_x+40U*comet3_y;
-
-                    POKE(SCREEN+old_comet3_pos,below);
-
-                    below = PEEK(SCREEN+comet3_pos);
-                    if(!comet3_counter)
-                    {
-                        POKE(SCREEN+comet3_pos,33);
-                    } 
-                }				
-            }
-
-
-            // Flash comet
-            if(!(XX&1))
-            {
-                if(comet_flash)
-                {
-                    POKE(SHAPE+33*8+1,0);
-                    POKE(SHAPE+33*8,0);
-                    comet_flash = 0;
-                }
-                else
-                {
-                    POKE(SHAPE+33*8+1,3);
-                    POKE(SHAPE+33*8,3);
-                    comet_flash = 1;
-                }
-            }
-            
+			handle_stars_and_colors();
 			
-            // Animate small/big stars
-            if(!(XX&31))
-            {
-                ++j;
-                for(i=0;i<5;++i)
-                {
-                    SPRC[i] = 5+((XX+i+j)&7);        
-					// POKE(0xD025,2);
-					// POKE(0xD026,);
-                }
-				if(flip)
-				{
-					for(i=5;i<8;++i)
-					{
-						SPRC[i] = 5+((XX+i+j)&7);        
-						// POKE(0xD025,2);
-						// POKE(0xD026,);
-					}
-				}
-				for(i=8;i<12;++i)
-                {
-                    SPRC[i] = 5+((XX+i+j)&7);        
-					// POKE(0xD025,2);
-					// POKE(0xD026,);
-                }
-                POKE(SHAPE+3,0x28+16*(j&1));
-                POKE(SHAPE+3+27*8,8*(j&1));
-                
-                color_change();
-                
-                POKE(SHAPE+2+30*8,STAR_0[j&3]);
-                POKE(SHAPE+3+30*8,STAR_1[j&3]);
-                POKE(SHAPE+4+30*8,STAR_0[j&3]);
-                
-                
-            }
-            if(!(XX))
-            {
-                if(text_counter==0)
-                {
-                    restore_text_row();
-                    print(TEXT1, 15,120+6,5);
-                }
-                else if(text_counter==1)
-                {
-                   restore_text_row();
-                   print(TEXT2, 28,120+6,11);
-                }
-                else if(text_counter==2)
-                {
-                    restore_text_row();
-                    print(TEXT3, 29,120+6,12);
-                }
-                else
-                {
-                    restore_text_row();
-                    // print(TEXT4, 17,120,8);
-                }
-                ++text_counter;
-                text_counter%=4;
-                    
-                if(flip)
-                {
-                    // SPRF[ 5]=GFX_START_INDEX + 32;
-                    SPRF[ 6]=GFX_START_INDEX + 32;
-                    SPRF[ 7]=GFX_START_INDEX + 32;
-					SPRY[ 5]=40;
-					SPRF[ 5]=GFX_START_INDEX + BEFANA;
-					SPRC[ 5]=12;
-					XB = 20;
-                    // SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'Z' + 2;
-                    // SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'Z' + 3;
-                    
-                    SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
-                    SPRF[ 9]=GFX_START_INDEX + '0'; // 0
-                    SPRF[10]=GFX_START_INDEX + YEAR_HIGH; // 2
-                    SPRF[11]=GFX_START_INDEX + YEAR_LOW; // 3
-                    SPREX[ 8]=1;
-                    SPREX[ 9]=1;
-                    SPREX[10]=1;
-                    SPREX[11]=1;                    
-                    flip = 0;
-                }
-                else
-                {
-					SPRY[ 5] = 255;
-                    SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';
-					
-                    SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
-                    SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
-                    
-                    SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
-                    SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
-                    SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
-                    SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
-                    SPREX[ 8]=0;
-                    SPREX[ 9]=0;
-                    SPREX[10]=0;
-                    SPREX[11]=0; 
-                    flip = 1;
-                }
-            }
-
+			handle_sprite_change();
 
             ++XX;
             ++XX2;
