@@ -196,6 +196,8 @@ void restore_text_row(void)
 #define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
 #define BEFANA BEFANA_RIGHT_TO_LEFT
 
+#define PRESENT (- 'A' + 1 + 'Z' + 15)
+
 #define SANTA (- 'A' + 1 + 'Z' + 5)
 
 #define REINDEER (- 'A' + 1 + 'Z' + 8)
@@ -234,10 +236,14 @@ void restore_text_row(void)
 15	$0F	light grey 
 
 */
+#define WHITE      0x01
 #define RED        0x02
 #define CYAN       0x03
+#define PURPLE     0x04
+#define GREEN      0x05
 #define YELLOW     0x07
 #define BROWN      0x09
+#define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
 
     unsigned char XX = 1;
@@ -613,10 +619,16 @@ void init_happy_new_year_sprites(void)
 	SPRF[NUMSPRITES-2] = GFX_START_INDEX + HOT_AIR_BALLOON;
 	SPRF[NUMSPRITES-4] = GFX_START_INDEX + HOT_AIR_BALLOON;
 	
-	// commodore logo
+	// commodore logo or present
 	SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
 	SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
-		
+
+	// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
+	// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
+	// SPRM[NUMSPRITES-7] = 1;
+	// SPRM[NUMSPRITES-5] = 1;	
+
+	
 	
 	SPRC[NUMSPRITES-2] = 3;
 	SPRC[NUMSPRITES-4] = 2;
@@ -642,6 +654,10 @@ void init_happy_new_year_sprites(void)
 	{
 		SPRM[i]=0;
 	}
+	
+	// SPRM[NUMSPRITES-7] = 1;
+	// SPRM[NUMSPRITES-5] = 1;	
+	
 	POKE(MULTICOLOR_1,2);
 	POKE(MULTICOLOR_2,3);
 	
@@ -750,18 +766,26 @@ void handle_sprite_movement(void)
 	}
 	else
 	{
+		unsigned char xb_mod3 = (XB%3);
 
 		if(XX&1)
 		{
+			
 			++XB;
 			SPRX[5]=XB;
-			SPRF[5]=GFX_START_INDEX + SANTA+(XB%3);
+			SPRF[5]=GFX_START_INDEX + SANTA+xb_mod3;
 			
 			SPRX[6]=XB+12;
-			SPRF[6]=GFX_START_INDEX + REINDEER+(XB%3);
+			SPRF[6]=GFX_START_INDEX + REINDEER+xb_mod3;
 
 			SPRX[7]=162-XB;
 			SPRF[7]=GFX_START_INDEX + BEFANA+(XB&3);
+
+		}
+		if(!(XX&7))
+		{
+			SPRF[NUMSPRITES-5]=GFX_START_INDEX + PRESENT+xb_mod3;
+			SPRF[NUMSPRITES-7]=GFX_START_INDEX + PRESENT+xb_mod3;
 
 		}
 
@@ -801,6 +825,14 @@ void handle_sprite_change(void)
 			SPREX[10]=1;
 			SPREX[11]=1;                    
 			flip = 0;
+			
+			SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
+			SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
+			SPRM[NUMSPRITES-7] = 1;
+			SPRM[NUMSPRITES-5] = 1;	
+			SPRC[NUMSPRITES-7] = RED;
+			SPRC[NUMSPRITES-5] = LIGHT_BLUE;
+			
 			SPRC[5]=RED;
 			SPRC[6]=YELLOW;
 			POKE(MULTICOLOR_1,BROWN);
@@ -825,6 +857,16 @@ void handle_sprite_change(void)
 			SPREX[11]=0; 
 			POKE(MULTICOLOR_1,RED);
 			POKE(MULTICOLOR_2,CYAN);
+			
+			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
+			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
+
+			SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
+			SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
+			SPRM[NUMSPRITES-7] = 0;
+			SPRM[NUMSPRITES-5] = 0;	
+			SPRC[NUMSPRITES-7] = PURPLE;
+			SPRC[NUMSPRITES-5] = GREEN;
 			flip = 1;
 			for(i=0;i<3;++i)
 			{
