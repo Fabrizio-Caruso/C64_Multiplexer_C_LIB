@@ -25,77 +25,41 @@ extern unsigned short SPRITE_GFX;
 #pragma zpsym ("MULTIPLEX_DONE")
 /******************/
 // Pre-calculated sinus values
+#define ONE_SINUS(F) \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F
+
+#define ONE_SHIFTED_SINUS(F) \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F
+
 #define SINUS(F) \
 { \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+	ONE_SINUS(F), \
+	ONE_SINUS(F), \
+	ONE_SINUS(F), \
+	ONE_SINUS(F) \
 }
 
 
 #define SHIFTED_SINUS(F) \
 { \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
-    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
-    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
-    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
-    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
-    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
-    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
-    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+	ONE_SHIFTED_SINUS(F), \
+	ONE_SHIFTED_SINUS(F), \
+	ONE_SHIFTED_SINUS(F), \
+	ONE_SHIFTED_SINUS(F) \
 }
 
 // Pre-calculated sinus values
@@ -289,25 +253,26 @@ void restore_text_row(void)
     unsigned comet_counter = 0;
     unsigned short old_comet_pos;
     
-    // unsigned char comet2_flash;
-    unsigned char comet2_x = COMET_X+3;
-    unsigned char comet2_y = COMET_Y-2;
-    unsigned short comet2_pos;
-    unsigned comet2_counter = 0;
-    unsigned short old_comet2_pos;
+    // unsigned char fast_comet_1_flash;
+    unsigned char fast_comet_1_x = COMET_X+3;
+    unsigned char fast_comet_1_y = COMET_Y-2;
+    unsigned short fast_comet_1_pos;
+    unsigned fast_comet_1_counter = 0;
+    unsigned short old_fast_comet_1_pos;
     
 	
-    unsigned char comet3_x = COMET_X+4;
-    unsigned char comet3_y = COMET_Y-3;
-    unsigned short comet3_pos;
-    unsigned comet3_counter = 0;
-    unsigned short old_comet3_pos;
+    unsigned char fast_comet_2_x = COMET_X+4;
+    unsigned char fast_comet_2_y = COMET_Y-3;
+    unsigned short fast_comet_2_pos;
+    unsigned fast_comet_2_counter = 0;
+    unsigned short old_fast_comet_2_pos;
 	
     unsigned char below;
     unsigned char text_counter = 0;
 	
 	unsigned char XB;
-
+	unsigned cycle;
+	// unsigned xmas = 0;
 
 void draw_top_text(void)
 {
@@ -524,7 +489,7 @@ void handle_slow_comet(void)
 				{
 					comet_x = COMET_X+(rand()&31);
 				}
-				while((comet_x==comet2_x)||(comet_x==comet3_x));
+				while((comet_x==fast_comet_1_x)||(comet_x==fast_comet_2_x));
 				comet_y = COMET_Y;
 				comet_counter = rand()&31;
 			}
@@ -546,67 +511,67 @@ void handle_fast_comets(void)
 {
 	if(!(XX&1))
 	{
-		if(comet2_counter)
+		if(fast_comet_1_counter)
 		{
-			--comet2_counter;
+			--fast_comet_1_counter;
 		}
-		if(!comet2_counter)
+		if(!fast_comet_1_counter)
 		{
 
-			old_comet2_pos = comet2_x+40U*comet2_y;
+			old_fast_comet_1_pos = fast_comet_1_x+40U*fast_comet_1_y;
 
-			--comet2_y;
-			++comet2_x;
-			if((comet2_x>36)||(comet2_y<4))
+			--fast_comet_1_y;
+			++fast_comet_1_x;
+			if((fast_comet_1_x>36)||(fast_comet_1_y<4))
 			{
 				do
 				{
-					comet2_x = COMET_X+(rand()&31);
+					fast_comet_1_x = COMET_X+(rand()&31);
 				}
-				while((comet2_x==comet_x)||(comet2_x==comet3_x));
-				comet2_y = COMET_Y;
-				comet2_counter = rand()&63;
+				while((fast_comet_1_x==comet_x)||(fast_comet_1_x==fast_comet_2_x));
+				fast_comet_1_y = COMET_Y;
+				fast_comet_1_counter = rand()&63;
 			}
-			comet2_pos = comet2_x+40U*comet2_y;
+			fast_comet_1_pos = fast_comet_1_x+40U*fast_comet_1_y;
 
-			POKE(SCREEN+old_comet2_pos,below);
+			POKE(SCREEN+old_fast_comet_1_pos,below);
 
-			below = PEEK(SCREEN+comet2_pos);
-			if(!comet2_counter)
+			below = PEEK(SCREEN+fast_comet_1_pos);
+			if(!fast_comet_1_counter)
 			{
-				POKE(SCREEN+comet2_pos,COMET);
+				POKE(SCREEN+fast_comet_1_pos,COMET);
 			} 
 		}
 		
-		if(comet3_counter)
+		if(fast_comet_2_counter)
 		{
-			--comet3_counter;
+			--fast_comet_2_counter;
 		}
-		if(!comet3_counter)
+		if(!fast_comet_2_counter)
 		{
 
-			old_comet3_pos = comet3_x+40U*comet3_y;
+			old_fast_comet_2_pos = fast_comet_2_x+40U*fast_comet_2_y;
 
-			--comet3_y;
-			++comet3_x;
-			if((comet3_x>36)||(comet3_y<4))
+			--fast_comet_2_y;
+			++fast_comet_2_x;
+			if((fast_comet_2_x>36)||(fast_comet_2_y<4))
 			{
 				do
 				{
-					comet3_x = COMET_X+(rand()&31);
+					fast_comet_2_x = COMET_X+(rand()&31);
 				}
-				while((comet3_x==comet2_x) || (comet3_x==comet_x));
-				comet3_y = COMET_Y;
-				comet3_counter = rand()&63;
+				while((fast_comet_2_x==fast_comet_1_x) || (fast_comet_2_x==comet_x));
+				fast_comet_2_y = COMET_Y;
+				fast_comet_2_counter = rand()&63;
 			}
-			comet3_pos = comet3_x+40U*comet3_y;
+			fast_comet_2_pos = fast_comet_2_x+40U*fast_comet_2_y;
 
-			POKE(SCREEN+old_comet3_pos,below);
+			POKE(SCREEN+old_fast_comet_2_pos,below);
 
-			below = PEEK(SCREEN+comet3_pos);
-			if(!comet3_counter)
+			below = PEEK(SCREEN+fast_comet_2_pos);
+			if(!fast_comet_2_counter)
 			{
-				POKE(SCREEN+comet3_pos,33);
+				POKE(SCREEN+fast_comet_2_pos,33);
 			} 
 		}
 		
@@ -627,7 +592,7 @@ void handle_fast_comets(void)
 }
 
 
-void init_sprites(void)
+void init_happy_new_year_sprites(void)
 {
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
@@ -869,6 +834,24 @@ void handle_sprite_change(void)
 	}	
 }
 
+void happy_new_year(void)
+{
+	
+	handle_sprite_movement();
+
+	handle_slow_comet();
+
+	handle_fast_comets();
+	
+	handle_stars_and_colors();
+	
+	handle_sprite_change();
+
+	++XX;
+	++XX2;
+
+}
+
 /******************/
 int main()
 {        
@@ -876,27 +859,17 @@ int main()
     
     INITSPRITES();
     INITRASTER();	
-	
-	init_sprites();
+	init_happy_new_year_sprites();
 	
     while(1) 
     {
-        if (MULTIPLEX_DONE) {
-			handle_sprite_movement();
-
-			handle_slow_comet();
-
-			handle_fast_comets();
-            
-			handle_stars_and_colors();
+        if (MULTIPLEX_DONE) {	
+			happy_new_year();
 			
-			handle_sprite_change();
-
-            ++XX;
-            ++XX2;
-            MULTIPLEX_DONE = 0;
-            SPRUPDATEFLAG = 1;
+			MULTIPLEX_DONE = 0;
+			SPRUPDATEFLAG = 1;	
         }
+
     }
     return 0;
 }
