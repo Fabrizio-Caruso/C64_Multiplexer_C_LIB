@@ -127,6 +127,21 @@ many_flakes2:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
+# 	--asm-define DEBUG=1
+happy_new_year: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
+	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MUSIC_CODE=1 \
+	--asm-define MULTICOLOR=1 \
+	-DSPRITES_AT_2800 \
+	$(DEMOS_PATH)/generic_multiplexer/many_flakes2_test.c \
+	$(SNOW_UDG_ASM_FILES2) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
 
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
 # -m mapfile
@@ -305,7 +320,8 @@ generic_multiplexer_tests: \
 	many_sprites_tests \
 	sin_scroller_tests \
 	commodore_tests \
-	many_flakes_tests
+	many_flakes_tests \
+	happy_new_year
 
 
 ####################################################

@@ -25,41 +25,6 @@ extern unsigned short SPRITE_GFX;
 #pragma zpsym ("MULTIPLEX_DONE")
 /******************/
 // Pre-calculated sinus values
-// const char yValues[] = {
-    // 32, 35, 38, 41, 44, 47, 49, 52, 
-    // 54, 56, 58, 60, 61, 62, 63, 63, 
-    // 64, 63, 63, 62, 61, 60, 58, 56, 
-    // 54, 52, 49, 47, 44, 41, 38, 35, 
-    // 32, 28, 25, 22, 19, 16, 14, 11, 
-    // 9, 7, 5, 3, 2, 1, 0, 0, 
-    // 0, 0, 0, 1, 2, 3, 5, 7, 
-    // 9, 11, 14, 16, 19, 22, 25, 28,
-    // 32, 35, 38, 41, 44, 47, 49, 52, 
-    // 54, 56, 58, 60, 61, 62, 63, 63, 
-    // 64, 63, 63, 62, 61, 60, 58, 56, 
-    // 54, 52, 49, 47, 44, 41, 38, 35, 
-    // 32, 28, 25, 22, 19, 16, 14, 11, 
-    // 9, 7, 5, 3, 2, 1, 0, 0, 
-    // 0, 0, 0, 1, 2, 3, 5, 7, 
-    // 9, 11, 14, 16, 19, 22, 25, 28,
-    // 32, 35, 38, 41, 44, 47, 49, 52, 
-    // 54, 56, 58, 60, 61, 62, 63, 63, 
-    // 64, 63, 63, 62, 61, 60, 58, 56, 
-    // 54, 52, 49, 47, 44, 41, 38, 35, 
-    // 32, 28, 25, 22, 19, 16, 14, 11, 
-    // 9, 7, 5, 3, 2, 1, 0, 0, 
-    // 0, 0, 0, 1, 2, 3, 5, 7, 
-    // 9, 11, 14, 16, 19, 22, 25, 28,
-    // 32, 35, 38, 41, 44, 47, 49, 52, 
-    // 54, 56, 58, 60, 61, 62, 63, 63, 
-    // 64, 63, 63, 62, 61, 60, 58, 56, 
-    // 54, 52, 49, 47, 44, 41, 38, 35, 
-    // 32, 28, 25, 22, 19, 16, 14, 11, 
-    // 9, 7, 5, 3, 2, 1, 0, 0, 
-    // 0, 0, 0, 1, 2, 3, 5, 7, 
-    // 9, 11, 14, 16, 19, 22, 25, 28
-// };
-
 #define SINUS(F) \
 { \
     32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
@@ -274,6 +239,17 @@ void restore_text_row(void)
 #define MULTICOLOR_1 0xD025
 #define MULTICOLOR_2 0xD026
 
+// Characters for flashing stars
+#define BIG_FLASHING_STAR 0
+#define FLASHING_STAR 30
+#define SMALL_FLASHING_STAR 27
+
+// Characters for fixed stars
+#define SMALL_FIXED_STAR 28
+#define BIG_FIXED_STAR 29
+
+// Characters for comets
+#define COMET 33
 
 /*
 0	$00	black
@@ -332,81 +308,14 @@ void restore_text_row(void)
 	
 	unsigned char XB;
 
-void init_background(void)
+
+void draw_top_text(void)
 {
-    for(k=0;k<1000;++k)
-    {
-        POKE(SCREEN+k,32);
-        POKE(COLOR+k,0);
-    }
-    
-    init_udg();
-    
-    POKE(0xd020, 0x00);
-    POKE(0xd021, 0x00);    
-    
-    for(k=0;k<55;++k)
-    {
-        star_loc = rand()%1000;
-        POKE(SCREEN+star_loc,0); // big flashing star
-        POKE(COLOR+star_loc,1);
-    }
-    for(k=0;k<30;++k)
-    {
-        star_loc = rand()%1000;
-        POKE(SCREEN+star_loc,28); // big fixed star
-        POKE(COLOR+star_loc,1);
-    }
-    for(k=0;k<60;++k)
-    {
-        star_loc = rand()%1000;
-        POKE(SCREEN+star_loc,27); // small flashing star
-        POKE(COLOR+star_loc,1);
-    }
-    for(k=0;k<30;++k)
-    {
-        star_loc = rand()%1000;
-        POKE(SCREEN+star_loc,29); // small fixed star
-        POKE(COLOR+star_loc,1);
-    }
-    for(k=0;k<75;++k)
-    {
-        star_loc = rand()%1000;
-        POKE(SCREEN+star_loc,30); // small/big flashing star
-        POKE(COLOR+star_loc,1);
-    }
-
-
-    for(k=0;k<40;++k)
-    {
-        star_loc = rand()%80;
-        POKE(SCREEN+star_loc,27); // small flashing star (top 2 rows)
-        POKE(COLOR+star_loc,1);
-    }
-
-    for(k=0;k<40;++k)
-    {
-        star_loc = rand()%80;
-        POKE(SCREEN+star_loc,30); // small/big flashing star (top 2 rows)
-        POKE(COLOR+star_loc,1);
-    }
-
-    for(i=0;i<35;++i)
-    {
-        restored_text_row[i]=PEEK(SCREEN+120+i);
-    }
-    
-	for(k=COLOR+160;k<COLOR+960;++k)
-	{
-		POKE(k,1);
-	}
-	
-    // print(WRITTEN, 15, 1000-40-15-1,1);
-    
-    print(AUTHOR, 15, 1000-15-1,3);
-    
+	// Set color for top fixed "happy new year" text
     color_change();
     
+	// Draw top fixed "happy new year" text
+	
     // H
     POKE(HAPPYNEWYEAR_POS      ,'9'+10); 
     POKE(HAPPYNEWYEAR_POS+1    ,'9'+11);
@@ -477,9 +386,12 @@ void init_background(void)
     POKE(HAPPYNEWYEAR_POS+26   ,'9'+ 19);
     POKE(HAPPYNEWYEAR_POS+27   ,'9'+ 20);
     POKE(HAPPYNEWYEAR_POS+40+26,'9'+ 21);
-    POKE(HAPPYNEWYEAR_POS+40+27,'9'+ 22);
+    POKE(HAPPYNEWYEAR_POS+40+27,'9'+ 22);	
+}
 
 
+void draw_the_moon(void)
+{
     for(i=1;i<4;++i)
     {
         for(j=0;j<4;++j)
@@ -487,7 +399,107 @@ void init_background(void)
             POKE(SCREEN+MOON_OFFSET+i+40*j,(255-16)+i+j*4);
             POKE(COLOR+MOON_OFFSET+i+40*j,1);
         }
+    }	
+}
+
+
+void draw_stars(void)
+{
+	// Set stars color to white
+	for(k=COLOR+160;k<COLOR+960;++k)
+	{
+		POKE(k,1);
+	}	
+	
+    for(k=0;k<55;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,BIG_FLASHING_STAR); // big flashing star
+        POKE(COLOR+star_loc,1);
     }
+    for(k=0;k<30;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,BIG_FIXED_STAR); // big fixed star
+        POKE(COLOR+star_loc,1);
+    }
+    for(k=0;k<60;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,SMALL_FLASHING_STAR); // small flashing star
+        POKE(COLOR+star_loc,1);
+    }
+    for(k=0;k<30;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,SMALL_FIXED_STAR); // small fixed star
+        POKE(COLOR+star_loc,1);
+    }
+    for(k=0;k<75;++k)
+    {
+        star_loc = rand()%1000;
+        POKE(SCREEN+star_loc,FLASHING_STAR); // small/big flashing star
+        POKE(COLOR+star_loc,1);
+    }
+
+
+    for(k=0;k<40;++k)
+    {
+        star_loc = rand()%80;
+        POKE(SCREEN+star_loc,SMALL_FLASHING_STAR); // small flashing star (top 2 rows)
+        POKE(COLOR+star_loc,1);
+    }
+
+    for(k=0;k<40;++k)
+    {
+        star_loc = rand()%80;
+        POKE(SCREEN+star_loc,FLASHING_STAR); // small/big flashing star (top 2 rows)
+        POKE(COLOR+star_loc,1);
+    }	
+}
+
+
+void set_background_colors(void)
+{
+    POKE(0xd020, 0x00);
+    POKE(0xd021, 0x00);  	
+}
+
+
+void init_text(void)
+{
+    for(i=0;i<35;++i)
+    {
+        restored_text_row[i]=PEEK(SCREEN+120+i);
+    }
+	    
+    print(AUTHOR, 15, 1000-15-1,3);	
+}
+
+void clear_screen(void)
+{
+    for(k=0;k<1000;++k)
+    {
+        POKE(SCREEN+k,32);
+        POKE(COLOR+k,0);
+    }	
+}
+
+void init_background(void)
+{
+	clear_screen();
+	
+    init_udg();
+    
+	set_background_colors();
+    
+	draw_stars();
+
+	init_text();
+    
+	draw_top_text();
+
+	draw_the_moon();
 	
 }
 
@@ -523,7 +535,7 @@ void handle_slow_comet(void)
 			below = PEEK(SCREEN+comet_pos);
 			if(!comet_counter)
 			{
-				POKE(SCREEN+comet_pos,33);
+				POKE(SCREEN+comet_pos,COMET);
 			} 
 		}
 	}	
@@ -562,7 +574,7 @@ void handle_fast_comets(void)
 			below = PEEK(SCREEN+comet2_pos);
 			if(!comet2_counter)
 			{
-				POKE(SCREEN+comet2_pos,33);
+				POKE(SCREEN+comet2_pos,COMET);
 			} 
 		}
 		
@@ -681,7 +693,6 @@ void init_sprites(void)
 	for(i=0;i<3;++i)
 	{
 		SPRX[i+5]=X_OFFSET+i*22; // TODO: do we need this on all cycles?
-		// SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
 	} 
 }
 
@@ -707,15 +718,13 @@ void handle_stars_and_colors(void)
 			SPRC[i] = 5+((XX+i+j)&7);        
 		}
 		POKE(SHAPE+3,0x28+16*(j&1));
-		POKE(SHAPE+3+27*8,8*(j&1));
+		POKE(SHAPE+3+SMALL_FLASHING_STAR*8,8*(j&1));
 		
 		color_change();
 		
-		POKE(SHAPE+2+30*8,STAR_0[j&3]);
-		POKE(SHAPE+3+30*8,STAR_1[j&3]);
-		POKE(SHAPE+4+30*8,STAR_0[j&3]);
-		
-		
+		POKE(SHAPE+2+FLASHING_STAR*8,STAR_0[j&3]);
+		POKE(SHAPE+3+FLASHING_STAR*8,STAR_1[j&3]);
+		POKE(SHAPE+4+FLASHING_STAR*8,STAR_0[j&3]);
 	}	
 }
 
