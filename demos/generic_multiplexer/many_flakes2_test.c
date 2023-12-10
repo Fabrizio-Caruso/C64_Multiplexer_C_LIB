@@ -831,7 +831,7 @@ void handle_sprite_change(void)
 			SPRM[NUMSPRITES-7] = 1;
 			SPRM[NUMSPRITES-5] = 1;	
 			SPRC[NUMSPRITES-7] = RED;
-			SPRC[NUMSPRITES-5] = LIGHT_BLUE;
+			SPRC[NUMSPRITES-5] = RED;
 			
 			SPRC[5]=RED;
 			SPRC[6]=YELLOW;
