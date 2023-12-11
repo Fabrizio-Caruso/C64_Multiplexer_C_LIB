@@ -260,26 +260,38 @@ void restore_text_row(void)
     unsigned short k;
     unsigned short star_loc;
     unsigned char flip = 1;
+	
     unsigned char comet_flash;
-	unsigned char comet_x_start;
-    unsigned char comet_x = COMET_X;
-    unsigned char comet_y = COMET_Y;
-    unsigned short comet_pos;
-    unsigned comet_counter = 0;
-    unsigned short old_comet_pos;
+	
+	
+    unsigned char slow_comet_1_x = COMET_X;
+    unsigned char slow_comet_1_y = COMET_Y;
+	
+	unsigned char slow_comet_1_x_start;
+    unsigned short slow_comet_1_pos;
+    unsigned slow_comet_1_counter = 0;
+    unsigned short old_slow_comet_1_pos;
+
+    unsigned char slow_comet_2_x = COMET_X+16;
+    unsigned char slow_comet_2_y = COMET_Y;
+	
+	unsigned char slow_comet_2_x_start;
+    unsigned short slow_comet_2_pos;
+    unsigned slow_comet_2_counter = 0;
+    unsigned short old_slow_comet_2_pos;
     
     // unsigned char fast_comet_1_flash;
-    unsigned char fast_comet_1_x = COMET_X+3;
-    unsigned char fast_comet_1_y = COMET_Y-2;
+    unsigned char fast_comet_1_x = COMET_X+12;
+    unsigned char fast_comet_1_y = COMET_Y;
+	
 	unsigned char fast_comet_1_x_start;
-
     unsigned short fast_comet_1_pos;
     unsigned fast_comet_1_counter = 0;
     unsigned short old_fast_comet_1_pos;
     
 	
-    unsigned char fast_comet_2_x = COMET_X+4;
-    unsigned char fast_comet_2_y = COMET_Y-3;
+    unsigned char fast_comet_2_x = COMET_X+18;
+    unsigned char fast_comet_2_y = COMET_Y;
 	unsigned char fast_comet_2_x_start;
 	
     unsigned short fast_comet_2_pos;
@@ -487,43 +499,76 @@ void init_background(void)
 	
 }
 
-void handle_slow_comet(void)
+void handle_slow_comets(void)
 {
 	if(!(XX&3))
 	{
-		if(comet_counter)
+		if(slow_comet_1_counter)
 		{
-			--comet_counter;
+			--slow_comet_1_counter;
 		}
-		if(!comet_counter)
+		if(!slow_comet_1_counter)
 		{
 
-			old_comet_pos = comet_x+40U*comet_y;
+			old_slow_comet_1_pos = slow_comet_1_x+40U*slow_comet_1_y;
 
-			--comet_y;
-			++comet_x;
-			if((comet_x>36)||(comet_y<4))
+			--slow_comet_1_y;
+			++slow_comet_1_x;
+			if((slow_comet_1_x>36)||(slow_comet_1_y<4))
 			{
 				do
 				{
-					comet_x_start = COMET_X+(rand()&31);
+					slow_comet_1_x_start = COMET_X+(rand()&31);
 				}
-				while((comet_x_start==fast_comet_1_x_start)||(comet_x_start==fast_comet_2_x_start));
-				comet_x = comet_x_start;
-				comet_y = COMET_Y;
-				comet_counter = rand()&31;
+				while((slow_comet_1_x_start==slow_comet_2_x_start)||(slow_comet_1_x_start==fast_comet_1_x_start)||(slow_comet_1_x_start==fast_comet_2_x_start));
+				slow_comet_1_x = slow_comet_1_x_start;
+				slow_comet_1_y = COMET_Y;
+				slow_comet_1_counter = rand()&31;
 			}
-			comet_pos = comet_x+40U*comet_y;
+			slow_comet_1_pos = slow_comet_1_x+40U*slow_comet_1_y;
 
-			POKE(SCREEN+old_comet_pos,below);
+			POKE(SCREEN+old_slow_comet_1_pos,below);
 
-			below = PEEK(SCREEN+comet_pos);
-			if(!comet_counter)
+			below = PEEK(SCREEN+slow_comet_1_pos);
+			if(!slow_comet_1_counter)
 			{
-				POKE(SCREEN+comet_pos,COMET);
+				POKE(SCREEN+slow_comet_1_pos,COMET);
 			} 
 		}
-	}	
+		
+		if(slow_comet_2_counter)
+		{
+			--slow_comet_2_counter;
+		}
+		if(!slow_comet_2_counter)
+		{
+
+			old_slow_comet_2_pos = slow_comet_2_x+40U*slow_comet_2_y;
+
+			--slow_comet_2_y;
+			++slow_comet_2_x;
+			if((slow_comet_2_x>36)||(slow_comet_2_y<4))
+			{
+				do
+				{
+					slow_comet_2_x_start = COMET_X+(rand()&31);
+				}
+				while((slow_comet_2_x_start==slow_comet_1_x_start)||(slow_comet_2_x_start==fast_comet_1_x_start)||(slow_comet_2_x_start==fast_comet_2_x_start));
+				slow_comet_2_x = slow_comet_2_x_start;
+				slow_comet_2_y = COMET_Y;
+				slow_comet_2_counter = rand()&31;
+			}
+			slow_comet_2_pos = slow_comet_2_x+40U*slow_comet_2_y;
+
+			POKE(SCREEN+old_slow_comet_2_pos,below);
+
+			below = PEEK(SCREEN+slow_comet_2_pos);
+			if(!slow_comet_2_counter)
+			{
+				POKE(SCREEN+slow_comet_2_pos,COMET);
+			} 
+		}		
+	}
 }
 
 
@@ -548,7 +593,7 @@ void handle_fast_comets(void)
 				{
 					fast_comet_1_x_start = COMET_X+(rand()&31);
 				}
-				while((fast_comet_1_x_start==comet_x_start)||(fast_comet_1_x_start==fast_comet_2_x_start));
+				while((fast_comet_1_x_start==slow_comet_1_x_start)||(fast_comet_1_x_start==slow_comet_2_x_start)||(fast_comet_1_x_start==fast_comet_2_x_start));
 				fast_comet_1_x = fast_comet_1_x_start;
 				fast_comet_1_y = COMET_Y;
 				fast_comet_1_counter = rand()&63;
@@ -581,7 +626,7 @@ void handle_fast_comets(void)
 				{
 					fast_comet_2_x_start = COMET_X+(rand()&31);
 				}
-				while((fast_comet_2_x_start==fast_comet_1_x_start) || (fast_comet_2_x_start==comet_x_start));
+				while((fast_comet_2_x_start==fast_comet_1_x_start)||(fast_comet_2_x_start==slow_comet_1_x_start)||(fast_comet_2_x_start==slow_comet_2_x_start));
 				fast_comet_2_x = fast_comet_2_x_start;
 				fast_comet_2_y = COMET_Y;
 				fast_comet_2_counter = rand()&63;
@@ -976,7 +1021,7 @@ void happy_new_year(void)
 	
 	handle_sprite_movement();
 
-	handle_slow_comet();
+	handle_slow_comets();
 
 	handle_fast_comets();
 	
