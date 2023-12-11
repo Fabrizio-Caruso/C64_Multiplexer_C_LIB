@@ -875,8 +875,8 @@ void handle_sprite_change(void)
 			SPREX[ 9]=0;
 			SPREX[10]=0;
 			SPREX[11]=0; 
-			// POKE(MULTICOLOR_1,RED);
-			// POKE(MULTICOLOR_2,CYAN);
+			POKE(MULTICOLOR_1,RED);
+			POKE(MULTICOLOR_2,CYAN);
 			
 			// POKE(MULTICOLOR_1,2);
 			// POKE(MULTICOLOR_2,3);
