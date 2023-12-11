@@ -109,6 +109,10 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 #define X_OFFSET 46
 #define Y_OFFSET 58
 
+#define XMAS_X_OFFSET X_OFFSET
+#define FONT_SPACING 22
+#define XMAS_FONT_SPACING 22
+
 #define SCREEN 0x0400
 #define COLOR  0xD800
 #define SHAPE  0x2000
@@ -286,7 +290,7 @@ void restore_text_row(void)
     unsigned char text_counter = 0;
 	
 	unsigned char XB;
-	unsigned cycle;
+	unsigned cycle = 1;
 	// unsigned xmas = 0;
 
 void draw_top_text(void)
@@ -614,13 +618,13 @@ void init_happy_new_year_sprites(void)
 {
     NUMSPRITES = _NUMBER_OF_SPRITES_;
 
-    for(i=0;i<12;++i)
+    for(i=0;i<14;++i)
     {
-        SPRF[i] = GFX_START_INDEX + MESSAGE[i] - 'A' + 1;
+        SPRF[i] = GFX_START_INDEX + MESSAGE2[i] - 'A' + 1;
         SPRC[i] = 2+i;        
     }    
     
-    for(i=12;i<NUMSPRITES;++i)
+    for(i=14;i<NUMSPRITES;++i)
     {
         SPRF[i]= GFX_START_INDEX+62+(i&1);
 
@@ -675,18 +679,20 @@ void init_happy_new_year_sprites(void)
 	
 	for(i=0;i<5;++i)
 	{
-		SPRX[i]=X_OFFSET+i*22;
+		SPRX[i]=XMAS_X_OFFSET+i*XMAS_FONT_SPACING;
 	}
 
-	for(i=0;i<4;++i)
+	for(i=0;i<9;++i)
 	{
-		SPRX[i+8]=X_OFFSET+i*(22+4-4*flip);
-	}  
-
-	for(i=0;i<3;++i)
-	{
-		SPRX[i+5]=X_OFFSET+i*22; // TODO: do we need this on all cycles?
+		SPRX[i+5]=25+i*(XMAS_FONT_SPACING/2+4); // TODO: do we need this on all cycles?
 	} 
+
+	// for(i=0;i<6;++i)
+	// {
+		// SPRX[i+8]=10+i*XMAS_FONT_SPACING;
+	// }  
+
+
 }
 
 
@@ -774,20 +780,37 @@ void handle_sprite_movement(void)
 	SPRX[NUMSPRITES-7]=XX;
 	SPRX[NUMSPRITES-8]=255-XX;
 
+	// HAPPY/MERRY
 	for(i=0;i<5;++i)
 	{
 		SPRY[i]=i*8+Y_OFFSET+yValues[XX];
 	}
 
 	
-	if(flip)
+	if(flip) // HAPPY NEW YEAR or MERRY CHRISTMAS
 	{
-		for(i=0;i<3;++i)
+		
+		if(cycle)
 		{
-			SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
-		}    
+			for(i=0;i<3;++i)
+			{
+				SPRY[i+5]=i*8+Y_OFFSET+SEPARATION+yValues[XX];;
+			}
+			
+			for(i=0;i<4;++i)
+			{
+				SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
+			}			
+		}
+		else
+		{
+			for(i=0;i<9;++i)
+			{
+				SPRY[i+5]=i*8+Y_OFFSET+30+yValues[XX];;
+			}
+		}
 	}
-	else
+	else // HAPPY <YEAR>
 	{
 
 		if(!(XX&1))
@@ -811,10 +834,9 @@ void handle_sprite_movement(void)
 		SPRF[NUMSPRITES-7]=GFX_START_INDEX + PRESENT+xb_mod3;
 	}
 
-	for(i=0;i<4;++i)
-	{
-		SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
-	}  	
+
+	
+
 }
 
 
@@ -838,8 +860,11 @@ void handle_sprite_change(void)
 			SPRF[ 7]=GFX_START_INDEX + BEFANA;	
 			XB = 15;
 			
-			
-			
+			SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'H';
+			SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'A';
+			SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'P';
+			SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';	
+				
 			SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
 			SPRF[ 9]=GFX_START_INDEX + '0'; // 0
 			SPRF[10]=GFX_START_INDEX + YEAR_HIGH; // 2
@@ -847,7 +872,10 @@ void handle_sprite_change(void)
 			SPREX[ 8]=1;
 			SPREX[ 9]=1;
 			SPREX[10]=1;
-			SPREX[11]=1;                    
+			SPREX[11]=1;
+
+			SPRY[12]=255;
+			SPRY[13]=255;			
 			flip = 0;
 			
 			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
@@ -855,7 +883,7 @@ void handle_sprite_change(void)
 			// SPRM[NUMSPRITES-7] = 1;
 			// SPRM[NUMSPRITES-5] = 1;	
 			SPRC[NUMSPRITES-7] = RED;
-			SPRC[NUMSPRITES-5] = RED;
+			SPRC[NUMSPRITES-5] = CYAN;
 			
 			SPRC[5]=RED;
 			SPRC[6]=YELLOW;
@@ -864,41 +892,81 @@ void handle_sprite_change(void)
 		}
 		else
 		{
-			SPRY[ 5] = 255;
-			SPRY[ 6] = 255;
-			SPRY[ 7] = 255;
-			SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';					
-			SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
-			SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
-			
-			SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
-			SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
-			SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
-			SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
-			SPREX[ 8]=0;
-			SPREX[ 9]=0;
-			SPREX[10]=0;
-			SPREX[11]=0; 
-			POKE(MULTICOLOR_1,RED);
-			POKE(MULTICOLOR_2,CYAN);
-			
-			// POKE(MULTICOLOR_1,2);
-			// POKE(MULTICOLOR_2,3);
-			
-			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
-			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
-
-			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
-			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
-			// SPRM[NUMSPRITES-7] = 0;
-			// SPRM[NUMSPRITES-5] = 0;	
-			SPRC[NUMSPRITES-7] = PURPLE;
-			SPRC[NUMSPRITES-5] = GREEN;
-			flip = 1;
-			for(i=0;i<3;++i)
+			++cycle;
+			cycle&=1;
+			if(cycle&1)
 			{
-				SPRX[i+5]=X_OFFSET+i*22;
-			} 			
+				
+				SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'H';
+				SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'A';
+				SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'P';
+				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';				
+				// SPRY[ 4] = GFX_START_INDEX - 'A' + 1 + 'N';
+
+				SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';					
+				SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
+				SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
+				
+				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
+				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
+				SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
+				SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
+				
+				SPRY[12]=255;
+				SPRY[13]=255;
+				
+				SPREX[ 8]=0;
+				SPREX[ 9]=0;
+				SPREX[10]=0;
+				SPREX[11]=0; 
+				POKE(MULTICOLOR_1,RED);
+				POKE(MULTICOLOR_2,CYAN);
+				
+				SPRC[NUMSPRITES-7] = PURPLE;
+				SPRC[NUMSPRITES-5] = GREEN;
+				flip = 1;
+				for(i=0;i<3;++i)
+				{
+					SPRX[i+5]=X_OFFSET+i*22;
+				} 	
+			}
+			else
+			{
+				SPRY[ 5] = 255;
+				SPRY[ 6] = 255;
+				SPRY[ 7] = 255;
+				
+				SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'M';
+				SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'E';
+				SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'R';
+				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'R';	
+			
+				SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'C';					
+				SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'H';
+				SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'R';
+				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'I';
+				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'S';
+				SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'T';
+				SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'M';
+				SPRF[12]=GFX_START_INDEX - 'A' + 1 + 'A';
+				SPRF[13]=GFX_START_INDEX - 'A' + 1 + 'S';				
+				SPREX[ 8]=0;
+				SPREX[ 9]=0;
+				SPREX[10]=0;
+				SPREX[11]=0; 
+				
+				POKE(MULTICOLOR_1,RED);
+				POKE(MULTICOLOR_2,CYAN);
+				
+			
+				SPRC[NUMSPRITES-7] = PURPLE;
+				SPRC[NUMSPRITES-5] = GREEN;
+				flip = 1;
+				for(i=0;i<9;++i)
+				{
+					SPRX[i+5]=20+i*3*XMAS_FONT_SPACING/4;
+				} 					
+			}				
 		}
 	}	
 }

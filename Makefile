@@ -130,7 +130,7 @@ many_flakes2:
 # 	--asm-define DEBUG=1
 happy_new_year: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
-	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22  -D_SPRITE_SEPARATION_=30 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
