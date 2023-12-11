@@ -85,6 +85,10 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 #define GFX_START_INDEX (GFX_START/0x40U)
 
 const char MESSAGE[12] = "HAPPYNEWYEAR";
+#define MESSAGE_LENGTH 12
+
+const char MESSAGE2[14] = "MERRYCHRISTMAS";
+#define MESSAGE2_LENGTH 14
 
 const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
@@ -449,7 +453,7 @@ void init_text(void)
         restored_text_row[i]=PEEK(SCREEN+120+i);
     }
 	    
-    print(AUTHOR, 15, 1000-15-1,3);	
+    print(AUTHOR, 15, 1000-15,3);	
 }
 
 void clear_screen(void)
