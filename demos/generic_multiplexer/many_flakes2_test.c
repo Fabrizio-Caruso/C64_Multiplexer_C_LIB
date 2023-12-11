@@ -263,37 +263,34 @@ void restore_text_row(void)
 	
     unsigned char comet_flash;
 	
-	
+    // SLOW COMET 1
     unsigned char slow_comet_1_x = COMET_X;
     unsigned char slow_comet_1_y = COMET_Y;
-	
 	unsigned char slow_comet_1_x_start;
     unsigned short slow_comet_1_pos;
     unsigned slow_comet_1_counter = 0;
     unsigned short old_slow_comet_1_pos;
 
+    // SLOW COMET 2
     unsigned char slow_comet_2_x = COMET_X+16;
     unsigned char slow_comet_2_y = COMET_Y;
-	
 	unsigned char slow_comet_2_x_start;
     unsigned short slow_comet_2_pos;
     unsigned slow_comet_2_counter = 0;
     unsigned short old_slow_comet_2_pos;
     
-    // unsigned char fast_comet_1_flash;
+    // FAST COMET 1
     unsigned char fast_comet_1_x = COMET_X+12;
     unsigned char fast_comet_1_y = COMET_Y;
-	
 	unsigned char fast_comet_1_x_start;
     unsigned short fast_comet_1_pos;
     unsigned fast_comet_1_counter = 0;
     unsigned short old_fast_comet_1_pos;
     
-	
+    // FAST COMET 2
     unsigned char fast_comet_2_x = COMET_X+18;
     unsigned char fast_comet_2_y = COMET_Y;
 	unsigned char fast_comet_2_x_start;
-	
     unsigned short fast_comet_2_pos;
     unsigned fast_comet_2_counter = 0;
     unsigned short old_fast_comet_2_pos;
@@ -835,7 +832,7 @@ void handle_sprite_movement(void)
 	if(flip) // HAPPY NEW YEAR or MERRY CHRISTMAS
 	{
 		
-		if(cycle)
+		if(cycle) // NEW EAR
 		{
 			for(i=0;i<3;++i)
 			{
@@ -847,11 +844,11 @@ void handle_sprite_movement(void)
 				SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
 			}			
 		}
-		else
+		else // CHRISTMAS
 		{
 			for(i=0;i<9;++i)
 			{
-				SPRY[i+5]=i*8+Y_OFFSET+30+yValues[XX];;
+				SPRY[i+5]=i*8+Y_OFFSET+40+yValues[XX];;
 			}
 		}
 	}
@@ -871,6 +868,10 @@ void handle_sprite_movement(void)
 			SPRF[7]=GFX_START_INDEX + BEFANA+(XB&3);
 
 		}
+		for(i=0;i<4;++i)
+		{
+			SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
+		}			
 	}
 
 	if(!(XX&7))
@@ -922,6 +923,11 @@ void handle_sprite_change(void)
 			SPRY[12]=255;
 			SPRY[13]=255;			
 			flip = 0;
+			
+			for(i=0;i<4;++i)
+			{
+				SPRX[i+8]=X_OFFSET+i*26;
+			} 				
 			
 			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
 			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
