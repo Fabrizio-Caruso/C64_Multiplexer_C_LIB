@@ -253,6 +253,7 @@ void restore_text_row(void)
     unsigned short star_loc;
     unsigned char flip = 1;
     unsigned char comet_flash;
+	unsigned char comet_x_start;
     unsigned char comet_x = COMET_X;
     unsigned char comet_y = COMET_Y;
     unsigned short comet_pos;
@@ -262,6 +263,8 @@ void restore_text_row(void)
     // unsigned char fast_comet_1_flash;
     unsigned char fast_comet_1_x = COMET_X+3;
     unsigned char fast_comet_1_y = COMET_Y-2;
+	unsigned char fast_comet_1_x_start;
+
     unsigned short fast_comet_1_pos;
     unsigned fast_comet_1_counter = 0;
     unsigned short old_fast_comet_1_pos;
@@ -269,6 +272,8 @@ void restore_text_row(void)
 	
     unsigned char fast_comet_2_x = COMET_X+4;
     unsigned char fast_comet_2_y = COMET_Y-3;
+	unsigned char fast_comet_2_x_start;
+	
     unsigned short fast_comet_2_pos;
     unsigned fast_comet_2_counter = 0;
     unsigned short old_fast_comet_2_pos;
@@ -493,9 +498,10 @@ void handle_slow_comet(void)
 			{
 				do
 				{
-					comet_x = COMET_X+(rand()&31);
+					comet_x_start = COMET_X+(rand()&31);
 				}
-				while((comet_x==fast_comet_1_x)||(comet_x==fast_comet_2_x));
+				while((comet_x_start==fast_comet_1_x_start)||(comet_x_start==fast_comet_2_x_start));
+				comet_x = comet_x_start;
 				comet_y = COMET_Y;
 				comet_counter = rand()&31;
 			}
@@ -532,9 +538,10 @@ void handle_fast_comets(void)
 			{
 				do
 				{
-					fast_comet_1_x = COMET_X+(rand()&31);
+					fast_comet_1_x_start = COMET_X+(rand()&31);
 				}
-				while((fast_comet_1_x==comet_x)||(fast_comet_1_x==fast_comet_2_x));
+				while((fast_comet_1_x_start==comet_x_start)||(fast_comet_1_x_start==fast_comet_2_x_start));
+				fast_comet_1_x = fast_comet_1_x_start;
 				fast_comet_1_y = COMET_Y;
 				fast_comet_1_counter = rand()&63;
 			}
@@ -564,9 +571,10 @@ void handle_fast_comets(void)
 			{
 				do
 				{
-					fast_comet_2_x = COMET_X+(rand()&31);
+					fast_comet_2_x_start = COMET_X+(rand()&31);
 				}
-				while((fast_comet_2_x==fast_comet_1_x) || (fast_comet_2_x==comet_x));
+				while((fast_comet_2_x_start==fast_comet_1_x_start) || (fast_comet_2_x_start==comet_x_start));
+				fast_comet_2_x = fast_comet_2_x_start;
 				fast_comet_2_y = COMET_Y;
 				fast_comet_2_counter = rand()&63;
 			}
@@ -620,8 +628,8 @@ void init_happy_new_year_sprites(void)
 	SPRF[NUMSPRITES-4] = GFX_START_INDEX + HOT_AIR_BALLOON;
 	
 	// commodore logo or present
-	SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
-	SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
+	SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
+	SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
 
 	// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
 	// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
@@ -655,8 +663,8 @@ void init_happy_new_year_sprites(void)
 		SPRM[i]=0;
 	}
 	
-	// SPRM[NUMSPRITES-7] = 1;
-	// SPRM[NUMSPRITES-5] = 1;	
+	SPRM[NUMSPRITES-7] = 1;
+	SPRM[NUMSPRITES-5] = 1;	
 	
 	POKE(MULTICOLOR_1,2);
 	POKE(MULTICOLOR_2,3);
@@ -737,6 +745,16 @@ void handle_text(void)
 
 void handle_sprite_movement(void)
 {
+	
+	unsigned char xb_mod3;
+	
+	
+	if(XX&1)
+	{
+		++XB;
+		xb_mod3 = (XB%3);
+	}
+	
 	SPRY[NUMSPRITES-1]=XX;
 	SPRY[NUMSPRITES-2]=255-XX;
 	SPRX[NUMSPRITES-2] = 100-10+xValues[XX2];
@@ -756,6 +774,7 @@ void handle_sprite_movement(void)
 	{
 		SPRY[i]=i*8+Y_OFFSET+yValues[XX];
 	}
+
 	
 	if(flip)
 	{
@@ -766,12 +785,10 @@ void handle_sprite_movement(void)
 	}
 	else
 	{
-		unsigned char xb_mod3 = (XB%3);
 
-		if(XX&1)
+		if(!(XX&1))
 		{
 			
-			++XB;
 			SPRX[5]=XB;
 			SPRF[5]=GFX_START_INDEX + SANTA+xb_mod3;
 			
@@ -782,13 +799,12 @@ void handle_sprite_movement(void)
 			SPRF[7]=GFX_START_INDEX + BEFANA+(XB&3);
 
 		}
-		if(!(XX&7))
-		{
-			SPRF[NUMSPRITES-5]=GFX_START_INDEX + PRESENT+xb_mod3;
-			SPRF[NUMSPRITES-7]=GFX_START_INDEX + PRESENT+xb_mod3;
+	}
 
-		}
-
+	if(!(XX&7))
+	{
+		SPRF[NUMSPRITES-5]=GFX_START_INDEX + PRESENT+xb_mod3;
+		SPRF[NUMSPRITES-7]=GFX_START_INDEX + PRESENT+xb_mod3;
 	}
 
 	for(i=0;i<4;++i)
@@ -806,15 +822,19 @@ void handle_sprite_change(void)
 			
 		if(flip)
 		{
-			SPRF[ 7]=GFX_START_INDEX + 32;
+			// SPRF[ 7]=GFX_START_INDEX + 32;
 			SPRY[ 5]=53;
-			SPRF[ 5]=GFX_START_INDEX + SANTA;
 			SPRY[ 6]=53;
-			SPRF[ 6]=GFX_START_INDEX + REINDEER;					
+			SPRX[ 7]=0;
 			SPRY[ 7]=230;
-			SPRF[ 7]=GFX_START_INDEX + BEFANA;	
 			SPRC[ 5]=12;
-			XB = 20;
+			
+			SPRF[ 5]=GFX_START_INDEX + SANTA;
+			SPRF[ 6]=GFX_START_INDEX + REINDEER;
+			SPRF[ 7]=GFX_START_INDEX + BEFANA;	
+			XB = 15;
+			
+			
 			
 			SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
 			SPRF[ 9]=GFX_START_INDEX + '0'; // 0
@@ -826,10 +846,10 @@ void handle_sprite_change(void)
 			SPREX[11]=1;                    
 			flip = 0;
 			
-			SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
-			SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
-			SPRM[NUMSPRITES-7] = 1;
-			SPRM[NUMSPRITES-5] = 1;	
+			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
+			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
+			// SPRM[NUMSPRITES-7] = 1;
+			// SPRM[NUMSPRITES-5] = 1;	
 			SPRC[NUMSPRITES-7] = RED;
 			SPRC[NUMSPRITES-5] = RED;
 			
@@ -855,16 +875,19 @@ void handle_sprite_change(void)
 			SPREX[ 9]=0;
 			SPREX[10]=0;
 			SPREX[11]=0; 
-			POKE(MULTICOLOR_1,RED);
-			POKE(MULTICOLOR_2,CYAN);
+			// POKE(MULTICOLOR_1,RED);
+			// POKE(MULTICOLOR_2,CYAN);
+			
+			// POKE(MULTICOLOR_1,2);
+			// POKE(MULTICOLOR_2,3);
 			
 			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
 			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
 
-			SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
-			SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
-			SPRM[NUMSPRITES-7] = 0;
-			SPRM[NUMSPRITES-5] = 0;	
+			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + COMMODORE_LOGO;
+			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + COMMODORE_LOGO;
+			// SPRM[NUMSPRITES-7] = 0;
+			// SPRM[NUMSPRITES-5] = 0;	
 			SPRC[NUMSPRITES-7] = PURPLE;
 			SPRC[NUMSPRITES-5] = GREEN;
 			flip = 1;
