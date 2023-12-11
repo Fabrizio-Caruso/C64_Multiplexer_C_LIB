@@ -254,7 +254,7 @@ void restore_text_row(void)
 #define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
 
-    unsigned char XX = 1;
+    unsigned char XX = 0;
     unsigned char XX2 = 100;
     unsigned char i;
     unsigned short k;
@@ -1025,6 +1025,8 @@ void handle_sprite_change(void)
 void happy_new_year(void)
 {
 	
+	handle_sprite_change();
+	
 	handle_sprite_movement();
 
 	handle_slow_comets();
@@ -1033,8 +1035,6 @@ void happy_new_year(void)
 	
 	handle_stars_and_colors();
 	
-	handle_sprite_change();
-
 	++XX;
 	++XX2;
 
