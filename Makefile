@@ -11,6 +11,8 @@ GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphic
 SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
 SNOW_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg.s
 SNOW_UDG_ASM_FILES2=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg2.s
+SANTA_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/santa_graphics_udg.s
+
 
 COMMODORE_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/commodore_graphics_udg.s
 
@@ -112,23 +114,8 @@ many_flakes:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
-many_flakes2: 
-	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
-	--asm-define MAXSPR=20 -D_NUMBER_OF_SPRITES_=20  -D_SPRITE_SEPARATION_=30 \
-	--asm-define MUSIC_CODE=1 \
-	--asm-define MULTICOLOR=1 \
-	-DSPRITES_AT_2800 \
-	$(DEMOS_PATH)/generic_multiplexer/many_flakes2_test.c \
-	$(SNOW_UDG_ASM_FILES2) \
-	$(SID_PATH)/sid_Xmas.s \
-	-o $(BUILD_PATH)/$@.prg
-	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
-	rm -rf $(SOURCE_PATH)/*.o
-	rm -rf $(GRAPHICS_PATH)/*.o 
-
-
 # 	--asm-define DEBUG=1
-happy_new_year: 
+xmas: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
 	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22  -D_SPRITE_SEPARATION_=30 \
 	--asm-define MUSIC_CODE=1 \
@@ -142,6 +129,20 @@ happy_new_year:
 	rm -rf $(SOURCE_PATH)/*.o
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
+
+santa: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MUSIC_CODE=1 \
+	--asm-define MULTICOLOR=1 \
+	-DSPRITES_AT_2800 \
+	$(DEMOS_PATH)/generic_multiplexer/santa.c \
+	$(SANTA_UDG_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
 
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
 # -m mapfile
@@ -321,7 +322,7 @@ generic_multiplexer_tests: \
 	sin_scroller_tests \
 	commodore_tests \
 	many_flakes_tests \
-	happy_new_year
+	xmas
 
 
 ####################################################
