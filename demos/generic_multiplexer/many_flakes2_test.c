@@ -1007,7 +1007,7 @@ void handle_sprite_change(void)
 				SPREX[11]=0; 
 				
 				POKE(MULTICOLOR_1,RED);
-				POKE(MULTICOLOR_2,GREEN);
+				POKE(MULTICOLOR_2,CYAN);
 				
 			
 				SPRC[NUMSPRITES-7] = PURPLE;
