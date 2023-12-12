@@ -832,7 +832,7 @@ void handle_sprite_movement(void)
 	if(flip) // HAPPY NEW YEAR or MERRY CHRISTMAS
 	{
 		
-		if(cycle) // NEW EAR
+		if(cycle) // NEW YEAR
 		{
 			for(i=0;i<3;++i)
 			{
@@ -848,7 +848,7 @@ void handle_sprite_movement(void)
 		{
 			for(i=0;i<9;++i)
 			{
-				SPRY[i+5]=i*8+Y_OFFSET+40+yValues[XX];;
+				SPRY[i+5]=i*8+i+Y_OFFSET+35+yValues[XX];;
 			}
 		}
 	}
