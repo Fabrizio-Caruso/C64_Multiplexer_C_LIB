@@ -1007,11 +1007,11 @@ void handle_sprite_change(void)
 				SPREX[11]=0; 
 				
 				POKE(MULTICOLOR_1,RED);
-				POKE(MULTICOLOR_2,CYAN);
+				POKE(MULTICOLOR_2,GREEN);
 				
 			
 				SPRC[NUMSPRITES-7] = PURPLE;
-				SPRC[NUMSPRITES-5] = GREEN;
+				SPRC[NUMSPRITES-5] = CYAN;
 				flip = 1;
 				for(i=0;i<9;++i)
 				{
