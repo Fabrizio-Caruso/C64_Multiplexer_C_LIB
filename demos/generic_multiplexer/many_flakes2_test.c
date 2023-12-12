@@ -870,7 +870,7 @@ void handle_sprite_movement(void)
 		}
 		for(i=0;i<4;++i)
 		{
-			SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+flip*(SEPARATION/2)+yValues[XX];;
+			SPRY[i+8]=i*8+Y_OFFSET+(3*SEPARATION/2)+yValues[XX];;
 		}			
 	}
 
@@ -1007,7 +1007,7 @@ void handle_sprite_change(void)
 				SPREX[11]=0; 
 				
 				POKE(MULTICOLOR_1,RED);
-				POKE(MULTICOLOR_2,CYAN);
+				POKE(MULTICOLOR_2,GREEN);
 				
 			
 				SPRC[NUMSPRITES-7] = PURPLE;
