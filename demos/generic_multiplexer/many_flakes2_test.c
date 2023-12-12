@@ -251,6 +251,7 @@ void restore_text_row(void)
 #define GREEN      0x05
 #define YELLOW     0x07
 #define BROWN      0x09
+#define PINK       0x0A
 #define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
 
@@ -940,6 +941,7 @@ void handle_sprite_change(void)
 			SPRC[6]=YELLOW;
 			POKE(MULTICOLOR_1,BROWN);
 			POKE(MULTICOLOR_2,LIGHT_GREY);
+            SPRC[7]=PINK;
 		}
 		else
 		{
