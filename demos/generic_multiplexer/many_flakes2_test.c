@@ -111,6 +111,36 @@ const unsigned char STAR_0[4] = {0x00,0x10,0x10,0x00};
 const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 // const star STAR_0[4] = {};
 
+/*
+0	$00	black
+1	$01	white
+2	$02	red
+3	$03	cyan
+4	$04	purple
+5	$05	green
+6	$06	blue
+7	$07	yellow
+8	$08	orange
+9	$09	brown
+10	$0A	pink
+11	$0B	dark grey
+12	$0C	grey
+13	$0D	light green
+14	$0E	light blue
+15	$0F	light grey 
+
+*/
+#define WHITE      0x01
+#define RED        0x02
+#define CYAN       0x03
+#define PURPLE     0x04
+#define GREEN      0x05
+#define YELLOW     0x07
+#define BROWN      0x09
+#define PINK       0x0A
+#define LIGHT_BLUE 0x0E
+#define LIGHT_GREY 0x0F
+
 #define X_OFFSET 46
 #define Y_OFFSET 58
 
@@ -132,7 +162,7 @@ static unsigned char j;
 static unsigned char h;
 static unsigned char restored_text_row[35];
 
-#define COMET_X 0
+#define COMET_X 4
 #define COMET_Y 23
 
 unsigned char XX = 0;
@@ -182,6 +212,23 @@ unsigned char text_counter = 0;
 unsigned char XB;
 unsigned cycle = 1;
 
+
+#define TILE_BASE ('9'+31)
+
+#define NUMBER_OF_COLUMNS 40
+#define TREE_LEVEL(n) ((24-n)*(NUMBER_OF_COLUMNS))
+
+#define MULTI_CHAR_COLOR_1 0xD022
+#define MULTI_CHAR_COLOR_2 0xD023
+
+#define MULTI_COLOR_BIT 8
+
+#define XTREE_LIGHT_1 (COLOR+TREE_LEVEL(3)+1)
+#define XTREE_LIGHT_2 (COLOR+TREE_LEVEL(2)+1)
+#define XTREE_LIGHT_3 (COLOR+TREE_LEVEL(2)+2)
+#define XTREE_LIGHT_4 (COLOR+TREE_LEVEL(1)+1)
+#define XTREE_LIGHT_5 (COLOR+TREE_LEVEL(1)+2)
+
 // $D018 = 53272
 // -----------------
 void init_udg(void)
@@ -230,6 +277,14 @@ void color_change(void)
         POKE(COLOR+26+h,TEXT_COLOR_OFFSET+color);
         POKE(COLOR+40+26+h,TEXT_COLOR_OFFSET+color);
     }  
+	
+	
+	POKE(XTREE_LIGHT_1,MULTI_COLOR_BIT+RED+(j&3));
+	POKE(XTREE_LIGHT_2,MULTI_COLOR_BIT+RED+((j+1)&3));
+	POKE(XTREE_LIGHT_3,MULTI_COLOR_BIT+RED+((j+2)&3));
+	POKE(XTREE_LIGHT_4,MULTI_COLOR_BIT+RED+((j+3)&3));
+	POKE(XTREE_LIGHT_5,MULTI_COLOR_BIT+RED+((j)&3));
+	
 }
 
 
@@ -310,35 +365,7 @@ void restore_text_row(void)
 #define RIGHT_BIG_SNOW_INDEX (NUMSPRITES-1)
 #define LEFT_BIG_SNOW_INDEX (NUMSPRITES-3)
 
-/*
-0	$00	black
-1	$01	white
-2	$02	red
-3	$03	cyan
-4	$04	purple
-5	$05	green
-6	$06	blue
-7	$07	yellow
-8	$08	orange
-9	$09	brown
-10	$0A	pink
-11	$0B	dark grey
-12	$0C	grey
-13	$0D	light green
-14	$0E	light blue
-15	$0F	light grey 
 
-*/
-#define WHITE      0x01
-#define RED        0x02
-#define CYAN       0x03
-#define PURPLE     0x04
-#define GREEN      0x05
-#define YELLOW     0x07
-#define BROWN      0x09
-#define PINK       0x0A
-#define LIGHT_BLUE 0x0E
-#define LIGHT_GREY 0x0F
 
 void draw_top_text(void)
 {
@@ -516,6 +543,56 @@ void clear_screen(void)
     }	
 }
 
+
+void draw_xmas_tree(void)
+{
+	
+	POKE(MULTI_CHAR_COLOR_1,YELLOW);
+	POKE(MULTI_CHAR_COLOR_2,GREEN);
+
+	
+	POKE(SCREEN+TREE_LEVEL(3)+1,TILE_BASE);
+	POKE(SCREEN+TREE_LEVEL(3)+2,TILE_BASE+1);
+
+	POKE(SCREEN+TREE_LEVEL(2),  TILE_BASE+2);
+	POKE(SCREEN+TREE_LEVEL(2)+1,TILE_BASE+3);	
+	POKE(SCREEN+TREE_LEVEL(2)+2,TILE_BASE+4);
+	POKE(SCREEN+TREE_LEVEL(2)+3,TILE_BASE+5);	
+
+	POKE(SCREEN+TREE_LEVEL(1),  TILE_BASE+6);
+	POKE(SCREEN+TREE_LEVEL(1)+1,TILE_BASE+7);	
+	POKE(SCREEN+TREE_LEVEL(1)+2,TILE_BASE+8);
+	POKE(SCREEN+TREE_LEVEL(1)+3,TILE_BASE+9);	
+
+	POKE(SCREEN+TREE_LEVEL(0),  TILE_BASE+10);
+	POKE(SCREEN+TREE_LEVEL(0)+1,TILE_BASE+11);	
+	POKE(SCREEN+TREE_LEVEL(0)+2,TILE_BASE+12);
+	POKE(SCREEN+TREE_LEVEL(0)+3,TILE_BASE+13);	
+	
+	
+	POKE(COLOR+TREE_LEVEL(3)+1,RED+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(3)+2,YELLOW+MULTI_COLOR_BIT);
+
+	POKE(COLOR+TREE_LEVEL(2),  3+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(2)+1,YELLOW+MULTI_COLOR_BIT);	
+	POKE(COLOR+TREE_LEVEL(2)+2,RED+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(2)+3,3+MULTI_COLOR_BIT);	
+
+	POKE(COLOR+TREE_LEVEL(1),  4+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(1)+1,RED+MULTI_COLOR_BIT);	
+	POKE(COLOR+TREE_LEVEL(1)+2,YELLOW+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(1)+3,4+MULTI_COLOR_BIT);	
+
+	POKE(COLOR+TREE_LEVEL(0),  GREEN+MULTI_COLOR_BIT);
+	POKE(COLOR+TREE_LEVEL(0)+1,RED);	
+	POKE(COLOR+TREE_LEVEL(0)+2,RED);
+	POKE(COLOR+TREE_LEVEL(0)+3,GREEN+MULTI_COLOR_BIT);		
+	
+	// while(1)
+	// {}
+}
+
+
 void init_background(void)
 {
 	clear_screen();
@@ -534,6 +611,8 @@ void init_background(void)
 	draw_top_text();
 
 	draw_the_moon();
+	
+	draw_xmas_tree();
 	
 }
 
@@ -556,7 +635,7 @@ void handle_slow_comets(void)
 			{
 				do
 				{
-					slow_comet_1_x_start = COMET_X+(rand()&31);
+					slow_comet_1_x_start = COMET_X+(rand()&15);
 				}
 				#if SLOW_COMETS==2
 				while((slow_comet_1_x_start==slow_comet_2_x_start)||(slow_comet_1_x_start==fast_comet_1_x_start)||(slow_comet_1_x_start==fast_comet_2_x_start));
@@ -792,7 +871,7 @@ void init_happy_new_year_sprites(void)
 		// SPRX[i+8]=10+i*XMAS_FONT_SPACING;
 	// }  
 
-
+	// draw_xmas_tree();
 }
 
 
