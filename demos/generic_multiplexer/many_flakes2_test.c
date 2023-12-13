@@ -71,6 +71,8 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 
 // const char yValues4[] = SINUS(4);
 
+const char santa_map[] = {0,1,2,1};
+
 
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
@@ -137,32 +139,34 @@ void init_udg(void)
 	POKE(648,192);
 }
 
+#define TEXT_COLOR_OFFSET 2
+
 void color_change(void)
 {
     for(h=0;h<10;++h)
     {
         
-        POKE(COLOR+6+h,3+(j&7));
-        POKE(COLOR+40+6+h,3+(j&7));
+        POKE(COLOR+6+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+40+6+h,TEXT_COLOR_OFFSET+(j&3));
     }
 
     for(h=0;h<6;++h)
     {
         
-        POKE(COLOR+18+h,3+(j&7));
-        POKE(COLOR+40+18+h,3+(j&7));
+        POKE(COLOR+18+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+40+18+h,TEXT_COLOR_OFFSET+(j&3));
     }
     
     for(h=0;h<8;++h)
     {
         
-        POKE(COLOR+26+h,3+(j&7));
-        POKE(COLOR+40+26+h,3+(j&7));
+        POKE(COLOR+26+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+40+26+h,TEXT_COLOR_OFFSET+(j&3));
     }  
 }
 
 #define COMET_X 0
-#define COMET_Y 22
+#define COMET_Y 23
 
 void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
 {
@@ -224,6 +228,22 @@ void restore_text_row(void)
 
 // Characters for comets
 #define COMET 33
+
+#define SANTA_INDEX 5
+#define REINDEER_INDEX 6
+#define BEFANA_INDEX 7
+
+#define TOP_SNOW_INDEX (NUMSPRITES-6)
+#define BOTTOM_SNOW_INDEX (NUMSPRITES-8)
+
+#define TOP_PRESENT_INDEX (NUMSPRITES-5)
+#define BOTTOM_PRESENT_INDEX (NUMSPRITES-7)
+
+#define RIGHT_HOT_AIR_BALLOON_INDEX (NUMSPRITES-2)
+#define LEFT_HOT_AIR_BALLOON_INDEX (NUMSPRITES-4)
+
+#define RIGHT_BIG_SNOW_INDEX (NUMSPRITES-1)
+#define LEFT_BIG_SNOW_INDEX (NUMSPRITES-3)
 
 /*
 0	$00	black
@@ -486,6 +506,9 @@ void init_background(void)
     init_udg();
     
 	set_background_colors();
+	
+	// Set multi-color character mode
+	POKE(0xD016,PEEK(0xD016)|0x10);
     
 	draw_stars();
 
@@ -675,47 +698,50 @@ void init_happy_new_year_sprites(void)
     }
     
 	// hot air balloon
-	SPRF[NUMSPRITES-2] = GFX_START_INDEX + HOT_AIR_BALLOON;
-	SPRF[NUMSPRITES-4] = GFX_START_INDEX + HOT_AIR_BALLOON;
+	SPRF[RIGHT_HOT_AIR_BALLOON_INDEX] = GFX_START_INDEX + HOT_AIR_BALLOON;
+	SPRF[LEFT_HOT_AIR_BALLOON_INDEX] = GFX_START_INDEX + HOT_AIR_BALLOON;
 	
 	// commodore logo or present
-	SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
-	SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
+	SPRF[BOTTOM_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
+	SPRF[TOP_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
 
-	// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
-	// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
-	// SPRM[NUMSPRITES-7] = 1;
-	// SPRM[NUMSPRITES-5] = 1;	
+	// SPRF[BOTTOM_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
+	// SPRF[TOP_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
+	// SPRM[BOTTOM_PRESENT_INDEX] = 1;
+	// SPRM[TOP_PRESENT_INDEX] = 1;	
 
 	
 	
-	SPRC[NUMSPRITES-2] = 3;
-	SPRC[NUMSPRITES-4] = 2;
-	SPRC[NUMSPRITES-7] = 4;
-	SPRC[NUMSPRITES-5] = 5;
+	SPRC[RIGHT_HOT_AIR_BALLOON_INDEX] = 3;
+	SPRC[LEFT_HOT_AIR_BALLOON_INDEX] = 2;
+	SPRC[BOTTOM_PRESENT_INDEX] = 4;
+	SPRC[TOP_PRESENT_INDEX] = 5;
 	
     // Position snow flakes, commodore logos and hot air balloons
-    SPRX[NUMSPRITES-1]=120;
-    SPRX[NUMSPRITES-3]=40;
-    SPRX[NUMSPRITES-2]=100;
-    SPRX[NUMSPRITES-4]=60;   
+    SPRX[RIGHT_BIG_SNOW_INDEX]=120;
+    SPRX[LEFT_BIG_SNOW_INDEX]=40;
+    SPRX[RIGHT_HOT_AIR_BALLOON_INDEX]=100;
+    SPRX[LEFT_HOT_AIR_BALLOON_INDEX]=60;   
 
-    SPRY[NUMSPRITES-5]=90;
-    SPRY[NUMSPRITES-6]=60;  
-    SPRY[NUMSPRITES-7]=200;
-    SPRY[NUMSPRITES-8]=170;  
+    SPRY[TOP_PRESENT_INDEX]=90;
+	
+    SPRY[TOP_SNOW_INDEX]=60;  
     
-	for(i=0;i<NUMSPRITES-8;++i)
+	SPRY[BOTTOM_PRESENT_INDEX]=200;
+	
+    SPRY[BOTTOM_SNOW_INDEX]=170;  
+    
+	for(i=0;i<BOTTOM_SNOW_INDEX;++i)
 	{
 		SPRM[i]=1;
 	}
-	for(i=NUMSPRITES-8;i<NUMSPRITES;++i)
+	for(i=BOTTOM_SNOW_INDEX;i<NUMSPRITES;++i)
 	{
 		SPRM[i]=0;
 	}
 	
-	SPRM[NUMSPRITES-7] = 1;
-	SPRM[NUMSPRITES-5] = 1;	
+	SPRM[BOTTOM_PRESENT_INDEX] = 1;
+	SPRM[TOP_PRESENT_INDEX] = 1;	
 	
 	POKE(MULTICOLOR_1,2);
 	POKE(MULTICOLOR_2,3);
@@ -776,17 +802,17 @@ void handle_text(void)
 	if(text_counter==0)
 	{
 		restore_text_row();
-		print(TEXT1, 27,120+6,5);
+		print(TEXT1, 27,120+6,YELLOW);
 	}
 	else if(text_counter==1)
 	{
 	   restore_text_row();
-	   print(TEXT2, 28,120+6,11);
+	   print(TEXT2, 28,120+6,GREEN);
 	}
 	else if(text_counter==2)
 	{
 		restore_text_row();
-		print(TEXT3, 29,120+6,12);
+		print(TEXT3, 29,120+6,CYAN);
 	}
 	else
 	{
@@ -808,20 +834,29 @@ void handle_sprite_movement(void)
 		xb_mod3 = (XB%3);
 	}
 	
-	SPRY[NUMSPRITES-1]=XX;
-	SPRY[NUMSPRITES-2]=255-XX;
-	SPRX[NUMSPRITES-2] = 100-10+xValues[XX2];
-
-
-	SPRY[NUMSPRITES-3]=XX2;
-	SPRY[NUMSPRITES-4]=255-XX2;
-	SPRX[NUMSPRITES-4] = 60-10+shifted_xValues[XX2];
+	SPRY[RIGHT_BIG_SNOW_INDEX]=XX;
 	
-	SPRX[NUMSPRITES-5]=XX2;
-	SPRX[NUMSPRITES-6]=255-XX2;
+	// Hot air balloon 1	
+	SPRY[RIGHT_HOT_AIR_BALLOON_INDEX]=255-XX;
+	SPRX[RIGHT_HOT_AIR_BALLOON_INDEX] = 100-10+xValues[XX2];
 
-	SPRX[NUMSPRITES-7]=XX;
-	SPRX[NUMSPRITES-8]=255-XX;
+	SPRY[LEFT_BIG_SNOW_INDEX]=XX2;
+	
+	// Hot air balloon 2
+	SPRY[LEFT_HOT_AIR_BALLOON_INDEX]=255-XX2;
+	SPRX[LEFT_HOT_AIR_BALLOON_INDEX] = 60-10+shifted_xValues[XX2];
+	
+	// Present 1
+	SPRX[TOP_PRESENT_INDEX]=XX2;
+	
+	// Small snow flake 1
+	SPRX[TOP_SNOW_INDEX]=255-XX2;
+
+	// Present 2
+	SPRX[BOTTOM_PRESENT_INDEX]=XX;
+	
+	// Small snow flake 2
+	SPRX[BOTTOM_SNOW_INDEX]= 255-XX;
 
 	// HAPPY/MERRY
 	for(i=0;i<5;++i)
@@ -858,15 +893,16 @@ void handle_sprite_movement(void)
 
 		if(!(XX&1))
 		{
+			// ++XB;
 			
-			SPRX[5]=XB;
-			SPRF[5]=GFX_START_INDEX + SANTA+xb_mod3;
+			SPRX[SANTA_INDEX]=XB;
+			SPRF[SANTA_INDEX]=GFX_START_INDEX + SANTA+santa_map[(XB&3)];
 			
-			SPRX[6]=XB+12;
-			SPRF[6]=GFX_START_INDEX + REINDEER+xb_mod3;
+			SPRX[REINDEER_INDEX]=XB+12;
+			SPRF[REINDEER_INDEX]=GFX_START_INDEX + REINDEER+santa_map[(XB&3)];
 
-			SPRX[7]=162-XB;
-			SPRF[7]=GFX_START_INDEX + BEFANA+(XB&3);
+			SPRX[BEFANA_INDEX]=162-XB;
+			SPRF[BEFANA_INDEX]=GFX_START_INDEX + BEFANA+(XB&3);
 
 		}
 		for(i=0;i<4;++i)
@@ -877,8 +913,8 @@ void handle_sprite_movement(void)
 
 	if(!(XX&7))
 	{
-		SPRF[NUMSPRITES-5]=GFX_START_INDEX + PRESENT+xb_mod3;
-		SPRF[NUMSPRITES-7]=GFX_START_INDEX + PRESENT+xb_mod3;
+		SPRF[TOP_PRESENT_INDEX]=GFX_START_INDEX + PRESENT+xb_mod3;
+		SPRF[BOTTOM_PRESENT_INDEX]=GFX_START_INDEX + PRESENT+xb_mod3;
 	}
 
 
@@ -896,15 +932,15 @@ void handle_sprite_change(void)
 		if(flip)
 		{
 			// SPRF[ 7]=GFX_START_INDEX + 32;
-			SPRY[ 5]=53;
-			SPRY[ 6]=53;
-			SPRX[ 7]=0;
-			SPRY[ 7]=230;
-			SPRC[ 5]=12;
+			SPRY[SANTA_INDEX]=53;
+			SPRY[REINDEER_INDEX]=53;
+			SPRX[BEFANA_INDEX]=0;
+			SPRY[BEFANA_INDEX]=230;
+			// SPRC[SANTA_INDEX]=12;
 			
-			SPRF[ 5]=GFX_START_INDEX + SANTA;
-			SPRF[ 6]=GFX_START_INDEX + REINDEER;
-			SPRF[ 7]=GFX_START_INDEX + BEFANA;	
+			SPRF[SANTA_INDEX]=GFX_START_INDEX + SANTA;
+			SPRF[REINDEER_INDEX]=GFX_START_INDEX + REINDEER;
+			SPRF[BEFANA_INDEX]=GFX_START_INDEX + BEFANA;	
 			XB = 15;
 			
 			SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'H';
@@ -930,18 +966,18 @@ void handle_sprite_change(void)
 				SPRX[i+8]=X_OFFSET+i*26;
 			} 				
 			
-			// SPRF[NUMSPRITES-7] = GFX_START_INDEX + PRESENT;
-			// SPRF[NUMSPRITES-5] = GFX_START_INDEX + PRESENT;
-			// SPRM[NUMSPRITES-7] = 1;
-			// SPRM[NUMSPRITES-5] = 1;	
-			SPRC[NUMSPRITES-7] = RED;
-			SPRC[NUMSPRITES-5] = CYAN;
+			// SPRF[BOTTOM_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
+			// SPRF[TOP_PRESENT_INDEX] = GFX_START_INDEX + PRESENT;
+			// SPRM[BOTTOM_PRESENT_INDEX] = 1;
+			// SPRM[TOP_PRESENT_INDEX] = 1;	
+			SPRC[BOTTOM_PRESENT_INDEX] = RED;
+			SPRC[TOP_PRESENT_INDEX] = CYAN;
 			
-			SPRC[5]=RED;
-			SPRC[6]=YELLOW;
+			SPRC[SANTA_INDEX]=RED;
+			SPRC[REINDEER_INDEX]=YELLOW;
 			POKE(MULTICOLOR_1,BROWN);
 			POKE(MULTICOLOR_2,LIGHT_GREY);
-            SPRC[7]=PINK;
+            SPRC[BEFANA_INDEX]=PINK;
 		}
 		else
 		{
@@ -956,9 +992,9 @@ void handle_sprite_change(void)
 				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';				
 				// SPRY[ 4] = GFX_START_INDEX - 'A' + 1 + 'N';
 
-				SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'N';					
-				SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'E';
-				SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'W';
+				SPRF[SANTA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'N';					
+				SPRF[REINDEER_INDEX]=GFX_START_INDEX - 'A' + 1 + 'E';
+				SPRF[BEFANA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'W';
 				
 				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
 				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
@@ -975,8 +1011,8 @@ void handle_sprite_change(void)
 				POKE(MULTICOLOR_1,RED);
 				POKE(MULTICOLOR_2,CYAN);
 				
-				SPRC[NUMSPRITES-7] = PURPLE;
-				SPRC[NUMSPRITES-5] = GREEN;
+				SPRC[BOTTOM_PRESENT_INDEX] = PURPLE;
+				SPRC[TOP_PRESENT_INDEX] = GREEN;
 				flip = 1;
 				for(i=0;i<3;++i)
 				{
@@ -985,18 +1021,18 @@ void handle_sprite_change(void)
 			}
 			else
 			{
-				SPRY[ 5] = 255;
-				SPRY[ 6] = 255;
-				SPRY[ 7] = 255;
+				SPRY[SANTA_INDEX] = 255;
+				SPRY[REINDEER_INDEX] = 255;
+				SPRY[BEFANA_INDEX] = 255;
 				
 				SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'M';
 				SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'E';
 				SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'R';
 				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'R';	
 			
-				SPRF[ 5]=GFX_START_INDEX - 'A' + 1 + 'C';					
-				SPRF[ 6]=GFX_START_INDEX - 'A' + 1 + 'H';
-				SPRF[ 7]=GFX_START_INDEX - 'A' + 1 + 'R';
+				SPRF[SANTA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'C';					
+				SPRF[REINDEER_INDEX]=GFX_START_INDEX - 'A' + 1 + 'H';
+				SPRF[BEFANA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'R';
 				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'I';
 				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'S';
 				SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'T';
@@ -1012,8 +1048,8 @@ void handle_sprite_change(void)
 				POKE(MULTICOLOR_2,GREEN);
 				
 			
-				SPRC[NUMSPRITES-7] = PURPLE;
-				SPRC[NUMSPRITES-5] = CYAN;
+				SPRC[BOTTOM_PRESENT_INDEX] = PURPLE;
+				SPRC[TOP_PRESENT_INDEX] = CYAN;
 				flip = 1;
 				for(i=0;i<9;++i)
 				{
