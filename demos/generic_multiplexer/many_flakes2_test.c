@@ -229,6 +229,9 @@ unsigned cycle = 1;
 #define XTREE_LIGHT_4 (COLOR+TREE_LEVEL(1)+1)
 #define XTREE_LIGHT_5 (COLOR+TREE_LEVEL(1)+2)
 
+#define MULTICOLOR_1 0xD025
+#define MULTICOLOR_2 0xD026
+
 // $D018 = 53272
 // -----------------
 void init_udg(void)
@@ -284,7 +287,7 @@ void color_change(void)
 	POKE(XTREE_LIGHT_3,MULTI_COLOR_BIT+RED+((j+2)&3));
 	POKE(XTREE_LIGHT_4,MULTI_COLOR_BIT+RED+((j+3)&3));
 	POKE(XTREE_LIGHT_5,MULTI_COLOR_BIT+RED+((j)&3));
-	
+	POKE(MULTI_CHAR_COLOR_1,MULTI_COLOR_BIT+6+(j&1));
 }
 
 
@@ -334,8 +337,6 @@ void restore_text_row(void)
 
 #define REINDEER (- 'A' + 1 + 'Z' + 8)
 
-#define MULTICOLOR_1 0xD025
-#define MULTICOLOR_2 0xD026
 
 // Characters for flashing stars
 #define BIG_FLASHING_STAR 0
