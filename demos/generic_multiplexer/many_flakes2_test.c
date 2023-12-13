@@ -4,6 +4,9 @@
 /*******************
 ** Prototypes
 *******************/
+
+#define SLOW_COMETS 1
+
 void INITSPRITES(void);
 void INITRASTER(void);
 /******************/
@@ -129,6 +132,56 @@ static unsigned char j;
 static unsigned char h;
 static unsigned char restored_text_row[35];
 
+#define COMET_X 0
+#define COMET_Y 23
+
+unsigned char XX = 0;
+unsigned char XX2 = 100;
+unsigned char i;
+unsigned short k;
+unsigned short star_loc;
+unsigned char flip = 1;
+
+unsigned char comet_flash;
+
+// SLOW COMET 1
+unsigned char slow_comet_1_x = COMET_X;
+unsigned char slow_comet_1_y = COMET_Y;
+unsigned char slow_comet_1_x_start;
+unsigned short slow_comet_1_pos;
+unsigned slow_comet_1_counter = 0;
+unsigned short old_slow_comet_1_pos;
+
+// SLOW COMET 2
+unsigned char slow_comet_2_x = COMET_X+16;
+unsigned char slow_comet_2_y = COMET_Y;
+unsigned char slow_comet_2_x_start;
+unsigned short slow_comet_2_pos;
+unsigned slow_comet_2_counter = 0;
+unsigned short old_slow_comet_2_pos;
+
+// FAST COMET 1
+unsigned char fast_comet_1_x = COMET_X+12;
+unsigned char fast_comet_1_y = COMET_Y;
+unsigned char fast_comet_1_x_start;
+unsigned short fast_comet_1_pos;
+unsigned fast_comet_1_counter = 0;
+unsigned short old_fast_comet_1_pos;
+
+// FAST COMET 2
+unsigned char fast_comet_2_x = COMET_X+18;
+unsigned char fast_comet_2_y = COMET_Y;
+unsigned char fast_comet_2_x_start;
+unsigned short fast_comet_2_pos;
+unsigned fast_comet_2_counter = 0;
+unsigned short old_fast_comet_2_pos;
+
+unsigned char below;
+unsigned char text_counter = 0;
+
+unsigned char XB;
+unsigned cycle = 1;
+
 // $D018 = 53272
 // -----------------
 void init_udg(void)
@@ -139,34 +192,46 @@ void init_udg(void)
 	POKE(648,192);
 }
 
-#define TEXT_COLOR_OFFSET 2
+//#define TEXT_COLOR_OFFSET 2
+#define TEXT_COLOR_OFFSET 0
+// #define COLOR_MASK 3
+#define COLOR_MASK 7
 
 void color_change(void)
 {
+	unsigned char color;
+
+	if(!flip)
+	{
+		color = 0;
+	}
+	else
+	{
+		color = +(j&COLOR_MASK);
+	}
+	
     for(h=0;h<10;++h)
     {
         
-        POKE(COLOR+6+h,TEXT_COLOR_OFFSET+(j&3));
-        POKE(COLOR+40+6+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+6+h,TEXT_COLOR_OFFSET+color);
+        POKE(COLOR+40+6+h,TEXT_COLOR_OFFSET+color);
     }
 
     for(h=0;h<6;++h)
     {
         
-        POKE(COLOR+18+h,TEXT_COLOR_OFFSET+(j&3));
-        POKE(COLOR+40+18+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+18+h,TEXT_COLOR_OFFSET+color);
+        POKE(COLOR+40+18+h,TEXT_COLOR_OFFSET+color);
     }
     
     for(h=0;h<8;++h)
     {
         
-        POKE(COLOR+26+h,TEXT_COLOR_OFFSET+(j&3));
-        POKE(COLOR+40+26+h,TEXT_COLOR_OFFSET+(j&3));
+        POKE(COLOR+26+h,TEXT_COLOR_OFFSET+color);
+        POKE(COLOR+40+26+h,TEXT_COLOR_OFFSET+color);
     }  
 }
 
-#define COMET_X 0
-#define COMET_Y 23
 
 void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
 {
@@ -274,54 +339,6 @@ void restore_text_row(void)
 #define PINK       0x0A
 #define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
-
-    unsigned char XX = 0;
-    unsigned char XX2 = 100;
-    unsigned char i;
-    unsigned short k;
-    unsigned short star_loc;
-    unsigned char flip = 1;
-	
-    unsigned char comet_flash;
-	
-    // SLOW COMET 1
-    unsigned char slow_comet_1_x = COMET_X;
-    unsigned char slow_comet_1_y = COMET_Y;
-	unsigned char slow_comet_1_x_start;
-    unsigned short slow_comet_1_pos;
-    unsigned slow_comet_1_counter = 0;
-    unsigned short old_slow_comet_1_pos;
-
-    // SLOW COMET 2
-    unsigned char slow_comet_2_x = COMET_X+16;
-    unsigned char slow_comet_2_y = COMET_Y;
-	unsigned char slow_comet_2_x_start;
-    unsigned short slow_comet_2_pos;
-    unsigned slow_comet_2_counter = 0;
-    unsigned short old_slow_comet_2_pos;
-    
-    // FAST COMET 1
-    unsigned char fast_comet_1_x = COMET_X+12;
-    unsigned char fast_comet_1_y = COMET_Y;
-	unsigned char fast_comet_1_x_start;
-    unsigned short fast_comet_1_pos;
-    unsigned fast_comet_1_counter = 0;
-    unsigned short old_fast_comet_1_pos;
-    
-    // FAST COMET 2
-    unsigned char fast_comet_2_x = COMET_X+18;
-    unsigned char fast_comet_2_y = COMET_Y;
-	unsigned char fast_comet_2_x_start;
-    unsigned short fast_comet_2_pos;
-    unsigned fast_comet_2_counter = 0;
-    unsigned short old_fast_comet_2_pos;
-	
-    unsigned char below;
-    unsigned char text_counter = 0;
-	
-	unsigned char XB;
-	unsigned cycle = 1;
-	// unsigned xmas = 0;
 
 void draw_top_text(void)
 {
@@ -541,7 +558,11 @@ void handle_slow_comets(void)
 				{
 					slow_comet_1_x_start = COMET_X+(rand()&31);
 				}
+				#if SLOW_COMETS==2
 				while((slow_comet_1_x_start==slow_comet_2_x_start)||(slow_comet_1_x_start==fast_comet_1_x_start)||(slow_comet_1_x_start==fast_comet_2_x_start));
+				#else
+				while((slow_comet_1_x_start==fast_comet_1_x_start)||(slow_comet_1_x_start==fast_comet_2_x_start));
+				#endif
 				slow_comet_1_x = slow_comet_1_x_start;
 				slow_comet_1_y = COMET_Y;
 				slow_comet_1_counter = rand()&31;
@@ -557,6 +578,7 @@ void handle_slow_comets(void)
 			} 
 		}
 		
+		#if SLOW_COMETS==2
 		if(slow_comet_2_counter)
 		{
 			--slow_comet_2_counter;
@@ -588,7 +610,8 @@ void handle_slow_comets(void)
 			{
 				POKE(SCREEN+slow_comet_2_pos,COMET);
 			} 
-		}		
+		}	
+		#endif
 	}
 }
 
@@ -614,7 +637,11 @@ void handle_fast_comets(void)
 				{
 					fast_comet_1_x_start = COMET_X+(rand()&31);
 				}
+				#if SLOW_COMETS==2
 				while((fast_comet_1_x_start==slow_comet_1_x_start)||(fast_comet_1_x_start==slow_comet_2_x_start)||(fast_comet_1_x_start==fast_comet_2_x_start));
+				#else
+				while((fast_comet_1_x_start==slow_comet_1_x_start)||(fast_comet_1_x_start==fast_comet_2_x_start));
+				#endif
 				fast_comet_1_x = fast_comet_1_x_start;
 				fast_comet_1_y = COMET_Y;
 				fast_comet_1_counter = rand()&63;
@@ -647,7 +674,11 @@ void handle_fast_comets(void)
 				{
 					fast_comet_2_x_start = COMET_X+(rand()&31);
 				}
+				#if SLOW_COMETS==2				
 				while((fast_comet_2_x_start==fast_comet_1_x_start)||(fast_comet_2_x_start==slow_comet_1_x_start)||(fast_comet_2_x_start==slow_comet_2_x_start));
+				#else
+				while((fast_comet_2_x_start==fast_comet_1_x_start)||(fast_comet_2_x_start==slow_comet_1_x_start));
+				#endif
 				fast_comet_2_x = fast_comet_2_x_start;
 				fast_comet_2_y = COMET_Y;
 				fast_comet_2_counter = rand()&63;
@@ -729,7 +760,7 @@ void init_happy_new_year_sprites(void)
     
 	SPRY[BOTTOM_PRESENT_INDEX]=200;
 	
-    SPRY[BOTTOM_SNOW_INDEX]=170;  
+    SPRY[BOTTOM_SNOW_INDEX]=210;  
     
 	for(i=0;i<BOTTOM_SNOW_INDEX;++i)
 	{
@@ -821,6 +852,7 @@ void handle_text(void)
 	++text_counter;
 	text_counter%=4;
 }
+
 
 void handle_sprite_movement(void)
 {
