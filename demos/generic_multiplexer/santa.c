@@ -1,24 +1,28 @@
-// #include <conio.h>
+#include <conio.h>
 #include <stdlib.h>
 #include <peekpoke.h>
+
+#define uint8_t unsigned char
+#define uint16_t unsigned short
+
 /*******************
 ** Prototypes
 *******************/
 void INITSPRITES(void);
 void INITRASTER(void);
 /******************/
-extern unsigned char SPRX[];
-extern unsigned char SPRY[];
-extern unsigned char SPRC[];
-extern unsigned char SPRF[];
-extern unsigned char SPREX[];
+extern uint8_t SPRX[];
+extern uint8_t SPRY[];
+extern uint8_t SPRC[];
+extern uint8_t SPRF[];
+extern uint8_t SPREX[];
 
-extern unsigned char SPRM[];
+extern uint8_t SPRM[];
 
-extern unsigned char NUMSPRITES;
-extern unsigned char SPRUPDATEFLAG;
-extern unsigned char SPRIRQCOUNTER;
-extern unsigned char MULTIPLEX_DONE;
+extern uint8_t NUMSPRITES;
+extern uint8_t SPRUPDATEFLAG;
+extern uint8_t SPRIRQCOUNTER;
+extern uint8_t MULTIPLEX_DONE;
 extern unsigned short SPRITE_GFX;
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
@@ -84,27 +88,28 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 
 #define GFX_START_INDEX (GFX_START/0x40U)
 
-const char MESSAGE[12] = "HAPPYNEWYEAR";
-#define MESSAGE_LENGTH 12
+// const char MESSAGE[12] = "HAPPYNEWYEAR";
+// #define MESSAGE_LENGTH 12
 
-const char MESSAGE2[14] = "MERRYCHRISTMAS";
-#define MESSAGE2_LENGTH 14
+// const char MESSAGE2[14] = "MERRYCHRISTMAS";
+// #define MESSAGE2_LENGTH 14
 
-const unsigned char COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+// const uint8_t COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
-const char AUTHOR[15] = "FABRIZIO CARUSO";
-const char TEXT1[27] =  "ALL LOGIC CODE WRITTEN IN C";
-const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
-const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
-const char TEXT4[17] =  "FAST MODE ENABLED";
+// const char AUTHOR[15] = "FABRIZIO CARUSO";
+// const char TEXT1[27] =  "ALL LOGIC CODE WRITTEN IN C";
+// const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
+// const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
+// const char TEXT4[17] =  "FAST MODE ENABLED";
 
-const char WRITTEN[15] = "WRITTEN IN C BY";
+// const char WRITTEN[15] = "WRITTEN IN C BY";
 
-const char YEAR[14] =   "HAPPY NEW YEAR";
+// const char YEAR[14] =   "HAPPY NEW YEAR";
 
-const unsigned char STAR_0[4] = {0x00,0x10,0x10,0x00};
-const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
+// const uint8_t STAR_0[4] = {0x00,0x10,0x10,0x00};
+// const uint8_t STAR_1[4] = {0x10,0x28,0x38,0x10};
 // const star STAR_0[4] = {};
+
 
 #define X_OFFSET 46
 #define Y_OFFSET 58
@@ -123,8 +128,6 @@ const unsigned char STAR_1[4] = {0x10,0x28,0x38,0x10};
 #define MOON_OFFSET (40*2+36)
 
 
-static unsigned char j;
-
 
 // $D018 = 53272
 // -----------------
@@ -134,21 +137,6 @@ void init_udg(void)
 	POKE(0xD018,PEEK(0xD018)|8);
 	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
 	POKE(648,192);
-}
-
-
-void print(const char *str, unsigned char len, unsigned short offset, unsigned char col)
-{
-    unsigned char k;
-    
-    for(k=0;k<len;++k)
-    {
-        if(str[k]!=' ')
-        {
-            POKE(SCREEN+offset+k,str[k]-'A'+1);
-            POKE(COLOR+offset+k,col);
-        }
-    }
 }
 
 
@@ -207,6 +195,7 @@ void print(const char *str, unsigned char len, unsigned short offset, unsigned c
 15	$0F	light grey 
 
 */
+#define BLACK      0x00
 #define WHITE      0x01
 #define RED        0x02
 #define CYAN       0x03
@@ -217,11 +206,34 @@ void print(const char *str, unsigned char len, unsigned short offset, unsigned c
 #define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
 
-unsigned char XX = 0;
-unsigned char XX2 = 100;
-unsigned char i;
-unsigned short k;
-unsigned short star_loc;
+
+#define STAR_TILE ('9'+31)
+#define NUMBER_OF_COLS 40
+
+
+
+static uint16_t loop = 0;
+static uint8_t i;
+static uint8_t j;
+static uint8_t star_mask = 1;
+
+static uint16_t k;
+
+
+
+void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
+{
+    uint8_t k;
+    
+    for(k=0;k<len;++k)
+    {
+        if(str[k]!=' ')
+        {
+            POKE(SCREEN+offset+k,str[k]-'A'+1);
+            POKE(COLOR+offset+k,col);
+        }
+    }
+}
  
 
 void draw_the_moon(void)
@@ -230,19 +242,17 @@ void draw_the_moon(void)
     {
         for(j=0;j<4;++j)
         {
-            POKE(SCREEN+MOON_OFFSET+i+40*j,(255-16)+i+j*4);
-            POKE(COLOR+MOON_OFFSET+i+40*j,1);
+            POKE(SCREEN+MOON_OFFSET+i+NUMBER_OF_COLS*j,(255-16)+i+j*4);
+            POKE(COLOR+MOON_OFFSET+i+NUMBER_OF_COLS*j,1);
         }
     }	
 }
 
 
-
-
 void set_background_colors(void)
 {
-    POKE(0xd020, 0x00);
-    POKE(0xd021, 0x00);  	
+    POKE(0xd020, BLACK);
+    POKE(0xd021, BLACK);  	
 }
 
 
@@ -251,8 +261,24 @@ void clear_screen(void)
     for(k=0;k<1000;++k)
     {
         POKE(SCREEN+k,32);
-        POKE(COLOR+k,0);
+        POKE(COLOR+k,1);
     }	
+}
+
+
+void init_stars(void)
+{
+	uint8_t h;
+	uint8_t m;
+	
+	for(i=2;i<22;++i)
+	{
+		h = 2+(rand())%20;
+		for(j=0;j<40;++j)
+		{
+			POKE(SCREEN+h*NUMBER_OF_COLS+j,STAR_TILE+((j+i)%NUMBER_OF_COLS));	
+		}
+	}
 }
 
 void init_background(void)
@@ -263,29 +289,92 @@ void init_background(void)
     
 	set_background_colors();
 
+	init_stars();
+
 	draw_the_moon();
 	
 }
 
 
+#define handle_stars() \
+do \
+{ \
+	POKE(SHAPE+(('9'+31U+loop)*8U),star_mask); \
+} while(0)
 
-void init_screen(void)
+
+void printd(char val, uint8_t length, unsigned short offset, uint8_t color)
 {
+	uint8_t i;
+	uint8_t digit;
+	
+	for(i=0;i<length;++i)
+	{
+		digit = (uint8_t) ((val)%10);
+		val-= digit;
+		val/=10;
+		
+		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
+		POKE(COLOR+offset+length-1-i, color);
+
+		/*
+        #if ((defined(__APPLE2__) || defined(__APPLE2ENH__)) && defined(__APPLE2_HGR_GRAPHICS))
+        _DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 1u));
+        #elif ((defined(__COCO__) || defined(__DRAGON__))&&!defined(__BIT_MAPPED_GRAPHICS))
+        _DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u + 64u));
+        #elif defined(__QUAD_MEMORY_MAPPED_GRAPHICS)
+		_DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u-32u));
+        #else
+		_DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u));
+        #endif
+		*/
+	}
 }
 
+
+#include<joystick.h>
 /******************/
 int main()
 {        
+	uint8_t input;
+	
 	init_background();
     
     INITSPRITES();
     INITRASTER();	
-    
-	init_screen();
-	
+
+	loop=NUMBER_OF_COLS;
+
+	joy_install((void *)joy_static_stddrv);
+    	
     while(1) 
     {
         if (MULTIPLEX_DONE) {	
+			// ++loop;
+			// loop=0;
+			// loop%=NUMBER_OF_COLS;
+			star_mask<<=1;
+			if(!star_mask)
+			{
+				// handle_stars();
+				POKE(SHAPE+(('9'+31U+loop)*8U),0);
+				++star_mask;
+				--loop;
+				if(!loop)
+				{
+					loop=NUMBER_OF_COLS;
+				}
+			}
+			// print("HELLO", 5, 1, WHITE);
+
+			// do
+			// {
+			// input = joy_read (JOY_2);
+
+			// } while(!JOY_FIRE(input));
+			printd(loop,3,0,WHITE);
+				
+			handle_stars();
 		
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	

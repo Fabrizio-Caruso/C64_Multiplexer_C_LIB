@@ -132,7 +132,7 @@ xmas:
 
 santa: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
-	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MAXSPR=12 -D_NUMBER_OF_SPRITES_=12 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \

@@ -282,6 +282,7 @@ void color_change(void)
     }  
 	
 	
+	// Change tree lights
 	POKE(XTREE_LIGHT_1,MULTI_COLOR_BIT+WHITE+(j&3));
 	POKE(XTREE_LIGHT_2,MULTI_COLOR_BIT+WHITE+((j+1)&3));
 	POKE(XTREE_LIGHT_3,MULTI_COLOR_BIT+WHITE+((j+2)&3));
