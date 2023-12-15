@@ -212,7 +212,7 @@ void init_udg(void)
 
 
 
-static uint16_t loop = 0;
+static uint8_t loop = 0;
 static uint8_t i;
 static uint8_t j;
 static uint8_t star_mask = 1;
@@ -269,14 +269,13 @@ void clear_screen(void)
 void init_stars(void)
 {
 	uint8_t h;
-	uint8_t m;
 	
 	for(i=2;i<22;++i)
 	{
-		h = 2+(rand())%20;
-		for(j=0;j<40;++j)
+		h = 2+(rand())%NUMBER_OF_COLS;
+		for(j=0;j<NUMBER_OF_COLS;++j)
 		{
-			POKE(SCREEN+h*NUMBER_OF_COLS+j,STAR_TILE+((j+i)%NUMBER_OF_COLS));	
+			POKE(SCREEN+i*NUMBER_OF_COLS+(j+h)%NUMBER_OF_COLS,STAR_TILE+((j+i)%NUMBER_OF_COLS));	
 		}
 	}
 }
@@ -299,7 +298,7 @@ void init_background(void)
 #define handle_stars() \
 do \
 { \
-	POKE(SHAPE+(('9'+31U+loop)*8U),star_mask); \
+	POKE(SHAPE+((STAR_TILE+loop)*8U),star_mask); \
 } while(0)
 
 
@@ -316,18 +315,6 @@ void printd(char val, uint8_t length, unsigned short offset, uint8_t color)
 		
 		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
 		POKE(COLOR+offset+length-1-i, color);
-
-		/*
-        #if ((defined(__APPLE2__) || defined(__APPLE2ENH__)) && defined(__APPLE2_HGR_GRAPHICS))
-        _DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 1u));
-        #elif ((defined(__COCO__) || defined(__DRAGON__))&&!defined(__BIT_MAPPED_GRAPHICS))
-        _DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u + 64u));
-        #elif defined(__QUAD_MEMORY_MAPPED_GRAPHICS)
-		_DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u-32u));
-        #else
-		_DISPLAY(x+length-1-i,y, (uint8_t) (digit+(uint8_t) 48u));
-        #endif
-		*/
 	}
 }
 
@@ -357,7 +344,7 @@ int main()
 			if(!star_mask)
 			{
 				// handle_stars();
-				POKE(SHAPE+(('9'+31U+loop)*8U),0);
+				POKE(SHAPE+((STAR_TILE+loop)<<3),0);
 				++star_mask;
 				--loop;
 				if(!loop)
@@ -372,7 +359,7 @@ int main()
 			// input = joy_read (JOY_2);
 
 			// } while(!JOY_FIRE(input));
-			printd(loop,3,0,WHITE);
+			// printd(loop,3,0,WHITE);
 				
 			handle_stars();
 		
