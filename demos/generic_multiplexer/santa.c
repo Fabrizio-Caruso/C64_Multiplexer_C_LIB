@@ -234,6 +234,25 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
         }
     }
 }
+
+
+void printd(char val, uint8_t length, unsigned short offset, uint8_t color)
+{
+	uint8_t i;
+	uint8_t digit;
+	
+	for(i=0;i<length;++i)
+	{
+		digit = (uint8_t) ((val)%10);
+		val-= digit;
+		val/=10;
+		
+		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
+		POKE(COLOR+offset+length-1-i, color);
+	}
+}
+
+
  
 
 void draw_the_moon(void)
@@ -268,14 +287,31 @@ void clear_screen(void)
 
 void init_stars(void)
 {
-	uint8_t h;
+	uint8_t offset;
+	uint8_t previous;
+	
+	offset = 0;
 	
 	for(i=2;i<22;++i)
 	{
-		h = 2+(rand())%NUMBER_OF_COLS;
+		previous = offset;
+		do
+		{
+			offset = 2+(rand())%NUMBER_OF_COLS;
+		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
+		// offset = 0;
+		// {
+			// uint16_t t;
+			
+			// printd(offset,3,0,WHITE);
+			// for(t=0;t<9000;++t)
+			// {
+			// }
+		// }
+		
 		for(j=0;j<NUMBER_OF_COLS;++j)
 		{
-			POKE(SCREEN+i*NUMBER_OF_COLS+(j+h)%NUMBER_OF_COLS,STAR_TILE+((j+i)%NUMBER_OF_COLS));	
+			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,STAR_TILE+(j%NUMBER_OF_COLS));	
 		}
 	}
 }
@@ -294,30 +330,11 @@ void init_background(void)
 	
 }
 
-
-#define handle_stars() \
-do \
-{ \
-	POKE(SHAPE+((STAR_TILE+loop)*8U),star_mask); \
-} while(0)
-
-
-void printd(char val, uint8_t length, unsigned short offset, uint8_t color)
+#define  STAR_TILE_OFFSET SHAPE+8*STAR_TILE
+void handle_stars(void)
 {
-	uint8_t i;
-	uint8_t digit;
-	
-	for(i=0;i<length;++i)
-	{
-		digit = (uint8_t) ((val)%10);
-		val-= digit;
-		val/=10;
-		
-		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
-		POKE(COLOR+offset+length-1-i, color);
-	}
+POKE(STAR_TILE_OFFSET+((loop)<<3),star_mask);
 }
-
 
 #include<joystick.h>
 /******************/
@@ -337,14 +354,11 @@ int main()
     while(1) 
     {
         if (MULTIPLEX_DONE) {	
-			// ++loop;
-			// loop=0;
-			// loop%=NUMBER_OF_COLS;
 			star_mask<<=1;
+			handle_stars();
+
 			if(!star_mask)
 			{
-				// handle_stars();
-				POKE(SHAPE+((STAR_TILE+loop)<<3),0);
 				++star_mask;
 				--loop;
 				if(!loop)
@@ -352,16 +366,6 @@ int main()
 					loop=NUMBER_OF_COLS;
 				}
 			}
-			// print("HELLO", 5, 1, WHITE);
-
-			// do
-			// {
-			// input = joy_read (JOY_2);
-
-			// } while(!JOY_FIRE(input));
-			// printd(loop,3,0,WHITE);
-				
-			handle_stars();
 		
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
