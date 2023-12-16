@@ -333,21 +333,30 @@ void init_background(void)
 #define  STAR_TILE_OFFSET SHAPE+8*STAR_TILE
 void handle_stars(void)
 {
-POKE(STAR_TILE_OFFSET+((loop)<<3),star_mask);
+	// waitvsync();
+	// while(waitvsync())
+	// {
+		POKE(STAR_TILE_OFFSET+((loop)<<3),star_mask);
+	// }
 }
 
 #include<joystick.h>
+#define STANDARD_JOY 2
+
 /******************/
 int main()
 {        
 	uint8_t input;
+	
+	uint8_t prev_loop;
 	
 	init_background();
     
     INITSPRITES();
     INITRASTER();	
 
-	loop=NUMBER_OF_COLS;
+	// loop=NUMBER_OF_COLS;
+	loop=0;
 
 	joy_install((void *)joy_static_stddrv);
     	
@@ -355,17 +364,33 @@ int main()
     {
         if (MULTIPLEX_DONE) {	
 			star_mask<<=1;
-			handle_stars();
+			// handle_stars();
 
 			if(!star_mask)
 			{
 				++star_mask;
-				--loop;
+				prev_loop = loop;
 				if(!loop)
 				{
-					loop=NUMBER_OF_COLS;
+					loop=NUMBER_OF_COLS-1;
+				}
+				else
+				{
+					--loop;
 				}
 			}
+			// waitvsync();
+			handle_stars();
+			if(star_mask==1)
+			{
+				POKE(STAR_TILE_OFFSET+((prev_loop)<<3),0);
+			}
+		
+			// do
+			// {
+				// input = joy_read(STANDARD_JOY);
+			// } while (!JOY_FIRE(input));
+			
 		
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
