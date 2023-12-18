@@ -306,18 +306,18 @@ void clear_screen(void)
 }
 
 
-#define MIN_SLOW_STAR  2
-#define MAX_SLOW_STAR 14
-#define MAX_FAST_STAR 23
+#define MIN_STAR  1
+#define MAX_STAR 24
 
-void init_stars(void)
+void fill_sky(uint8_t star_offset, uint8_t star_type)
 {
 	uint8_t offset;
 	uint8_t previous;
+	// uint8_t char_type;
 	
 	offset = 0;
 	
-	for(i=MIN_SLOW_STAR;i<MAX_SLOW_STAR;++i)
+	for(i=MIN_STAR+star_offset;i<MAX_STAR;i+=2)
 	{
 		previous = offset;
 		do
@@ -325,27 +325,56 @@ void init_stars(void)
 			offset = 2+(rand())%NUMBER_OF_COLS;
 		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
 
+		// if(i&1)
+		// {
+			// char_type = SLOW_STAR_TILE;
+		// }
+		// else
+		// {
+			// char_type = FAST_STAR_TILE;
+		// }
 		for(j=0;j<NUMBER_OF_COLS;++j)
 		{
-			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,SLOW_STAR_TILE+(j%NUMBER_OF_COLS));	
-		}
-	}
-	
-	offset = 0;
-
-	for(i=MAX_SLOW_STAR;i<MAX_FAST_STAR;++i)
-	{
-		previous = offset;
-		do
-		{
-			offset = 2+(rand())%NUMBER_OF_COLS;
-		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
-
-		for(j=0;j<NUMBER_OF_COLS;++j)
-		{
-			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,FAST_STAR_TILE+(j%NUMBER_OF_COLS));	
+			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,star_type+(j%NUMBER_OF_COLS));	
 		}
 	}	
+	
+}
+
+void init_stars(void)
+{
+	// uint8_t offset;
+	// uint8_t previous;
+	// uint8_t char_type;
+	
+	// offset = 0;
+	
+	
+	fill_sky(0,SLOW_STAR_TILE);
+	fill_sky(1,FAST_STAR_TILE);
+	
+	// for(i=MIN_STAR;i<MAX_STAR;++i)
+	// {
+		// previous = offset;
+		// do
+		// {
+			// offset = 2+(rand())%NUMBER_OF_COLS;
+		// } while((offset==previous)||(offset==previous-1)||(offset==previous+1));
+
+		// if(i&1)
+		// {
+			// char_type = SLOW_STAR_TILE;
+		// }
+		// else
+		// {
+			// char_type = FAST_STAR_TILE;
+		// }
+		// for(j=0;j<NUMBER_OF_COLS;++j)
+		// {
+			// POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,char_type+(j%NUMBER_OF_COLS));	
+		// }
+	// }	
+	
 }
 
 void init_background(void)
@@ -368,6 +397,9 @@ void init_background(void)
 void handle_stars(void)
 {
 	POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
+
+	// POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
+
 	
 	POKE(FAST_STAR_TILE_OFFSET+((fast_loop)<<3),fast_star_mask);
 
