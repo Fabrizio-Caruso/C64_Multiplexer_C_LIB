@@ -398,7 +398,7 @@ void handle_stars(void)
 {
 	POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
 
-	// POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
+	// POKE(SLOW_STAR_TILE_OFFSET+(((slow_loop+(NUMBER_OF_COLS))%NUMBER_OF_COLS)<<3),slow_star_mask);
 
 	
 	POKE(FAST_STAR_TILE_OFFSET+((fast_loop)<<3),fast_star_mask);
