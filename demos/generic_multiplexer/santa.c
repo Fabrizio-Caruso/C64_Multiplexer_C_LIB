@@ -217,19 +217,29 @@ void init_udg(void)
 #define LIGHT_GREY 0x0F
 
 
-#define STAR_TILE ('9'+31)
 #define NUMBER_OF_COLS 40
 
+#define SLOW_STAR_TILE ('9'+31)
+
+#define FAST_STAR_TILE (SLOW_STAR_TILE+NUMBER_OF_COLS)
 
 
-static uint8_t loop = 0;
+
+
+static uint8_t slow_loop = 0;
+static uint8_t fast_loop = 20;
 static uint8_t i;
 static uint8_t j;
-static uint8_t star_mask = 1;
+static uint8_t slow_star_mask = 1;
+static uint8_t fast_star_mask = 1;
 
 static uint16_t k;
 
 static uint8_t input;
+
+uint8_t prev_slow_loop;
+uint8_t prev_fast_loop;
+
 
 
 void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
@@ -296,6 +306,10 @@ void clear_screen(void)
 }
 
 
+#define MIN_SLOW_STAR  2
+#define MAX_SLOW_STAR 14
+#define MAX_FAST_STAR 23
+
 void init_stars(void)
 {
 	uint8_t offset;
@@ -303,28 +317,35 @@ void init_stars(void)
 	
 	offset = 0;
 	
-	for(i=2;i<22;++i)
+	for(i=MIN_SLOW_STAR;i<MAX_SLOW_STAR;++i)
 	{
 		previous = offset;
 		do
 		{
 			offset = 2+(rand())%NUMBER_OF_COLS;
 		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
-		// offset = 0;
-		// {
-			// uint16_t t;
-			
-			// printd(offset,3,0,WHITE);
-			// for(t=0;t<9000;++t)
-			// {
-			// }
-		// }
-		
+
 		for(j=0;j<NUMBER_OF_COLS;++j)
 		{
-			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,STAR_TILE+(j%NUMBER_OF_COLS));	
+			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,SLOW_STAR_TILE+(j%NUMBER_OF_COLS));	
 		}
 	}
+	
+	offset = 0;
+
+	for(i=MAX_SLOW_STAR;i<MAX_FAST_STAR;++i)
+	{
+		previous = offset;
+		do
+		{
+			offset = 2+(rand())%NUMBER_OF_COLS;
+		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
+
+		for(j=0;j<NUMBER_OF_COLS;++j)
+		{
+			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,FAST_STAR_TILE+(j%NUMBER_OF_COLS));	
+		}
+	}	
 }
 
 void init_background(void)
@@ -341,14 +362,15 @@ void init_background(void)
 	
 }
 
-#define  STAR_TILE_OFFSET SHAPE+8*STAR_TILE
+#define SLOW_STAR_TILE_OFFSET SHAPE+8*SLOW_STAR_TILE
+#define FAST_STAR_TILE_OFFSET  SHAPE+8*FAST_STAR_TILE
+
 void handle_stars(void)
 {
-	// waitvsync();
-	// while(waitvsync())
-	// {
-		POKE(STAR_TILE_OFFSET+((loop)<<3),star_mask);
-	// }
+	POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
+	
+	POKE(FAST_STAR_TILE_OFFSET+((fast_loop)<<3),fast_star_mask);
+
 }
 
 
@@ -392,10 +414,6 @@ void handle_player(void)
 /******************/
 int main()
 {        
-	// uint8_t input;
-	
-	uint8_t prev_loop;
-	
 	counter = 50;
 	
 	init_background();
@@ -405,8 +423,9 @@ int main()
 
 	init_player();
 
-	// loop=NUMBER_OF_COLS;
-	loop=0;
+	// slow_loop=NUMBER_OF_COLS;
+	slow_loop=0;
+	fast_loop=0;
 	
 	SPRX[BEFANA_INDEX] = 100;
 	SPRY[BEFANA_INDEX] = 50;
@@ -420,33 +439,49 @@ int main()
     while(1) 
     {
         if (MULTIPLEX_DONE) {	
-			star_mask<<=1;
+			slow_star_mask<<=1;
 			// handle_stars();
 
-			if(!star_mask)
+			if(!slow_star_mask)
 			{
-				++star_mask;
-				prev_loop = loop;
-				if(!loop)
+				++slow_star_mask;
+				prev_slow_loop = slow_loop;
+				if(!slow_loop)
 				{
-					loop=NUMBER_OF_COLS-1;
+					slow_loop=NUMBER_OF_COLS-1;
 				}
 				else
 				{
-					--loop;
+					--slow_loop;
 				}
 			}
-			// waitvsync();
-			handle_stars();
-			if(star_mask==1)
+
+			fast_star_mask<<=2;
+			
+			if(!fast_star_mask)
 			{
-				POKE(STAR_TILE_OFFSET+((prev_loop)<<3),0);
+				++fast_star_mask;
+				prev_fast_loop = fast_loop;
+				if(!fast_loop)
+				{
+					fast_loop=NUMBER_OF_COLS-1;
+				}
+				else
+				{
+					--fast_loop;
+				}
 			}
+			
+			handle_stars();
+			if(slow_star_mask==1)
+			{
+				POKE(SLOW_STAR_TILE_OFFSET+((prev_slow_loop)<<3),0);
+			}
+			if(fast_star_mask==1)
+			{
+				POKE(FAST_STAR_TILE_OFFSET+((prev_fast_loop)<<3),0);
+			}			
 		
-			// do
-			// {
-				// input = joy_read(STANDARD_JOY);
-			// } while (!JOY_FIRE(input));
 			handle_player();
 			++counter; 
 			
