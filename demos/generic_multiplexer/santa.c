@@ -66,6 +66,10 @@ extern unsigned short SPRITE_GFX;
 	ONE_SHIFTED_SINUS(F) \
 }
 
+#include<joystick.h>
+#define STANDARD_JOY 2
+
+
 // Pre-calculated sinus values
 const char yValues[] = SINUS(1);
 
@@ -87,6 +91,11 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 #endif
 
 #define GFX_START_INDEX (GFX_START/0x40U)
+
+#define BEFANA_INDEX 0
+
+uint8_t counter;
+
 
 // const char MESSAGE[12] = "HAPPYNEWYEAR";
 // #define MESSAGE_LENGTH 12
@@ -153,7 +162,7 @@ void init_udg(void)
 
 #define BEFANA_LEFT_TO_RIGHT (- 'A' + 1 + 'Z' + 1)
 #define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
-#define BEFANA BEFANA_RIGHT_TO_LEFT
+#define BEFANA BEFANA_LEFT_TO_RIGHT
 
 #define PRESENT (- 'A' + 1 + 'Z' + 15)
 
@@ -203,6 +212,7 @@ void init_udg(void)
 #define GREEN      0x05
 #define YELLOW     0x07
 #define BROWN      0x09
+#define PINK       0x0A
 #define LIGHT_BLUE 0x0E
 #define LIGHT_GREY 0x0F
 
@@ -219,6 +229,7 @@ static uint8_t star_mask = 1;
 
 static uint16_t k;
 
+static uint8_t input;
 
 
 void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
@@ -340,23 +351,69 @@ void handle_stars(void)
 	// }
 }
 
-#include<joystick.h>
-#define STANDARD_JOY 2
+
+void init_player(void)
+{
+	SPRX[BEFANA_INDEX] = 50;
+	SPRY[BEFANA_INDEX] = 100;
+	SPRM[BEFANA_INDEX] = 1;	
+}
+
+void handle_player(void)
+{
+
+	// SPRX[BEFANA_INDEX] = counter;
+	// SPRY[BEFANA_INDEX] = 100;
+	input = joy_read(STANDARD_JOY);
+	
+	if(JOY_LEFT(input))
+	{
+		--SPRX[BEFANA_INDEX];
+	}
+	else if(JOY_RIGHT(input))
+	{
+		++SPRX[BEFANA_INDEX];
+	}
+	
+	if(JOY_UP(input))
+	{
+		--SPRY[BEFANA_INDEX];
+	}
+	else if(JOY_DOWN(input))
+	{
+		++SPRY[BEFANA_INDEX];
+	}
+	
+	SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+}
+
+
 
 /******************/
 int main()
 {        
-	uint8_t input;
+	// uint8_t input;
 	
 	uint8_t prev_loop;
+	
+	counter = 50;
 	
 	init_background();
     
     INITSPRITES();
     INITRASTER();	
 
+	init_player();
+
 	// loop=NUMBER_OF_COLS;
 	loop=0;
+	
+	SPRX[BEFANA_INDEX] = 100;
+	SPRY[BEFANA_INDEX] = 50;
+	SPRF[BEFANA_INDEX] = GFX_START+BEFANA;
+	POKE(MULTICOLOR_1,BROWN);
+	POKE(MULTICOLOR_2,LIGHT_GREY);
+	SPRC[BEFANA_INDEX]=PINK;
 
 	joy_install((void *)joy_static_stddrv);
     	
@@ -390,8 +447,9 @@ int main()
 			// {
 				// input = joy_read(STANDARD_JOY);
 			// } while (!JOY_FIRE(input));
+			handle_player();
+			++counter; 
 			
-		
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
         }
