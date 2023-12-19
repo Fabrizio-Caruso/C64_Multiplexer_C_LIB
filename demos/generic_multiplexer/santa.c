@@ -461,6 +461,7 @@ void handle_player(void)
 static const uint8_t GRASS_SHAPE[4][7]=
 {
     {0x18,0x0C,0x66,0x26,0x36,0x96,0x94},
+    // {0x0C,0x0C,0x66,0x26,0x36,0x96,0x94},
     {0x60,0x30,0x99,0x98,0xD8,0x5A,0x52},
     {0x81,0xC0,0x66,0x62,0x63,0x69,0x49},
     {0x06,0x03,0x99,0x89,0x8D,0xA5,0x25}  
@@ -481,6 +482,41 @@ void scroll_grass(void)
 }
 
 
+#define NUMBER_OF_BALLOONS 12
+void init_balloons(void)
+{
+    uint8_t i;
+    
+    for(i=1;i<=12;++i)
+    {
+        SPRF[i]=GFX_START_INDEX + HOT_AIR_BALLOON;
+        SPRC[i]=CYAN;
+        SPRM[i]=0;
+        SPRY[i]=255-i*12;
+        
+        if(i&1)
+        {
+            SPRX[i]=70;
+        }
+        else
+        {
+            SPRX[i]=110;
+        }
+    }
+}
+
+
+void handle_balloons(void)
+{
+    uint8_t i;
+    
+    for(i=1;i<=NUMBER_OF_BALLOONS;++i)
+    {
+        --SPRY[i];
+        SPRX[i]=xValues[counter];
+    }
+}
+
 
 /******************/
 int main()
@@ -493,6 +529,7 @@ int main()
     INITRASTER();	
 
 	init_player();
+    init_balloons();
 
 	// slow_loop=NUMBER_OF_COLS;
 	slow_loop=0;
@@ -554,6 +591,8 @@ int main()
 			}			
 		
 			handle_player();
+            
+            handle_balloons();
 			++counter; 
 			
             if(counter&1)
