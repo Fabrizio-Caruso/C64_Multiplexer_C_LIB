@@ -338,8 +338,8 @@ void fill_sky(uint8_t star_offset, uint8_t star_type)
 			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,star_type+(j%NUMBER_OF_COLS));	
 		}
 	}	
-	
 }
+
 
 void init_stars(void)
 {
@@ -377,6 +377,20 @@ void init_stars(void)
 	
 }
 
+#define GRASS_TILE 36
+
+void init_grass(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<NUMBER_OF_COLS;++i)
+    {
+        POKE(SCREEN+1000-40+i,GRASS_TILE);
+        POKE(COLOR+1000-40+i,GREEN);
+    }
+}
+
+
 void init_background(void)
 {
 	clear_screen();
@@ -386,6 +400,8 @@ void init_background(void)
 	set_background_colors();
 
 	init_stars();
+    
+    init_grass();
 
 	draw_the_moon();
 	
@@ -439,6 +455,29 @@ void handle_player(void)
 	}
 	
 	SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+}
+
+
+static const uint8_t GRASS_SHAPE[4][7]=
+{
+    {0x18,0x0C,0x66,0x26,0x36,0x96,0x94},
+    {0x60,0x30,0x99,0x98,0xD8,0x5A,0x52},
+    {0x81,0xC0,0x66,0x62,0x63,0x69,0x49},
+    {0x06,0x03,0x99,0x89,0x8D,0xA5,0x25}  
+};
+
+
+
+
+void scroll_grass(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<7;++i)
+    {
+        
+        POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(counter/2)&3][i]);
+    }
 }
 
 
@@ -517,6 +556,10 @@ int main()
 			handle_player();
 			++counter; 
 			
+            if(counter&1)
+            {
+                scroll_grass();
+            }
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
         }
