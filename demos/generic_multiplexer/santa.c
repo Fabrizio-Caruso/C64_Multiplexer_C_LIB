@@ -93,6 +93,7 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 #define GFX_START_INDEX (GFX_START/0x40U)
 
 #define BEFANA_INDEX 0
+#define HOT_AIR_BALLOON_INDEX 1
 
 uint8_t counter;
 
@@ -410,7 +411,7 @@ void init_background(void)
 #define SLOW_STAR_TILE_OFFSET SHAPE+8*SLOW_STAR_TILE
 #define FAST_STAR_TILE_OFFSET  SHAPE+8*FAST_STAR_TILE
 
-void handle_stars(void)
+void draw_stars(void)
 {
 	POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
 
@@ -426,14 +427,13 @@ void init_player(void)
 {
 	SPRX[BEFANA_INDEX] = 50;
 	SPRY[BEFANA_INDEX] = 100;
-	SPRM[BEFANA_INDEX] = 1;	
+	SPRM[BEFANA_INDEX] = 1;
+    SPRC[BEFANA_INDEX] = PINK;
 }
 
 void handle_player(void)
 {
 
-	// SPRX[BEFANA_INDEX] = counter;
-	// SPRY[BEFANA_INDEX] = 100;
 	input = joy_read(STANDARD_JOY);
 	
 	if(JOY_LEFT(input))
@@ -458,10 +458,56 @@ void handle_player(void)
 }
 
 
+void handle_stars(void)
+{
+    slow_star_mask<<=1;
+
+    if(!slow_star_mask)
+    {
+        ++slow_star_mask;
+        prev_slow_loop = slow_loop;
+        if(!slow_loop)
+        {
+            slow_loop=NUMBER_OF_COLS-1;
+        }
+        else
+        {
+            --slow_loop;
+        }
+    }
+
+    fast_star_mask<<=2;
+    
+    if(!fast_star_mask)
+    {
+        ++fast_star_mask;
+        prev_fast_loop = fast_loop;
+        if(!fast_loop)
+        {
+            fast_loop=NUMBER_OF_COLS-1;
+        }
+        else
+        {
+            --fast_loop;
+        }
+    }
+    
+    draw_stars();
+    if(slow_star_mask==1)
+    {
+        POKE(SLOW_STAR_TILE_OFFSET+((prev_slow_loop)<<3),0);
+    }
+    if(fast_star_mask==1)
+    {
+        POKE(FAST_STAR_TILE_OFFSET+((prev_fast_loop)<<3),0);
+    }	    
+}
+
+
+// TODO: could be done for each pixel shift
 static const uint8_t GRASS_SHAPE[4][7]=
 {
     {0x18,0x0C,0x66,0x26,0x36,0x96,0x94},
-    // {0x0C,0x0C,0x66,0x26,0x36,0x96,0x94},
     {0x60,0x30,0x99,0x98,0xD8,0x5A,0x52},
     {0x81,0xC0,0x66,0x62,0x63,0x69,0x49},
     {0x06,0x03,0x99,0x89,0x8D,0xA5,0x25}  
@@ -487,12 +533,12 @@ void init_balloons(void)
 {
     uint8_t i;
     
-    for(i=1;i<=12;++i)
+    for(i=1;i<=NUMBER_OF_BALLOONS;++i)
     {
         SPRF[i]=GFX_START_INDEX + HOT_AIR_BALLOON;
         SPRC[i]=CYAN;
         SPRM[i]=0;
-        SPRY[i]=255-i*12;
+        SPRY[i]=30U+i*16U;//;255-i*12;
         
         if(i&1)
         {
@@ -513,7 +559,7 @@ void handle_balloons(void)
     for(i=1;i<=NUMBER_OF_BALLOONS;++i)
     {
         --SPRY[i];
-        SPRX[i]=xValues[counter];
+        SPRX[i]=xValues[counter+i*8];
     }
 }
 
@@ -521,6 +567,9 @@ void handle_balloons(void)
 /******************/
 int main()
 {        
+
+    NUMSPRITES = _NUMBER_OF_SPRITES_;
+
 	counter = 50;
 	
 	init_background();
@@ -531,13 +580,12 @@ int main()
 	init_player();
     init_balloons();
 
-	// slow_loop=NUMBER_OF_COLS;
 	slow_loop=0;
 	fast_loop=0;
 	
 	SPRX[BEFANA_INDEX] = 100;
 	SPRY[BEFANA_INDEX] = 50;
-	SPRF[BEFANA_INDEX] = GFX_START+BEFANA;
+	// SPRF[BEFANA_INDEX] = GFX_START+BEFANA;
 	POKE(MULTICOLOR_1,BROWN);
 	POKE(MULTICOLOR_2,LIGHT_GREY);
 	SPRC[BEFANA_INDEX]=PINK;
@@ -547,48 +595,7 @@ int main()
     while(1) 
     {
         if (MULTIPLEX_DONE) {	
-			slow_star_mask<<=1;
-			// handle_stars();
-
-			if(!slow_star_mask)
-			{
-				++slow_star_mask;
-				prev_slow_loop = slow_loop;
-				if(!slow_loop)
-				{
-					slow_loop=NUMBER_OF_COLS-1;
-				}
-				else
-				{
-					--slow_loop;
-				}
-			}
-
-			fast_star_mask<<=2;
-			
-			if(!fast_star_mask)
-			{
-				++fast_star_mask;
-				prev_fast_loop = fast_loop;
-				if(!fast_loop)
-				{
-					fast_loop=NUMBER_OF_COLS-1;
-				}
-				else
-				{
-					--fast_loop;
-				}
-			}
-			
-			handle_stars();
-			if(slow_star_mask==1)
-			{
-				POKE(SLOW_STAR_TILE_OFFSET+((prev_slow_loop)<<3),0);
-			}
-			if(fast_star_mask==1)
-			{
-				POKE(FAST_STAR_TILE_OFFSET+((prev_fast_loop)<<3),0);
-			}			
+            handle_stars();
 		
 			handle_player();
             
