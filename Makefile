@@ -133,7 +133,7 @@ xmas:
 # 	--asm-define DEBUG=1
 santa: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
-	--asm-define MAXSPR=14 -D_NUMBER_OF_SPRITES_=14  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MAXSPR=14 --asm-define NUMSPRITES=18 \
 	--asm-define MUSIC_CODE=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
