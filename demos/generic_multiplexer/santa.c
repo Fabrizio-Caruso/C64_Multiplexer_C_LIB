@@ -1,4 +1,3 @@
-#include <conio.h>
 #include <stdlib.h>
 #include <peekpoke.h>
 
@@ -93,9 +92,9 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 #define GFX_START_INDEX (GFX_START/0x40U)
 
 #define BEFANA_INDEX 0
-#define HOT_AIR_BALLOON_INDEX 1
+#define BALLOON_INDEX 1
 
-uint8_t counter;
+static uint8_t counter;
 
 
 // const char MESSAGE[12] = "HAPPYNEWYEAR";
@@ -158,7 +157,7 @@ void init_udg(void)
 	#define YEAR_HIGH '2'
 #endif
 
-#define HOT_AIR_BALLOON ('9' + 1)
+#define BALLOON ('9' + 1)
 #define COMMODORE_LOGO ('9' + 2)
 
 #define BEFANA_LEFT_TO_RIGHT (- 'A' + 1 + 'Z' + 1)
@@ -238,8 +237,8 @@ static uint16_t k;
 
 static uint8_t input;
 
-uint8_t prev_slow_loop;
-uint8_t prev_fast_loop;
+static uint8_t prev_slow_loop;
+static uint8_t prev_fast_loop;
 
 
 
@@ -310,7 +309,7 @@ void clear_screen(void)
 #define MIN_STAR  1
 #define MAX_STAR 24
 
-void fill_sky(uint8_t star_offset, uint8_t star_type)
+void fill_sky(uint8_t star_offset, uint8_t last_position, uint8_t star_type)
 {
 	uint8_t offset;
 	uint8_t previous;
@@ -318,7 +317,7 @@ void fill_sky(uint8_t star_offset, uint8_t star_type)
 	
 	offset = 0;
 	
-	for(i=MIN_STAR+star_offset;i<MAX_STAR;i+=2)
+	for(i=MIN_STAR+star_offset;i<last_position;i+=2)
 	{
 		previous = offset;
 		do
@@ -344,37 +343,9 @@ void fill_sky(uint8_t star_offset, uint8_t star_type)
 
 void init_stars(void)
 {
-	// uint8_t offset;
-	// uint8_t previous;
-	// uint8_t char_type;
-	
-	// offset = 0;
-	
-	
-	fill_sky(0,SLOW_STAR_TILE);
-	fill_sky(1,FAST_STAR_TILE);
-	
-	// for(i=MIN_STAR;i<MAX_STAR;++i)
-	// {
-		// previous = offset;
-		// do
-		// {
-			// offset = 2+(rand())%NUMBER_OF_COLS;
-		// } while((offset==previous)||(offset==previous-1)||(offset==previous+1));
 
-		// if(i&1)
-		// {
-			// char_type = SLOW_STAR_TILE;
-		// }
-		// else
-		// {
-			// char_type = FAST_STAR_TILE;
-		// }
-		// for(j=0;j<NUMBER_OF_COLS;++j)
-		// {
-			// POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,char_type+(j%NUMBER_OF_COLS));	
-		// }
-	// }	
+	fill_sky(0,MAX_STAR-4, SLOW_STAR_TILE);
+	fill_sky(1,MAX_STAR, FAST_STAR_TILE);
 	
 }
 
@@ -506,15 +477,6 @@ void handle_stars(void)
 }
 
 
-// TODO: could be done for each pixel shift
-// static const uint8_t GRASS_SHAPE[4][7]=
-// {
-    // {0x18,0x0C,0x66,0x26,0x36,0x96,0x94},
-    // {0x60,0x30,0x99,0x98,0xD8,0x5A,0x52},
-    // {0x81,0xC0,0x66,0x62,0x63,0x69,0x49},
-    // {0x06,0x03,0x99,0x89,0x8D,0xA5,0x25}  
-// };
-
 static const uint8_t GRASS_SHAPE[8][7]=
 {
 	{0x18,0x0C,0x66,0x26,0x36,0x96,0x94},
@@ -544,9 +506,9 @@ void init_balloons(void)
 {
     uint8_t i;
     
-    for(i=1;i<=NUMBER_OF_BALLOONS;++i)
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS;++i)
     {
-        SPRF[i]=GFX_START_INDEX + HOT_AIR_BALLOON;
+        SPRF[i]=GFX_START_INDEX + BALLOON;
         SPRC[i]=CYAN;
         SPRM[i]=0;
         SPRY[i]=30U+i*16U;//;255-i*12;
@@ -567,10 +529,19 @@ void handle_balloons(void)
 {
     uint8_t i;
     
-    for(i=1;i<=NUMBER_OF_BALLOONS;++i)
+	
+	
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS;++i)
     {
-        --SPRY[i];
-        SPRX[i]=xValues[30+i*8];
+        SPRY[i]= i*32-counter;
+        SPRX[i]= i*16+xValues[counter+i*8];
+		// SPRF[i]= GFX_START_INDEX + BEFANA;
+		// SPRC[i]=i&7;
+		if(SPRY[i]<40)
+		{
+			SPRY[i]=180;
+			// SPRX[i]=150;
+		}
     }
 }
 
@@ -578,8 +549,6 @@ void handle_balloons(void)
 /******************/
 int main()
 {        
-
-    // NUMSPRITES = _NUMBER_OF_SPRITES_;
 
 	counter = 50;
 	
@@ -596,14 +565,15 @@ int main()
 	
 	SPRX[BEFANA_INDEX] = 100;
 	SPRY[BEFANA_INDEX] = 50;
-	// SPRF[BEFANA_INDEX] = GFX_START+BEFANA;
 	POKE(MULTICOLOR_1,BROWN);
 	POKE(MULTICOLOR_2,LIGHT_GREY);
 	SPRC[BEFANA_INDEX]=PINK;
 
 	joy_install((void *)joy_static_stddrv);
-    	
-    while(1) 
+	
+	NUMSPRITES = _NUMBER_OF_SPRITES_;
+    
+	while(1) 
     {
         if (MULTIPLEX_DONE) {	
             handle_stars();
@@ -611,12 +581,16 @@ int main()
 			handle_player();
             
             handle_balloons();
-			++counter; 
+			// NUMSPRITES=22;
 			
-            // if(counter&1)
-            // {
-                scroll_grass();
-            // }
+			scroll_grass();
+			// printd(SPRX[BEFANA_INDEX],3,0,WHITE);
+			// printd(SPRX[BALLOON_INDEX],3,80,WHITE);
+			// printd(SPRY[BALLOON_INDEX],3,120,WHITE);
+			// printd(NUMSPRITES,3,160,WHITE);
+
+			++counter; 
+
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
         }
@@ -624,3 +598,4 @@ int main()
     }
     return 0;
 }
+

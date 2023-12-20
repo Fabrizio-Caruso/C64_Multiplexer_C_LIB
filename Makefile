@@ -121,7 +121,7 @@ xmas:
 	--asm-define MUSIC_CODE=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
-	$(DEMOS_PATH)/generic_multiplexer/many_flakes2_test.c \
+	$(DEMOS_PATH)/generic_multiplexer/xmas.c \
 	$(SNOW_UDG_ASM_FILES2) \
 	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
@@ -133,8 +133,8 @@ xmas:
 # 	--asm-define DEBUG=1
 santa: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
-	--asm-define MAXSPR=14 --asm-define NUMSPRITES=18 \
-	--asm-define MUSIC_CODE=1 \
+	--asm-define MAXSPR=14 -D_NUMBER_OF_SPRITES_=14 \
+	--asm-define MUSIC_CODE=0 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
 	$(DEMOS_PATH)/generic_multiplexer/santa.c \
@@ -144,6 +144,9 @@ santa:
 	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
 	rm -rf $(SOURCE_PATH)/*.o
 	rm -rf $(GRAPHICS_PATH)/*.o 
+
+
+
 
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
 # -m mapfile
