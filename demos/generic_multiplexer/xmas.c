@@ -947,14 +947,18 @@ void handle_sprite_movement(void)
 		xb_mod3 = (XB%3);
 	}
 	
+	// TODO: avoid top/bottom border
 	SPRY[RIGHT_BIG_SNOW_INDEX]=XX;
 	
+	// TODO: avoid top/bottom border	
 	// Hot air balloon 1	
 	SPRY[RIGHT_HOT_AIR_BALLOON_INDEX]=255-XX;
 	SPRX[RIGHT_HOT_AIR_BALLOON_INDEX] = 100-10+xValues[XX2];
 
+	// TODO: avoid top/bottom border
 	SPRY[LEFT_BIG_SNOW_INDEX]=XX2;
-	
+
+	// TODO: avoid top/bottom border	
 	// Hot air balloon 2
 	SPRY[LEFT_HOT_AIR_BALLOON_INDEX]=255-XX2;
 	SPRX[LEFT_HOT_AIR_BALLOON_INDEX] = 60-10+shifted_xValues[XX2];
@@ -1188,7 +1192,6 @@ void happy_new_year(void)
 	
 	++XX;
 	++XX2;
-
 }
 
 /******************/
