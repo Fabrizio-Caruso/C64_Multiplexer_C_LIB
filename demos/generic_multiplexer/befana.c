@@ -224,7 +224,7 @@ void init_udg(void)
 #define FAST_STAR_TILE (SLOW_STAR_TILE+NUMBER_OF_COLS)
 
 
-
+#define SPRITE_COLLISION_REGISTER 0xD01E
 
 static uint8_t slow_loop = 0;
 static uint8_t fast_loop = 20;
@@ -396,8 +396,8 @@ void draw_stars(void)
 
 void init_player(void)
 {
-	SPRX[BEFANA_INDEX] = 50;
-	SPRY[BEFANA_INDEX] = 100;
+	SPRX[BEFANA_INDEX] = 40;
+	SPRY[BEFANA_INDEX] = 20;
 	SPRM[BEFANA_INDEX] = 1;
     SPRC[BEFANA_INDEX] = PINK;
 }
@@ -529,8 +529,6 @@ void handle_balloons(void)
 {
     uint8_t i;
     
-	
-	
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS;++i)
     {
         SPRY[i]= i*32-counter;
@@ -539,8 +537,7 @@ void handle_balloons(void)
 		// SPRC[i]=i&7;
 		if(SPRY[i]<40)
 		{
-			SPRY[i]=180;
-			// SPRX[i]=150;
+			SPRY[i]=255;
 		}
     }
 }
@@ -550,7 +547,7 @@ void handle_balloons(void)
 int main()
 {        
 
-	counter = 50;
+	counter = 48;
 	
 	init_background();
     
@@ -584,12 +581,14 @@ int main()
 			// NUMSPRITES=22;
 			
 			scroll_grass();
-			// printd(SPRX[BEFANA_INDEX],3,0,WHITE);
-			// printd(SPRX[BALLOON_INDEX],3,80,WHITE);
-			// printd(SPRY[BALLOON_INDEX],3,120,WHITE);
-			// printd(NUMSPRITES,3,160,WHITE);
 
-			++counter; 
+			// printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
+
+			++counter;
+			// if(counter>240)
+			// {
+				// counter = 48;
+			// }
 
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
