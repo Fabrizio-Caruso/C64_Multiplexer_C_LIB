@@ -934,7 +934,7 @@ void handle_text(void)
 	text_counter%=4;
 }
 
-
+#define NON_VISIBLE_THRESHOLD 20
 void handle_sprite_movement(void)
 {
 	
@@ -948,19 +948,48 @@ void handle_sprite_movement(void)
 	}
 	
 	// TODO: avoid top/bottom border
-	SPRY[RIGHT_BIG_SNOW_INDEX]=XX;
+	if(XX<NON_VISIBLE_THRESHOLD)
+	{
+		SPRY[RIGHT_BIG_SNOW_INDEX]=255;
+	}
+	else
+	{
+		SPRY[RIGHT_BIG_SNOW_INDEX]=XX;
+	}
 	
 	// TODO: avoid top/bottom border	
 	// Hot air balloon 1	
-	SPRY[RIGHT_HOT_AIR_BALLOON_INDEX]=255-XX;
+	if((255-XX)<NON_VISIBLE_THRESHOLD)
+	{
+		SPRY[RIGHT_HOT_AIR_BALLOON_INDEX]=255;
+	}
+	else
+	{
+		SPRY[RIGHT_HOT_AIR_BALLOON_INDEX]=255-XX;
+	}
 	SPRX[RIGHT_HOT_AIR_BALLOON_INDEX] = 100-10+xValues[XX2];
 
 	// TODO: avoid top/bottom border
-	SPRY[LEFT_BIG_SNOW_INDEX]=XX2;
-
+	if(XX2<NON_VISIBLE_THRESHOLD)
+	{
+		SPRY[LEFT_BIG_SNOW_INDEX]=255;
+	}
+	else
+	{
+		SPRY[LEFT_BIG_SNOW_INDEX]=XX2;
+	}
+	
 	// TODO: avoid top/bottom border	
 	// Hot air balloon 2
-	SPRY[LEFT_HOT_AIR_BALLOON_INDEX]=255-XX2;
+	if((255-XX2)<NON_VISIBLE_THRESHOLD)
+	{
+		SPRY[LEFT_HOT_AIR_BALLOON_INDEX]=255;		
+	}
+	else
+	{
+		SPRY[LEFT_HOT_AIR_BALLOON_INDEX]=255-XX2;
+	}
+	
 	SPRX[LEFT_HOT_AIR_BALLOON_INDEX] = 60-10+shifted_xValues[XX2];
 	
 	// Present 1
