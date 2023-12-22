@@ -69,14 +69,28 @@ extern unsigned short SPRITE_GFX;
 #define STANDARD_JOY 2
 
 
+#define NUMBER_OF_BALLOONS 9
+
+
+uint8_t active_balloon[NUMBER_OF_BALLOONS];
+
+uint8_t y_balloon[NUMBER_OF_BALLOONS];
+
 // Pre-calculated sinus values
-const char yValues[] = SINUS(1);
+const uint8_t sinValues1[] = SINUS(1);
 
-const char xValues[] = SINUS(2);
+const uint8_t sinValues2[] = SINUS(2);
 
-const char shifted_xValues[] = SHIFTED_SINUS(2);
+const uint8_t sinValues3[] = SINUS(3);
 
-// const char yValues4[] = SINUS(4);
+const uint8_t sinValues4[] = SINUS(4);
+
+const uint8_t sinValues8[] = SINUS(8);
+
+
+const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
+
+// const uint8_t yValues4[] = SINUS(4);
 
 
 #if defined(__C64__)
@@ -91,10 +105,12 @@ const char shifted_xValues[] = SHIFTED_SINUS(2);
 
 #define GFX_START_INDEX (GFX_START/0x40U)
 
-#define BEFANA_INDEX 0
-#define BALLOON_INDEX 1
+#define BEFANA_INDEX (NUMBER_OF_BALLOONS)
+#define BALLOON_INDEX 0
 
 static uint8_t counter;
+static uint8_t energy;
+uint16_t points = 0;
 
 
 // const char MESSAGE[12] = "HAPPYNEWYEAR";
@@ -223,8 +239,6 @@ void init_udg(void)
 
 #define FAST_STAR_TILE (SLOW_STAR_TILE+NUMBER_OF_COLS)
 
-
-#define SPRITE_COLLISION_REGISTER 0xD01E
 
 static uint8_t slow_loop = 0;
 static uint8_t fast_loop = 20;
@@ -500,53 +514,157 @@ void scroll_grass(void)
     }
 }
 
+#define BALLOON_TOP_Y 45
+#define BALLOON_BOTTOM_Y 180
 
-#define NUMBER_OF_BALLOONS 12
-void init_balloons(void)
+void init_sprite_balloons(void)
 {
     uint8_t i;
     
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS;++i)
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
+		
         SPRF[i]=GFX_START_INDEX + BALLOON;
         SPRC[i]=CYAN;
         SPRM[i]=0;
-        SPRY[i]=30U+i*16U;//;255-i*12;
-        
-        if(i&1)
-        {
-            SPRX[i]=70;
-        }
-        else
-        {
-            SPRX[i]=110;
-        }
+		
+		SPRX[i]=255-i*32;
+		
+		do
+		{
+			y_balloon[i]=rand()&0xFF;
+		} while((y_balloon[i]<BALLOON_TOP_Y)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
+		SPRY[i]=y_balloon[i];
+
     }
 }
 
+
+void init_balloons(void)
+{
+	// uint8_t i;
+	
+	init_sprite_balloons();
+	
+	active_balloon[0]=1;
+    for(i=1;i<NUMBER_OF_BALLOONS;++i)
+	{
+		active_balloon[i]=1;
+		y_balloon[i]= 40+i*22;
+
+	}
+
+}
 
 void handle_balloons(void)
 {
     uint8_t i;
     
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS;++i)
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-        SPRY[i]= i*32-counter;
-        SPRX[i]= i*16+xValues[counter+i*8];
-		// SPRF[i]= GFX_START_INDEX + BEFANA;
-		// SPRC[i]=i&7;
-		if(SPRY[i]<40)
+		if(active_balloon[i])
 		{
-			SPRY[i]=255;
+			--SPRX[i];
+			if(!SPRX[i])
+			{
+				if(i&1)
+				{
+					do
+					{
+						y_balloon[i]=rand()&0xFF;
+						
+					} while((y_balloon[i]<60)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
+				}
+				else
+				{
+					y_balloon[i]=SPRY[BEFANA_INDEX];
+
+				}
+			}
+			// else
+			// {
+				SPRY[i]=y_balloon[i]+sinValues4[counter];
+			// }
 		}
+			
+        // SPRY[i]= i*32-counter;
+        // SPRX[i]= i*16+xValues[counter+i*8];
+		// if(SPRY[i]<40)
+		// {
+			// SPRY[i]=255;
+			// SPRX[i]=i*24;
+		// }
     }
 }
 
+#define COLLISION_BOXX 8
+#define COLLISION_BOXY 12
+uint8_t collision(void)
+{
+    uint8_t i;
+    uint8_t x;
+	uint8_t y;
+	uint8_t befana_x;
+	uint8_t befana_y;
+	
+	befana_x = SPRX[BEFANA_INDEX];
+	befana_y = SPRY[BEFANA_INDEX];
+
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    {
+		x = SPRX[i];
+		if(x>=befana_x)
+		{
+			if((x-befana_x)>COLLISION_BOXX)
+			{
+				continue;
+			}
+		}
+		else // x < befana_x
+		{
+			if((befana_x-x)>COLLISION_BOXX)
+			{
+				continue;
+			}
+		}
+		
+		y = SPRY[i];
+		if(y>=befana_y)
+		{
+			if((y-befana_y)>COLLISION_BOXY)
+			{
+				continue;
+			}
+		}
+		else // y < befana_y
+		{
+			if((befana_y-y)>COLLISION_BOXY)
+			{
+				continue;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
+
+void handle_collision(void)
+{
+	if(collision())
+	{
+		++SPRC[BEFANA_INDEX];
+		--energy;
+		printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+	}
+}
 
 /******************/
 int main()
-{        
-
+{       
+	points = 0;
+ 
+	energy = 200;
 	counter = 48;
 	
 	init_background();
@@ -569,8 +687,12 @@ int main()
 	joy_install((void *)joy_static_stddrv);
 	
 	NUMSPRITES = _NUMBER_OF_SPRITES_;
-    
-	while(1) 
+	
+	printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+	printd(0,4,6,WHITE);
+	
+
+	while(energy) 
     {
         if (MULTIPLEX_DONE) {	
             handle_stars();
@@ -584,12 +706,21 @@ int main()
 
 			// printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
 
+			handle_collision();
+
 			++counter;
+			
+			if(!counter)
+			{
+				points+=10U;
+				printd(points,4,6,WHITE);
+			}
 			// if(counter>240)
 			// {
 				// counter = 48;
 			// }
-
+			// ++points;
+			
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;	
         }
