@@ -71,6 +71,13 @@ extern unsigned short SPRITE_GFX;
 
 #define NUMBER_OF_BALLOONS 9
 
+#define BEFANA_MIN_X 30
+#define BEFANA_MAX_X 140
+
+#define BEFANA_MIN_Y 50
+#define BEFANA_MAX_Y 208
+
+
 
 uint8_t active_balloon[NUMBER_OF_BALLOONS];
 
@@ -81,14 +88,23 @@ const uint8_t sinValues1[] = SINUS(1);
 
 const uint8_t sinValues2[] = SINUS(2);
 
-const uint8_t sinValues3[] = SINUS(3);
+// const uint8_t sinValues3[] = SINUS(3);
 
 const uint8_t sinValues4[] = SINUS(4);
 
-const uint8_t sinValues8[] = SINUS(8);
+// const uint8_t sinValues8[] = SINUS(8);
 
+const uint8_t shifted_sinValues1[] = SHIFTED_SINUS(1);
 
 const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
+
+// const uint8_t shifted_sinValues3[] = SHIFTED_SINUS(3);
+
+const uint8_t shifted_sinValues4[] = SHIFTED_SINUS(4);
+
+
+
+// const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
 
 // const uint8_t yValues4[] = SINUS(4);
 
@@ -220,18 +236,20 @@ void init_udg(void)
 15	$0F	light grey 
 
 */
-#define BLACK      0x00
-#define WHITE      0x01
-#define RED        0x02
-#define CYAN       0x03
-#define PURPLE     0x04
-#define GREEN      0x05
-#define YELLOW     0x07
-#define BROWN      0x09
-#define PINK       0x0A
-#define LIGHT_BLUE 0x0E
-#define LIGHT_GREY 0x0F
+#define BLACK       0x00
+#define WHITE       0x01
+#define RED         0x02
+#define CYAN        0x03
+#define PURPLE      0x04
+#define GREEN       0x05
+#define YELLOW      0x07
+#define BROWN       0x09
+#define PINK        0x0A
+#define LIGHT_GREEN 0x0D
+#define LIGHT_BLUE  0x0E
+#define LIGHT_GREY  0x0F
 
+const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
 
 #define NUMBER_OF_COLS 40
 
@@ -421,20 +439,20 @@ void handle_player(void)
 
 	input = joy_read(STANDARD_JOY);
 	
-	if(JOY_LEFT(input))
+	if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
 	{
 		--SPRX[BEFANA_INDEX];
 	}
-	else if(JOY_RIGHT(input))
+	else if(JOY_RIGHT(input) && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 	{
 		++SPRX[BEFANA_INDEX];
 	}
 	
-	if(JOY_UP(input))
+	if(JOY_UP(input) && SPRY[BEFANA_INDEX]>BEFANA_MIN_Y)
 	{
 		--SPRY[BEFANA_INDEX];
 	}
-	else if(JOY_DOWN(input))
+	else if(JOY_DOWN(input) && SPRY[BEFANA_INDEX]<BEFANA_MAX_Y)
 	{
 		++SPRY[BEFANA_INDEX];
 	}
@@ -528,7 +546,7 @@ void init_sprite_balloons(void)
         SPRC[i]=CYAN;
         SPRM[i]=0;
 		
-		SPRX[i]=255-i*32;
+		SPRX[i]=255-i*28;
 		
 		do
 		{
@@ -537,6 +555,7 @@ void init_sprite_balloons(void)
 		SPRY[i]=y_balloon[i];
 
     }
+    SPRC[NUMBER_OF_BALLOONS-1]=RED;
 }
 
 
@@ -556,6 +575,9 @@ void init_balloons(void)
 
 }
 
+
+// const uint8_t BALLOON_Y_INIT_POS[] = {80,120,140,160}
+
 void handle_balloons(void)
 {
     uint8_t i;
@@ -567,24 +589,39 @@ void handle_balloons(void)
 			--SPRX[i];
 			if(!SPRX[i])
 			{
-				if(i&1)
+				if(i<8)
 				{
-					do
-					{
-						y_balloon[i]=rand()&0xFF;
+                    y_balloon[i]=75+(i&3)*32+(rand()&0xF);
+					// do
+					// {
+						// y_balloon[i]=rand()&0xFF;
 						
-					} while((y_balloon[i]<60)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
+					// } while((y_balloon[i]<60)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
 				}
 				else
 				{
 					y_balloon[i]=SPRY[BEFANA_INDEX];
+                    // SPRX[i]=230;
 
 				}
+                SPRC[i]=BALLOON_COLORS[rand()&7];
 			}
-			// else
-			// {
-				SPRY[i]=y_balloon[i]+sinValues4[counter];
-			// }
+            if(!(i&3))
+            {
+				SPRY[i]=y_balloon[i]+sinValues2[counter];
+            }
+            else if((i&3)==1)
+            {
+				SPRY[i]=y_balloon[i]+shifted_sinValues1[counter];
+            }
+            else if((i&3)==2)
+            {
+				SPRY[i]=y_balloon[i]+sinValues1[counter];
+            }   
+            else if((i&3)==3)
+            {
+				SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
+            }              
 		}
 			
         // SPRY[i]= i*32-counter;
