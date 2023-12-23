@@ -317,7 +317,7 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
 }
 
 
-void printd(char val, uint8_t length, unsigned short offset, uint8_t color)
+void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
 {
 	uint8_t i;
 	uint8_t digit;
@@ -715,6 +715,10 @@ void handle_gifts(void)
     for(i=0;i<NUMBER_OF_GIFTS;++i)
     {
         --SPRX[GIFT_INDEX+i];
+        // if(!(counter&3))
+        // {
+            SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+        // }
         if(!SPRX[GIFT_INDEX+i])
         {
             SPRY[GIFT_INDEX+i]=80+i*40-(rand()&0xF);
@@ -930,8 +934,11 @@ int main()
                 {
                     points+=10U;
                     display_score();
+                }
+                if(!(counter&31))
+                {
                     --energy;
-                    display_energy();
+                    display_energy();                    
                 }
                 
                 MULTIPLEX_DONE = 0;
