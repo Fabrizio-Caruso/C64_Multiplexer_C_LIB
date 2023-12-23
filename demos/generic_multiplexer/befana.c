@@ -26,6 +26,9 @@ extern unsigned short SPRITE_GFX;
 
 extern uint8_t MUSIC_ON;
 
+#define INITIAL_ENERGY 100
+#define MAX_ENERGY 200
+
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
 #pragma zpsym ("MULTIPLEX_DONE")
@@ -798,15 +801,15 @@ uint8_t balloon_collision(void)
 
 void handle_befana_color(void)
 {
-    if(energy<50)
+    if(energy<(MAX_ENERGY/4))
     {
         SPRC[BEFANA_INDEX]=RED;
     }
-    else if(energy<100)
+    else if(energy<(MAX_ENERGY/2))
     {
         SPRC[BEFANA_INDEX]=PURPLE;
     }
-    else if(energy<150)
+    else if(energy<3*(MAX_ENERGY/4))
     {
         SPRC[BEFANA_INDEX]=LIGHT_GREEN;
     }
@@ -858,8 +861,6 @@ void handle_balloon_collision(void)
 }
 
 
-#define INITIAL_ENERGY 100
-#define MAX_ENERGY 200
 void increase_energy(uint8_t amount)
 {
     energy+=amount;
@@ -919,7 +920,7 @@ int main()
         points = 0;
      
         energy = INITIAL_ENERGY;
-        counter = 48;
+        counter = 0;
         
         SPRX[BEFANA_INDEX] = 100;
         SPRY[BEFANA_INDEX] = 50;

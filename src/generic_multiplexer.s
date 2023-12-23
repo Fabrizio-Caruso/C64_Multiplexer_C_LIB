@@ -195,7 +195,6 @@ IRQ1_NOTMORETHAN8:
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
     
-    
     .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
         .IF .DEFINED(MUSIC_SWITCH)
             LDA _MUSIC_ON
@@ -214,6 +213,7 @@ _SETIRQ0:
     .ELSE
         STA $FFFE                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
+    
     .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
         .IF .DEFINED(MUSIC_SWITCH)
             LDA _MUSIC_ON
@@ -232,6 +232,7 @@ _SETIRQ1:
     .ELSE
         STA $FFFF                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
+    
     .IF .DEFINED(MUSIC_CODE)            ; If MUSIC_CODE is defined
         .IF .DEFINED(MUSIC_SWITCH)
             LDA _MUSIC_ON
