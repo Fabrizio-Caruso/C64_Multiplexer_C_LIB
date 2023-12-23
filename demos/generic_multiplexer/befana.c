@@ -89,7 +89,10 @@ extern unsigned short SPRITE_GFX;
 
 #define NUMBER_OF_BALLOONS 9
 
-#define BEFANA_MIN_X 30
+#define NUMBER_OF_GIFTS 4
+
+
+#define BEFANA_MIN_X 36
 #define BEFANA_MAX_X 140
 
 #define BEFANA_MIN_Y 55
@@ -691,8 +694,6 @@ void handle_balloons(void)
     }
 }
 
-#define NUMBER_OF_GIFTS 4
-
 
 void init_gifts(void)
 {
@@ -704,6 +705,7 @@ void init_gifts(void)
         SPRC[GIFT_INDEX+i]=BALLOON_COLORS[i];
         SPRY[GIFT_INDEX+i]=80+40*i;
         SPRM[GIFT_INDEX+i]=1;
+        SPRX[GIFT_INDEX+i]=i*64;
     }
 }
 
@@ -715,13 +717,15 @@ void handle_gifts(void)
     for(i=0;i<NUMBER_OF_GIFTS;++i)
     {
         --SPRX[GIFT_INDEX+i];
-        // if(!(counter&3))
-        // {
+        if(!(counter&3))
+        {
             SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
-        // }
+        }
+        
+        // Re-position gift
         if(!SPRX[GIFT_INDEX+i])
         {
-            SPRY[GIFT_INDEX+i]=80+i*40-(rand()&0xF);
+            SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
         }
     }
 }
@@ -774,6 +778,7 @@ uint8_t collision(uint8_t i)
     return 1;    
 }
 
+
 uint8_t balloon_collision(void)
 {
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
@@ -784,19 +789,6 @@ uint8_t balloon_collision(void)
         }
 	}
 	return 0;
-}
-
-
-uint8_t gift_collision(void)
-{
-    for(i=GIFT_INDEX;i<=GIFT_INDEX+NUMBER_OF_GIFTS-1;++i)
-    {
-        if(collision(i))
-        {
-            return 1;
-        }
-	}
-	return 0;  
 }
 
 
@@ -833,31 +825,69 @@ void display_score(void)
 }
 
 
+void decrease_energy(uint8_t amount)
+{
+    if(energy>=amount)
+    {
+        energy-=amount;
+    }
+    else
+    {
+        energy=0;
+    }
+}
 
+#define BALLOON_DAMAGE 2
 void handle_balloon_collision(void)
 {
 	if(balloon_collision())
 	{
-		++SPRC[BEFANA_INDEX];
-		--energy;
+		// ++SPRC[BEFANA_INDEX];
+        SPRC[BEFANA_INDEX]=RED;
+		decrease_energy(BALLOON_DAMAGE);
         display_energy();
 	}
-    handle_befana_color();
+    // else
+    // {
+        // handle_befana_color();
+    // }
 }
 
 
+#define INITIAL_ENERGY 100
+#define MAX_ENERGY 200
+void increase_energy(uint8_t amount)
+{
+    energy+=amount;
+    if(energy>MAX_ENERGY)
+    {
+        energy = MAX_ENERGY;
+    }
+}
+
+
+#define GIFT_ENERGY 10
 void handle_gift_collision(void)
 {
-	if(gift_collision())
-	{
-		// ++SPRC[BEFANA_INDEX];
-		energy=200;
-		// printd(energy,3,NUMBER_OF_COLS-10,WHITE);
-        display_energy();
-        points+=100;
-        display_score();
+    uint8_t i;
+    
+
+    for(i=GIFT_INDEX;i<=GIFT_INDEX+NUMBER_OF_GIFTS-1;++i)
+    {
+        if(collision(i))
+        {
+            increase_energy(GIFT_ENERGY);
+            display_energy();
+            points+=100;
+            display_score();
+            SPRY[i]=255;
+
+            handle_befana_color();
+            
+            
+            return;
+        }
 	}
-    handle_befana_color();
 }
 
 
@@ -884,7 +914,7 @@ int main()
         
         points = 0;
      
-        energy = 200;
+        energy = INITIAL_ENERGY;
         counter = 48;
         
         SPRX[BEFANA_INDEX] = 100;
@@ -920,7 +950,10 @@ int main()
                 
                 scroll_grass();
 
-                // printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
+                // printd(SPRY[GIFT_INDEX],3,80,WHITE);
+                // printd(SPRY[GIFT_INDEX+1],3,120,WHITE);
+                // printd(SPRY[GIFT_INDEX+2],3,160,WHITE);
+                // printd(SPRY[GIFT_INDEX+3],3,200,WHITE);
 
                 handle_gifts();
 
@@ -930,15 +963,13 @@ int main()
 
                 ++counter;
                 
-                if(!counter)
-                {
-                    points+=10U;
-                    display_score();
-                }
                 if(!(counter&31))
                 {
-                    --energy;
-                    display_energy();                    
+                    decrease_energy(1);
+                    display_energy();
+                    points+=10U;
+                    display_score();   
+                    handle_befana_color();
                 }
                 
                 MULTIPLEX_DONE = 0;
