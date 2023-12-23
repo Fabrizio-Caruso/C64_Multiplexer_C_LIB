@@ -23,6 +23,9 @@
    .EXPORT _SPRY
    .EXPORT _SPRC
    .EXPORT _SPRF
+   .IFDEF MUSIC_SWITCH
+        .EXPORT _MUSIC_ON
+   .ENDIF
    .IFDEF MULTICOLOR                    ; If MULTICOLOR flag is set, then
         .EXPORT _SPRM                   ; export _SPRM SPRites Multicolor array of flags
    .ENDIF
@@ -56,6 +59,10 @@ IRQ3LINE = $23                          ; Sprites display IRQ at rasterline $023
 .ENDIF    
 ;MAXSPR = 16                            ; Maximum number of sprites
 ;-------------------
+
+.IFDEF MUSIC_SWITCH
+    _MUSIC_ON = $FA
+.ENDIF
 _MULTIPLEX_DONE = $FB                   ; "Job done" flag.
 _NUMSPRITES = $FC                       ; Number of sprites that the main program wants to pass to the sprite sorter
 _SPRUPDATEFLAG = $FD                    ; Main program must write a nonzero value here when it wants new sprites to be displayed
@@ -187,31 +194,57 @@ IRQ1_NOTMORETHAN8:
     BEQ IRQ1_NOSPRITESATALL             ; sprites. Now init the sprite-counter
     LDA #$00                            ; for the actual sprite display
     STA SPRIRQCOUNTER                   ; routine
+    
+    
     .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
-        LDA #<IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,
+        .IF .DEFINED(MUSIC_SWITCH)
+            LDA _MUSIC_ON
+            BEQ _NOMUSICBRN0
+        .ENDIF
+        LDA #<IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,    
+        JMP _SETIRQ0
+_NOMUSICBRN0:
+        LDA #<IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ELSE
         LDA #<IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ENDIF
+_SETIRQ0:
     .IFDEF USE_KERNAL
         STA IRQVec                      ; Store low byte into vector used if Kernal is ON,
     .ELSE
         STA $FFFE                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
     .IF .DEFINED(MUSIC_CODE)            ; Choose the next IRQ based on the MUSIC_CODE flag value:
+        .IF .DEFINED(MUSIC_SWITCH)
+            LDA _MUSIC_ON
+            BEQ _NOMUSICBRN1
+        .ENDIF
         LDA #>IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,
+        JMP _SETIRQ1
+_NOMUSICBRN1:
+        LDA #>IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ELSE
         LDA #>IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ENDIF
+_SETIRQ1:
     .IFDEF USE_KERNAL
         STA IRQVec+$0001                ; Store hi byte into vector used if Kernal is ON,
     .ELSE
         STA $FFFF                       ; otherwise store it into vector used if Kernal is OFF
     .ENDIF
     .IF .DEFINED(MUSIC_CODE)            ; If MUSIC_CODE is defined
+        .IF .DEFINED(MUSIC_SWITCH)
+            LDA _MUSIC_ON
+            BEQ _NOMUSICBRN2
+        .ENDIF
         LDA #IRQ2LINE                   ; then load raster line where start play routine
+        JMP _SETIRQPOS
+_NOMUSICBRN2:
+        LDA #IRQ3LINE                   ; otherwise load display routine raster position
     .ELSE
         LDA #IRQ3LINE                   ; otherwise load display routine raster position
     .ENDIF
+_SETIRQPOS:
     STA VIC_HLINE                       ; set new IRQ starting position
 IRQ1_NOSPRITESATALL:
     JMP EXIT_IRQ

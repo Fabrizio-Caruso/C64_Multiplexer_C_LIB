@@ -23,9 +23,13 @@ extern uint8_t SPRUPDATEFLAG;
 extern uint8_t SPRIRQCOUNTER;
 extern uint8_t MULTIPLEX_DONE;
 extern unsigned short SPRITE_GFX;
+
+extern uint8_t MUSIC_ON;
+
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
 #pragma zpsym ("MULTIPLEX_DONE")
+#pragma zpsym ("MUSIC_ON")
 /******************/
 // Pre-calculated sinus values
 #define ONE_SINUS(F) \
@@ -932,12 +936,13 @@ int main()
         display_score();
         // printd(0,4,6,WHITE);
         
+        MUSIC_ON=1;
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
             
-
+        MUSIC_ON=0;
         while(energy) 
         {
             if (MULTIPLEX_DONE) {	
@@ -954,6 +959,9 @@ int main()
                 // printd(SPRY[GIFT_INDEX+1],3,120,WHITE);
                 // printd(SPRY[GIFT_INDEX+2],3,160,WHITE);
                 // printd(SPRY[GIFT_INDEX+3],3,200,WHITE);
+
+                printd(PEEK(0xFA),3,0,WHITE);
+
 
                 handle_gifts();
 
@@ -978,6 +986,7 @@ int main()
 
         }
         print("GAME OVER",9,492,RED);
+
         do
         { 
         } while(!JOY_FIRE(joy_read(STANDARD_JOY)));

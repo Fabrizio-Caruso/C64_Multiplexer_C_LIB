@@ -131,10 +131,11 @@ xmas:
 
 
 # 	--asm-define DEBUG=1
+# 	--asm-define MUSIC_SWITCH=1
 befana: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
 	--asm-define MAXSPR=14 -D_NUMBER_OF_SPRITES_=14 \
-	--asm-define MUSIC_CODE=0 \
+	--asm-define MUSIC_CODE=1 --asm-define MUSIC_SWITCH=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
 	$(DEMOS_PATH)/generic_multiplexer/befana.c \
