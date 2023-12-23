@@ -691,7 +691,7 @@ void handle_balloons(void)
     }
 }
 
-#define NUMBER_OF_GIFTS 2
+#define NUMBER_OF_GIFTS 4
 
 
 void init_gifts(void)
@@ -701,8 +701,8 @@ void init_gifts(void)
     for(i=0;i<NUMBER_OF_GIFTS;++i)
     {
         SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
-        SPRC[GIFT_INDEX+i]=CYAN;
-        SPRY[GIFT_INDEX+i]=80+128*i;
+        SPRC[GIFT_INDEX+i]=BALLOON_COLORS[i];
+        SPRY[GIFT_INDEX+i]=80+40*i;
         SPRM[GIFT_INDEX+i]=1;
     }
 }
@@ -717,16 +717,17 @@ void handle_gifts(void)
         --SPRX[GIFT_INDEX+i];
         if(!SPRX[GIFT_INDEX+i])
         {
-            SPRY[GIFT_INDEX+i]=80+i*128-(rand()&0x1F);
+            SPRY[GIFT_INDEX+i]=80+i*40-(rand()&0xF);
         }
     }
 }
 
-#define COLLISION_BOXX 8
-#define COLLISION_BOXY 12
-uint8_t collision(void)
+#define COLLISION_BOX_X 8
+#define COLLISION_BOX_Y 12
+
+
+uint8_t collision(uint8_t i)
 {
-    uint8_t i;
     uint8_t x;
 	uint8_t y;
 	uint8_t befana_x;
@@ -734,41 +735,90 @@ uint8_t collision(void)
 	
 	befana_x = SPRX[BEFANA_INDEX];
 	befana_y = SPRY[BEFANA_INDEX];
+    
+    x = SPRX[i];
+    if(x>=befana_x)
+    {
+        if((x-befana_x)>COLLISION_BOX_X)
+        {
+            return 0;
+        }
+    }
+    else // x < befana_x
+    {
+        if((befana_x-x)>COLLISION_BOX_X)
+        {
+            return 0;
+        }
+    }
+    
+    y = SPRY[i];
+    if(y>=befana_y)
+    {
+        if((y-befana_y)>COLLISION_BOX_Y)
+        {
+            return 0;
+        }
+    }
+    else // y < befana_y
+    {
+        if((befana_y-y)>COLLISION_BOX_Y)
+        {
+            return 0;
+        }
+    }
+    return 1;    
+}
+
+uint8_t balloon_collision(void)
+{
+    // uint8_t i;
+    // uint8_t x;
+	// uint8_t y;
+	// uint8_t befana_x;
+	// uint8_t befana_y;
+	
+	// befana_x = SPRX[BEFANA_INDEX];
+	// befana_y = SPRY[BEFANA_INDEX];
 
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-		x = SPRX[i];
-		if(x>=befana_x)
-		{
-			if((x-befana_x)>COLLISION_BOXX)
-			{
-				continue;
-			}
-		}
-		else // x < befana_x
-		{
-			if((befana_x-x)>COLLISION_BOXX)
-			{
-				continue;
-			}
-		}
+        if(collision(i))
+        {
+            return 1;
+        }
+		// x = SPRX[i];
+		// if(x>=befana_x)
+		// {
+			// if((x-befana_x)>COLLISION_BOX_X)
+			// {
+				// continue;
+			// }
+		// }
+		// else // x < befana_x
+		// {
+			// if((befana_x-x)>COLLISION_BOX_X)
+			// {
+				// continue;
+			// }
+		// }
 		
-		y = SPRY[i];
-		if(y>=befana_y)
-		{
-			if((y-befana_y)>COLLISION_BOXY)
-			{
-				continue;
-			}
-		}
-		else // y < befana_y
-		{
-			if((befana_y-y)>COLLISION_BOXY)
-			{
-				continue;
-			}
-		}
-		return 1;
+		// y = SPRY[i];
+		// if(y>=befana_y)
+		// {
+			// if((y-befana_y)>COLLISION_BOX_Y)
+			// {
+				// continue;
+			// }
+		// }
+		// else // y < befana_y
+		// {
+			// if((befana_y-y)>COLLISION_BOX_Y)
+			// {
+				// continue;
+			// }
+		// }
+		// return 1;
 	}
 	return 0;
 }
@@ -796,7 +846,7 @@ void handle_befana_color(void)
 
 void handle_collision(void)
 {
-	if(collision())
+	if(balloon_collision())
 	{
 		++SPRC[BEFANA_INDEX];
 		--energy;
