@@ -772,55 +772,27 @@ uint8_t collision(uint8_t i)
 
 uint8_t balloon_collision(void)
 {
-    // uint8_t i;
-    // uint8_t x;
-	// uint8_t y;
-	// uint8_t befana_x;
-	// uint8_t befana_y;
-	
-	// befana_x = SPRX[BEFANA_INDEX];
-	// befana_y = SPRY[BEFANA_INDEX];
-
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
         if(collision(i))
         {
             return 1;
         }
-		// x = SPRX[i];
-		// if(x>=befana_x)
-		// {
-			// if((x-befana_x)>COLLISION_BOX_X)
-			// {
-				// continue;
-			// }
-		// }
-		// else // x < befana_x
-		// {
-			// if((befana_x-x)>COLLISION_BOX_X)
-			// {
-				// continue;
-			// }
-		// }
-		
-		// y = SPRY[i];
-		// if(y>=befana_y)
-		// {
-			// if((y-befana_y)>COLLISION_BOX_Y)
-			// {
-				// continue;
-			// }
-		// }
-		// else // y < befana_y
-		// {
-			// if((befana_y-y)>COLLISION_BOX_Y)
-			// {
-				// continue;
-			// }
-		// }
-		// return 1;
 	}
 	return 0;
+}
+
+
+uint8_t gift_collision(void)
+{
+    for(i=GIFT_INDEX;i<=GIFT_INDEX+NUMBER_OF_GIFTS-1;++i)
+    {
+        if(collision(i))
+        {
+            return 1;
+        }
+	}
+	return 0;  
 }
 
 
@@ -844,23 +816,51 @@ void handle_befana_color(void)
     }
 }
 
-void handle_collision(void)
+
+void display_energy(void)
+{
+    printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+}
+
+
+void display_score(void)
+{
+    printd(points,4,6,WHITE);
+}
+
+
+
+void handle_balloon_collision(void)
 {
 	if(balloon_collision())
 	{
 		++SPRC[BEFANA_INDEX];
 		--energy;
-		printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+        display_energy();
 	}
     handle_befana_color();
 }
+
+
+void handle_gift_collision(void)
+{
+	if(gift_collision())
+	{
+		// ++SPRC[BEFANA_INDEX];
+		energy=200;
+		// printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+        display_energy();
+        points+=100;
+        display_score();
+	}
+    handle_befana_color();
+}
+
 
 /******************/
 int main()
 {       
 
-	
-    
     INITSPRITES();
     INITRASTER();	
 
@@ -868,8 +868,6 @@ int main()
 	
 	NUMSPRITES = _NUMBER_OF_SPRITES_;
 
-
-	
 
     while(1)
     {
@@ -895,8 +893,10 @@ int main()
 
 
         init_background();
-        printd(energy,3,NUMBER_OF_COLS-10,WHITE);
-        printd(0,4,6,WHITE);
+        // printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+        display_energy();
+        display_score();
+        // printd(0,4,6,WHITE);
         
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
@@ -920,14 +920,18 @@ int main()
 
                 handle_gifts();
 
-                handle_collision();
+                handle_balloon_collision();
+                
+                handle_gift_collision();
 
                 ++counter;
                 
                 if(!counter)
                 {
                     points+=10U;
-                    printd(points,4,6,WHITE);
+                    display_score();
+                    --energy;
+                    display_energy();
                 }
                 
                 MULTIPLEX_DONE = 0;
