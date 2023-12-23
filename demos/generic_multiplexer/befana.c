@@ -149,10 +149,11 @@ const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
 #define BALLOON_INDEX 0
+#define GIFT_INDEX (BEFANA_INDEX+1)
 
 static uint8_t counter;
 static uint8_t energy;
-uint16_t points = 0;
+static uint16_t points = 0;
 
 
 // const char MESSAGE[12] = "HAPPYNEWYEAR";
@@ -222,7 +223,7 @@ void init_udg(void)
 #define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
 #define BEFANA BEFANA_LEFT_TO_RIGHT
 
-#define PRESENT (- 'A' + 1 + 'Z' + 15)
+#define GIFT (- 'A' + 1 + 'Z' + 15)
 
 #define SANTA (- 'A' + 1 + 'Z' + 5)
 
@@ -690,6 +691,37 @@ void handle_balloons(void)
     }
 }
 
+#define NUMBER_OF_GIFTS 2
+
+
+void init_gifts(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    {
+        SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
+        SPRC[GIFT_INDEX+i]=CYAN;
+        SPRY[GIFT_INDEX+i]=68+64*i;
+        SPRM[GIFT_INDEX+i]=1;
+    }
+}
+
+
+void handle_gifts(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    {
+        --SPRX[GIFT_INDEX+i];
+        if(!SPRX[GIFT_INDEX+i])
+        {
+            SPRY[GIFT_INDEX+i]=50+i*64+(rand()&0x1F);
+        }
+    }
+}
+
 #define COLLISION_BOXX 8
 #define COLLISION_BOXY 12
 uint8_t collision(void)
@@ -793,6 +825,7 @@ int main()
     {
         init_player();
         init_balloons();
+        init_gifts();
 
         slow_loop=0;
         fast_loop=0;
@@ -834,6 +867,8 @@ int main()
                 scroll_grass();
 
                 // printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
+
+                handle_gifts();
 
                 handle_collision();
 
