@@ -275,7 +275,8 @@ void init_udg(void)
 #define LIGHT_BLUE  0x0E
 #define LIGHT_GREY  0x0F
 
-const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
+// {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
+const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, BROWN, LIGHT_GREY, CYAN};
 
 #define NUMBER_OF_COLS 40
 
@@ -626,30 +627,40 @@ void handle_balloons(void)
 						// y_balloon[i]=rand()&0xFF;
 						
 					// } while((y_balloon[i]<60)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
+                    SPRC[i]=BALLOON_COLORS[rand()&7];
+
 				}
 				else
 				{
+                    SPRC[i]=WHITE;
                     if(SPRY[BEFANA_INDEX]>150)
                     {
                         y_balloon[i]=SPRY[BEFANA_INDEX]-16;
                     }
-                    else if(SPRY[BEFANA_INDEX]>150)
+                    else if(SPRY[BEFANA_INDEX]<70)     
                     {
-                        y_balloon[i]=SPRY[BEFANA_INDEX]+20;                        
+                        y_balloon[i]=SPRY[BEFANA_INDEX];                        
+                    }
+                    else if(SPRY[BEFANA_INDEX]>100)
+                    {
+                        y_balloon[i]=160;
+                        SPRC[i]=RED;
+                        // while(1){};
                     }
                     else
                     {
-                        y_balloon[i]=SPRY[BEFANA_INDEX];
+                        y_balloon[i]=80;
+                        SPRC[i]=RED;
+                        // while(1){};
                     }
                     
                    
                     // SPRX[i]=230;
 
 				}
-                SPRC[i]=BALLOON_COLORS[rand()&7];
                 SPRX[i]=184;
                 
-                SPRC[8]=WHITE; // TODO: DEBUG
+                // SPRC[8]=WHITE; // TODO: DEBUG
 			}
             if(!(i&3))
             {
