@@ -702,7 +702,7 @@ void init_gifts(void)
     {
         SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
         SPRC[GIFT_INDEX+i]=CYAN;
-        SPRY[GIFT_INDEX+i]=68+64*i;
+        SPRY[GIFT_INDEX+i]=80+128*i;
         SPRM[GIFT_INDEX+i]=1;
     }
 }
@@ -717,7 +717,7 @@ void handle_gifts(void)
         --SPRX[GIFT_INDEX+i];
         if(!SPRX[GIFT_INDEX+i])
         {
-            SPRY[GIFT_INDEX+i]=50+i*64+(rand()&0x1F);
+            SPRY[GIFT_INDEX+i]=80+i*128-(rand()&0x1F);
         }
     }
 }
