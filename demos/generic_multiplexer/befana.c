@@ -48,6 +48,16 @@ extern unsigned short SPRITE_GFX;
     64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
     54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F
 
+#define ONE_SHIFTED2_SINUS(F) \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F, \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F
+
 #define SINUS(F) \
 { \
 	ONE_SINUS(F), \
@@ -65,6 +75,14 @@ extern unsigned short SPRITE_GFX;
 	ONE_SHIFTED_SINUS(F) \
 }
 
+#define SHIFTED2_SINUS(F) \
+{ \
+	ONE_SHIFTED2_SINUS(F), \
+	ONE_SHIFTED2_SINUS(F), \
+	ONE_SHIFTED2_SINUS(F), \
+	ONE_SHIFTED2_SINUS(F) \
+}
+
 #include<joystick.h>
 #define STANDARD_JOY 2
 
@@ -74,7 +92,7 @@ extern unsigned short SPRITE_GFX;
 #define BEFANA_MIN_X 30
 #define BEFANA_MAX_X 140
 
-#define BEFANA_MIN_Y 50
+#define BEFANA_MIN_Y 55
 #define BEFANA_MAX_Y 208
 
 
@@ -88,7 +106,7 @@ const uint8_t sinValues1[] = SINUS(1);
 
 const uint8_t sinValues2[] = SINUS(2);
 
-// const uint8_t sinValues3[] = SINUS(3);
+const uint8_t sinValues3[] = SINUS(3);
 
 const uint8_t sinValues4[] = SINUS(4);
 
@@ -98,11 +116,19 @@ const uint8_t shifted_sinValues1[] = SHIFTED_SINUS(1);
 
 const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
 
-// const uint8_t shifted_sinValues3[] = SHIFTED_SINUS(3);
+const uint8_t shifted_sinValues3[] = SHIFTED_SINUS(3);
 
 const uint8_t shifted_sinValues4[] = SHIFTED_SINUS(4);
 
 
+
+const uint8_t shifted2_sinValues1[] = SHIFTED2_SINUS(1);
+
+const uint8_t shifted2_sinValues2[] = SHIFTED2_SINUS(2);
+
+const uint8_t shifted2_sinValues3[] = SHIFTED2_SINUS(3);
+
+const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
 // const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
 
@@ -328,6 +354,7 @@ void set_background_colors(void)
 }
 
 
+// TODO: Clear redefined star characters
 void clear_screen(void)
 {
     for(k=0;k<1000;++k)
@@ -578,6 +605,8 @@ void init_balloons(void)
 
 // const uint8_t BALLOON_Y_INIT_POS[] = {80,120,140,160}
 
+#define BALLON_THRESHOLD_X 9
+
 void handle_balloons(void)
 {
     uint8_t i;
@@ -587,11 +616,11 @@ void handle_balloons(void)
 		if(active_balloon[i])
 		{
 			--SPRX[i];
-			if(!SPRX[i])
+			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
 				if(i<8)
 				{
-                    y_balloon[i]=75+(i&3)*32+(rand()&0xF);
+                    y_balloon[i]=62+(i&3)*32+(rand()&0x1F);
 					// do
 					// {
 						// y_balloon[i]=rand()&0xFF;
@@ -600,27 +629,43 @@ void handle_balloons(void)
 				}
 				else
 				{
-					y_balloon[i]=SPRY[BEFANA_INDEX];
+                    if(SPRY[BEFANA_INDEX]>150)
+                    {
+                        y_balloon[i]=SPRY[BEFANA_INDEX]-16;
+                    }
+                    else if(SPRY[BEFANA_INDEX]>150)
+                    {
+                        y_balloon[i]=SPRY[BEFANA_INDEX]+20;                        
+                    }
+                    else
+                    {
+                        y_balloon[i]=SPRY[BEFANA_INDEX];
+                    }
+                    
+                   
                     // SPRX[i]=230;
 
 				}
                 SPRC[i]=BALLOON_COLORS[rand()&7];
+                SPRX[i]=184;
+                
+                SPRC[8]=WHITE; // TODO: DEBUG
 			}
             if(!(i&3))
             {
-				SPRY[i]=y_balloon[i]+sinValues2[counter];
+				SPRY[i]=y_balloon[i]+sinValues3[counter];
             }
             else if((i&3)==1)
             {
-				SPRY[i]=y_balloon[i]+shifted_sinValues1[counter];
+				SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
             }
             else if((i&3)==2)
             {
-				SPRY[i]=y_balloon[i]+sinValues1[counter];
+				SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter];
             }   
-            else if((i&3)==3)
+            else
             {
-				SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
+				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
             }              
 		}
 			
@@ -686,6 +731,26 @@ uint8_t collision(void)
 }
 
 
+void handle_befana_color(void)
+{
+    if(energy<50)
+    {
+        SPRC[BEFANA_INDEX]=RED;
+    }
+    else if(energy<100)
+    {
+        SPRC[BEFANA_INDEX]=PURPLE;
+    }
+    else if(energy<150)
+    {
+        SPRC[BEFANA_INDEX]=LIGHT_GREEN;
+    }
+    else
+    {
+        SPRC[BEFANA_INDEX]=PINK;
+    }
+}
+
 void handle_collision(void)
 {
 	if(collision())
@@ -694,74 +759,90 @@ void handle_collision(void)
 		--energy;
 		printd(energy,3,NUMBER_OF_COLS-10,WHITE);
 	}
+    handle_befana_color();
 }
 
 /******************/
 int main()
 {       
-	points = 0;
- 
-	energy = 200;
-	counter = 48;
+
 	
-	init_background();
     
     INITSPRITES();
     INITRASTER();	
 
-	init_player();
-    init_balloons();
-
-	slow_loop=0;
-	fast_loop=0;
-	
-	SPRX[BEFANA_INDEX] = 100;
-	SPRY[BEFANA_INDEX] = 50;
-	POKE(MULTICOLOR_1,BROWN);
-	POKE(MULTICOLOR_2,LIGHT_GREY);
-	SPRC[BEFANA_INDEX]=PINK;
-
 	joy_install((void *)joy_static_stddrv);
 	
 	NUMSPRITES = _NUMBER_OF_SPRITES_;
-	
-	printd(energy,3,NUMBER_OF_COLS-10,WHITE);
-	printd(0,4,6,WHITE);
+
+
 	
 
-	while(energy) 
+    while(1)
     {
-        if (MULTIPLEX_DONE) {	
-            handle_stars();
-		
-			handle_player();
+        init_player();
+        init_balloons();
+
+        slow_loop=0;
+        fast_loop=0;
+        
+        points = 0;
+     
+        energy = 200;
+        counter = 48;
+        
+        SPRX[BEFANA_INDEX] = 100;
+        SPRY[BEFANA_INDEX] = 50;
+        POKE(MULTICOLOR_1,BROWN);
+        POKE(MULTICOLOR_2,LIGHT_GREY);
+        SPRC[BEFANA_INDEX]=PINK;
+
+        clear_screen();
+
+
+        init_background();
+        printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+        printd(0,4,6,WHITE);
+        
+        // print("PRESS FIRE TO START",18,490,WHITE);
+        do
+        {
+        } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
             
-            handle_balloons();
-			// NUMSPRITES=22;
-			
-			scroll_grass();
 
-			// printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
+        while(energy) 
+        {
+            if (MULTIPLEX_DONE) {	
+                handle_stars();
+            
+                handle_player();
+                
+                handle_balloons();
+                // NUMSPRITES=22;
+                
+                scroll_grass();
 
-			handle_collision();
+                // printd(PEEK(SPRITE_COLLISION_REGISTER),3,0,WHITE);
 
-			++counter;
-			
-			if(!counter)
-			{
-				points+=10U;
-				printd(points,4,6,WHITE);
-			}
-			// if(counter>240)
-			// {
-				// counter = 48;
-			// }
-			// ++points;
-			
-			MULTIPLEX_DONE = 0;
-			SPRUPDATEFLAG = 1;	
+                handle_collision();
+
+                ++counter;
+                
+                if(!counter)
+                {
+                    points+=10U;
+                    printd(points,4,6,WHITE);
+                }
+                
+                MULTIPLEX_DONE = 0;
+                SPRUPDATEFLAG = 1;	
+            }
+
         }
-
+        print("GAME OVER",9,492,RED);
+        do
+        { 
+        } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
     }
     return 0;
 }
