@@ -105,15 +105,11 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MIN_Y 55
 #define BEFANA_MAX_Y 208
 
-#define VOLUME_REG 0xD418 
 
-static uint8_t volume;
 
-static uint8_t active_balloon[NUMBER_OF_BALLOONS];
+uint8_t active_balloon[NUMBER_OF_BALLOONS];
 
-static uint8_t active_gift[NUMBER_OF_GIFTS];
-
-static uint8_t y_balloon[NUMBER_OF_BALLOONS];
+uint8_t y_balloon[NUMBER_OF_BALLOONS];
 
 // Pre-calculated sinus values
 const uint8_t sinValues1[] = SINUS(1);
@@ -608,8 +604,8 @@ void init_balloons(void)
 	
 	init_sprite_balloons();
 	
-	active_balloon[0]=1;
-    for(i=1;i<NUMBER_OF_BALLOONS;++i)
+	// active_balloon[0]=1;
+    for(i=0;i<NUMBER_OF_BALLOONS;++i)
 	{
 		active_balloon[i]=1;
 		y_balloon[i]= 40+i*22;
@@ -796,6 +792,8 @@ uint8_t balloon_collision(void)
     {
         if(collision(i))
         {
+            active_balloon[i]=0;
+            SPRY[i]=255;
             return 1;
         }
 	}
@@ -848,15 +846,13 @@ void decrease_energy(uint8_t amount)
     }
 }
 
-#define BALLOON_DAMAGE 2
+#define BALLOON_DAMAGE 20
 void handle_balloon_collision(void)
 {
 	if(balloon_collision())
 	{
 		// ++SPRC[BEFANA_INDEX];
         SPRC[BEFANA_INDEX]=RED;
-		POKE(VOLUME_REG,15);
-		POKE(VOLUME_REG,0);
 		decrease_energy(BALLOON_DAMAGE);
         display_energy();
 	}
@@ -923,8 +919,6 @@ int main()
         slow_loop=0;
         fast_loop=0;
         
-		volume = 15;
-		
         points = 0;
      
         energy = INITIAL_ENERGY;
@@ -945,15 +939,12 @@ int main()
         display_score();
         // printd(0,4,6,WHITE);
         
-		POKE(VOLUME_REG,volume);
         MUSIC_ON=1;
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
             
-		volume=PEEK(VOLUME_REG);
-		POKE(VOLUME_REG,0);
         MUSIC_ON=0;
         while(energy) 
         {
