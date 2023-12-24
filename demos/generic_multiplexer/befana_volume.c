@@ -26,6 +26,8 @@ extern unsigned short SPRITE_GFX;
 
 extern uint8_t MUSIC_ON;
 
+static uint8_t volume;
+
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
 
@@ -105,7 +107,22 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MIN_Y 55
 #define BEFANA_MAX_Y 208
 
+#define VOLUME_REG 0xD418 
 
+void music_switch(uint8_t toggle)
+{
+    if(toggle)
+    {
+        POKE(VOLUME_REG,volume);
+        MUSIC_ON=1;
+    }
+    else
+    {
+        MUSIC_ON=0;
+        volume=PEEK(VOLUME_REG);
+        POKE(VOLUME_REG,0);
+    }
+}
 
 uint8_t active_balloon[NUMBER_OF_BALLOONS];
 
@@ -901,9 +918,11 @@ void handle_gift_collision(void)
 /******************/
 int main()
 {       
+    volume=0;
 
     INITSPRITES();
     INITRASTER();	
+    
 
 	joy_install((void *)joy_static_stddrv);
 	
@@ -939,17 +958,20 @@ int main()
         display_score();
         // printd(0,4,6,WHITE);
         
-        MUSIC_ON=1;
+        music_switch(1);
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
             
-        MUSIC_ON=0;
+        music_switch(0);
+        // POKE(VOLUME_REG,0);
         while(energy) 
         {
             if (MULTIPLEX_DONE) {	
                 handle_stars();
+                // POKE(VOLUME_REG,0);
+
             
                 handle_player();
                 
