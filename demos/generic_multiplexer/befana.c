@@ -707,6 +707,12 @@ void init_sprite_balloons(void)
 }
 
 
+uint8_t compute_y_ballon(uint8_t i)
+{
+	return 40+i*22;
+}
+
+
 void init_balloons(void)
 {
 	// uint8_t i;
@@ -719,7 +725,7 @@ void init_balloons(void)
 		if(i&1)
 		{
 			active_balloon[i]=1;
-			y_balloon[i]= 40+i*22;
+			y_balloon[i]= compute_y_ballon(i);
 
 		}
 		else
@@ -991,6 +997,38 @@ void handle_gift_collision(void)
 }
 
 
+void handle_distance(void)
+{
+	if(distance==10)
+	{
+		active_balloon[8]=1;
+		y_balloon[8]=compute_y_ballon(8);
+		// SPRY[8]=y_balloon[8];
+	}
+	else if(distance==20)
+	{
+		active_balloon[0]=1;
+		active_balloon[6]=1;
+		y_balloon[0]=compute_y_ballon(0);
+		y_balloon[6]=compute_y_ballon(6);
+		// SPRY[0]=y_balloon[0];		
+		// SPRY[6]=y_balloon[6];		
+	}
+	else if(distance==30)
+	{
+		active_balloon[2]=1;
+		y_balloon[2]=compute_y_ballon(2);
+		// SPRY[2]=y_balloon[2];		
+	}
+	else if(distance==40)
+	{
+		active_balloon[4]=1;
+		y_balloon[4]=compute_y_ballon(4);	
+		
+		// SPRY[4]=y_balloon[4];
+	}
+}
+
 
 /******************/
 int main()
@@ -1037,7 +1075,7 @@ int main()
 		print("SCORE",5,0,CYAN);
 		
 		display_distance();
-		print("KM",2,14,YELLOW);
+		print("M",1,14,YELLOW);
         display_score();
         // printd(0,4,6,WHITE);
         
@@ -1087,7 +1125,7 @@ int main()
                     // handle_befana_color();
                 }
                 
-				// handle_distance();
+				handle_distance();
 				
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
