@@ -106,7 +106,9 @@ extern uint8_t MUSIC_ON;
 
 
 
+uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 uint8_t active_balloon[NUMBER_OF_BALLOONS];
+
 
 uint8_t y_balloon[NUMBER_OF_BALLOONS];
 
@@ -143,6 +145,9 @@ const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
 // const uint8_t yValues4[] = SINUS(4);
 
+
+static uint16_t distance;
+static uint16_t record;
 
 static uint8_t volume;
 
@@ -310,10 +315,6 @@ static uint8_t prev_slow_loop;
 static uint8_t prev_fast_loop;
 
 
-
-
-
-
 void _set_noise(void)
 {
 	SID.v3.ad    = 0x00; 
@@ -398,6 +399,7 @@ void _XL_TOCK_SOUND(void)
 	_short_sound();
 };
 
+
 void _XL_ZAP_SOUND(void) 
 { 
 	uint8_t i;
@@ -422,6 +424,7 @@ void _XL_ZAP_SOUND(void)
 };
 
 
+// Print a string on screen memory
 void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
 {
     uint8_t k;
@@ -437,6 +440,7 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
 }
 
 
+// Print a 16-bit number on screen memory
 void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
 {
 	uint8_t i;
@@ -453,8 +457,6 @@ void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
 	}
 }
 
-
- 
 
 void draw_the_moon(void)
 {
@@ -476,7 +478,6 @@ void set_background_colors(void)
 }
 
 
-// TODO: Clear redefined star characters
 void clear_screen(void)
 {
     for(k=0;k<1000;++k)
@@ -712,18 +713,23 @@ void init_balloons(void)
 	
 	init_sprite_balloons();
 	
-	// active_balloon[0]=1;
     for(i=0;i<NUMBER_OF_BALLOONS;++i)
 	{
-		active_balloon[i]=1;
-		y_balloon[i]= 40+i*22;
+		harmful_balloon[i]=1;
+		if(i&1)
+		{
+			active_balloon[i]=1;
+			y_balloon[i]= 40+i*22;
 
-	}
-
+		}
+		else
+		{
+			active_balloon[i]=0;
+			y_balloon[i]= 255;
+			SPRY[i]=255;
+		}
+	}	
 }
-
-
-// const uint8_t BALLOON_Y_INIT_POS[] = {80,120,140,160}
 
 #define BALLON_THRESHOLD_X 9
 
@@ -733,73 +739,61 @@ void handle_balloons(void)
     
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-		// if(active_balloon[i])
-		// {
+		if(active_balloon[i])
+		{
 			--SPRX[i];
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
-				active_balloon[i]=1;
+				harmful_balloon[i]=1;
 				if(i<8)
 				{
-                    y_balloon[i]=62+(i&3)*32+(rand()&0x1F);
-					// do
-					// {
-						// y_balloon[i]=rand()&0xFF;
-						
-					// } while((y_balloon[i]<60)||(y_balloon[i]>BALLOON_BOTTOM_Y));		
-                    SPRC[i]=BALLOON_COLORS[rand()&7];
+					y_balloon[i]=62+(i&3)*32+(rand()&0x1F);
+
+					SPRC[i]=BALLOON_COLORS[rand()&7];
 
 				}
 				else
 				{
-                    SPRC[i]=WHITE;
-                    if(SPRY[BEFANA_INDEX]>150)
-                    {
-                        y_balloon[i]=SPRY[BEFANA_INDEX]-16;
-                    }
-                    else if(SPRY[BEFANA_INDEX]<70)     
-                    {
-                        y_balloon[i]=SPRY[BEFANA_INDEX];                        
-                    }
-                    else if(SPRY[BEFANA_INDEX]>100)
-                    {
-                        y_balloon[i]=160;
-                        SPRC[i]=RED;
-                        // while(1){};
-                    }
-                    else
-                    {
-                        y_balloon[i]=80;
-                        SPRC[i]=RED;
-                        // while(1){};
-                    }
-                    
-                   
-                    // SPRX[i]=230;
+					SPRC[i]=WHITE;
+					if(SPRY[BEFANA_INDEX]>150)
+					{
+						y_balloon[i]=SPRY[BEFANA_INDEX]-16;
+					}
+					else if(SPRY[BEFANA_INDEX]<70)     
+					{
+						y_balloon[i]=SPRY[BEFANA_INDEX];                        
+					}
+					else if(SPRY[BEFANA_INDEX]>100)
+					{
+						y_balloon[i]=160;
+						SPRC[i]=RED;
+					}
+					else
+					{
+						y_balloon[i]=80;
+						SPRC[i]=RED;
+					}
 
 				}
-                SPRX[i]=184;
-                
-                // SPRC[8]=WHITE; // TODO: DEBUG
+				SPRX[i]=184;
 			}
-            if(!(i&3))
-            {
+			if(!(i&3))
+			{
 				SPRY[i]=y_balloon[i]+sinValues3[counter];
-            }
-            else if((i&3)==1)
-            {
+			}
+			else if((i&3)==1)
+			{
 				SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
-            }
-            else if((i&3)==2)
-            {
+			}
+			else if((i&3)==2)
+			{
 				SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter];
-            }   
-            else
-            {
+			}   
+			else
+			{
 				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
-            }              
-		// }
-			
+			}
+		}            
     }
 }
 
@@ -892,13 +886,17 @@ uint8_t balloon_collision(void)
 {
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-        if(active_balloon[i] && collision(i))
-        {
-			_XL_EXPLOSION_SOUND();
-            active_balloon[i]=0;
-            SPRY[i]=255;
-            return 1;
-        }
+		if(collision(i))
+		{
+			SPRC[BEFANA_INDEX]=RED;
+			if(harmful_balloon[i])
+			{
+				_XL_EXPLOSION_SOUND();
+				harmful_balloon[i]=0;
+				return 1;
+			}
+		}
+		
 	}
 	return 0;
 }
@@ -906,15 +904,7 @@ uint8_t balloon_collision(void)
 
 void handle_befana_color(void)
 {
-    if(energy<(MAX_ENERGY/4))
-    {
-        SPRC[BEFANA_INDEX]=RED;
-    }
-    else if(energy<(MAX_ENERGY/2))
-    {
-        SPRC[BEFANA_INDEX]=PURPLE;
-    }
-    else if(energy<3*(MAX_ENERGY/4))
+	if(energy<(MAX_ENERGY/4))
     {
         SPRC[BEFANA_INDEX]=LIGHT_GREEN;
     }
@@ -937,6 +927,12 @@ void display_score(void)
 }
 
 
+void display_distance(void)
+{
+    printd(distance,3,11,WHITE);
+}
+
+
 void decrease_energy(uint8_t amount)
 {
     if(energy>=amount)
@@ -947,6 +943,7 @@ void decrease_energy(uint8_t amount)
     {
         energy=0;
     }
+	handle_befana_color();
 }
 
 #define BALLOON_DAMAGE 20
@@ -959,10 +956,6 @@ void handle_balloon_collision(void)
 		decrease_energy(BALLOON_DAMAGE);
         display_energy();
 	}
-    // else
-    // {
-        // handle_befana_color();
-    // }
 }
 
 
@@ -992,10 +985,6 @@ void handle_gift_collision(void)
             points+=100;
             display_score();
             SPRY[i]=255;
-
-            handle_befana_color();
-            
-            
             return;
         }
 	}
@@ -1014,13 +1003,14 @@ int main()
 	
 	NUMSPRITES = _NUMBER_OF_SPRITES_;
 
-
+	record = 0;
     while(1)
     {
         init_player();
         init_balloons();
         init_gifts();
 
+		distance=0;
         slow_loop=0;
         fast_loop=0;
         
@@ -1045,6 +1035,9 @@ int main()
 		print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
         display_energy();
 		print("SCORE",5,0,CYAN);
+		
+		display_distance();
+		print("KM",2,14,YELLOW);
         display_score();
         // printd(0,4,6,WHITE);
         
@@ -1088,17 +1081,24 @@ int main()
                     decrease_energy(1);
                     display_energy();
                     points+=10U;
-                    display_score();   
-                    handle_befana_color();
+                    display_score();
+					++distance;
+					display_distance();
+                    // handle_befana_color();
                 }
                 
+				// handle_distance();
+				
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
             }
 
         }
         print("GAME OVER",9,492,RED);
-
+		if(points>record)
+		{
+			record=points;
+		}
         do
         { 
         } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
