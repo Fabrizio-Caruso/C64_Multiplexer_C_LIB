@@ -145,6 +145,28 @@ const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 // const uint8_t yValues4[] = SINUS(4);
 
 
+static uint8_t volume;
+
+#define VOLUME_REG 0xD418 
+
+void music_switch(uint8_t toggle)
+{
+    if(toggle)
+    {
+        POKE(VOLUME_REG,volume);
+        MUSIC_ON=1;
+    }
+    else
+    {
+        MUSIC_ON=0;
+        volume=PEEK(VOLUME_REG);
+        POKE(VOLUME_REG,0);
+    }
+}
+
+
+
+
 #if defined(__C64__)
     #if defined(SPRITES_AT_2800)
         #define GFX_START 0x2800U
@@ -625,11 +647,12 @@ void handle_balloons(void)
     
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-		if(active_balloon[i])
-		{
+		// if(active_balloon[i])
+		// {
 			--SPRX[i];
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
+				active_balloon[i]=1;
 				if(i<8)
 				{
                     y_balloon[i]=62+(i&3)*32+(rand()&0x1F);
@@ -689,15 +712,8 @@ void handle_balloons(void)
             {
 				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
             }              
-		}
-			
-        // SPRY[i]= i*32-counter;
-        // SPRX[i]= i*16+xValues[counter+i*8];
-		// if(SPRY[i]<40)
-		// {
-			// SPRY[i]=255;
-			// SPRX[i]=i*24;
 		// }
+			
     }
 }
 
@@ -790,7 +806,7 @@ uint8_t balloon_collision(void)
 {
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-        if(collision(i))
+        if(active_balloon[i] && collision(i))
         {
             active_balloon[i]=0;
             SPRY[i]=255;
@@ -824,13 +840,13 @@ void handle_befana_color(void)
 
 void display_energy(void)
 {
-    printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+    printd(energy,3,NUMBER_OF_COLS-1-2,WHITE);
 }
 
 
 void display_score(void)
 {
-    printd(points,4,6,WHITE);
+    printd(points,5,5,WHITE);
 }
 
 
@@ -935,17 +951,19 @@ int main()
 
         init_background();
         // printd(energy,3,NUMBER_OF_COLS-10,WHITE);
+		print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
         display_energy();
+		print("SCORE",5,0,CYAN);
         display_score();
         // printd(0,4,6,WHITE);
         
-        MUSIC_ON=1;
+        music_switch(1);
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
             
-        MUSIC_ON=0;
+        music_switch(0);
         while(energy) 
         {
             if (MULTIPLEX_DONE) {	
@@ -963,7 +981,7 @@ int main()
                 // printd(SPRY[GIFT_INDEX+2],3,160,WHITE);
                 // printd(SPRY[GIFT_INDEX+3],3,200,WHITE);
 
-                printd(PEEK(0xFA),3,0,WHITE);
+                // printd(PEEK(0xFA),3,0,WHITE);
 
 
                 handle_gifts();
