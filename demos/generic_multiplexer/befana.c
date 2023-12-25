@@ -187,28 +187,6 @@ static uint8_t energy;
 static uint16_t points = 0;
 
 
-// const char MESSAGE[12] = "HAPPYNEWYEAR";
-// #define MESSAGE_LENGTH 12
-
-// const char MESSAGE2[14] = "MERRYCHRISTMAS";
-// #define MESSAGE2_LENGTH 14
-
-// const uint8_t COLORS[14] = {2,3,4,5,6,7,8,9,10,11,12,13,14,15};
-
-// const char AUTHOR[15] = "FABRIZIO CARUSO";
-// const char TEXT1[27] =  "ALL LOGIC CODE WRITTEN IN C";
-// const char TEXT2[28] =  "MODIFIED CADAVER MULTIPLEXER";
-// const char TEXT3[29] =  "SID TUNE AND FONTS RIPPED OFF";
-// const char TEXT4[17] =  "FAST MODE ENABLED";
-
-// const char WRITTEN[15] = "WRITTEN IN C BY";
-
-// const char YEAR[14] =   "HAPPY NEW YEAR";
-
-// const uint8_t STAR_0[4] = {0x00,0x10,0x10,0x00};
-// const uint8_t STAR_1[4] = {0x10,0x28,0x38,0x10};
-// const star STAR_0[4] = {};
-
 
 #define X_OFFSET 46
 #define Y_OFFSET 58
@@ -516,7 +494,6 @@ void fill_sky(uint8_t star_offset, uint8_t last_position, uint8_t star_type)
 {
 	uint8_t offset;
 	uint8_t previous;
-	// uint8_t char_type;
 	
 	offset = 0;
 	
@@ -528,14 +505,6 @@ void fill_sky(uint8_t star_offset, uint8_t last_position, uint8_t star_type)
 			offset = 2+(rand())%NUMBER_OF_COLS;
 		} while((offset==previous)||(offset==previous-1)||(offset==previous+1));
 
-		// if(i&1)
-		// {
-			// char_type = SLOW_STAR_TILE;
-		// }
-		// else
-		// {
-			// char_type = FAST_STAR_TILE;
-		// }
 		for(j=0;j<NUMBER_OF_COLS;++j)
 		{
 			POKE(SCREEN+i*NUMBER_OF_COLS+(j+offset)%NUMBER_OF_COLS,star_type+(j%NUMBER_OF_COLS));	
@@ -566,6 +535,7 @@ void init_grass(void)
 }
 
 
+
 void init_background(void)
 {
 	clear_screen();
@@ -588,12 +558,18 @@ void init_background(void)
 void draw_stars(void)
 {
 	POKE(SLOW_STAR_TILE_OFFSET+((slow_loop)<<3),slow_star_mask);
-
-	// POKE(SLOW_STAR_TILE_OFFSET+(((slow_loop+(NUMBER_OF_COLS))%NUMBER_OF_COLS)<<3),slow_star_mask);
-
-	
 	POKE(FAST_STAR_TILE_OFFSET+((fast_loop)<<3),fast_star_mask);
+}
 
+
+void clear_stars(void)
+{
+	uint16_t i;
+	for(i=0;i<NUMBER_OF_COLS*8;++i)
+	{
+		POKE(SLOW_STAR_TILE_OFFSET+i,0);
+		POKE(FAST_STAR_TILE_OFFSET+i,0);
+	}
 }
 
 
@@ -1059,10 +1035,12 @@ int main()
         POKE(MULTICOLOR_2,LIGHT_GREY);
         SPRC[BEFANA_INDEX]=PINK;
 
-        clear_screen();
+        // clear_screen();
 
+		clear_stars();
 
         init_background();
+		
         // printd(energy,3,NUMBER_OF_COLS-10,WHITE);
 		print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
         display_energy();
