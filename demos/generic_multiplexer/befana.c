@@ -111,9 +111,9 @@ extern uint8_t MUSIC_ON;
 #define GIFT_ENERGY 20
 
 #define DISTANCE_LEV_1 100
-#define DISTANCE_LEV_2 200
-#define DISTANCE_LEV_3 300
-#define DISTANCE_LEV_4 500
+#define DISTANCE_LEV_2 400
+#define DISTANCE_LEV_3 700
+#define DISTANCE_LEV_4 1000
 
 
 
@@ -750,6 +750,68 @@ void init_balloons(void)
 	}	
 }
 
+
+#define MAX_LEVEL 4
+uint8_t level;
+
+uint8_t distances[]={DISTANCE_LEV_1,DISTANCE_LEV_2,DISTANCE_LEV_3,DISTANCE_LEV_4};
+
+void activate_level(uint8_t i)
+{
+	if(level>=1)
+	{
+		if(i==8)
+		{
+			active_balloon[8]=1;
+			y_balloon[8]=compute_y_ballon(8);
+		}
+	}
+	if(level>=2)
+	{
+		if(!i)
+		{
+			active_balloon[0]=1;
+			y_balloon[0]=compute_y_ballon(0);
+		}
+		else if(i==6)
+		{
+			active_balloon[6]=1;
+			y_balloon[6]=compute_y_ballon(6);
+		}			
+	}
+	if(level>=3)
+	{
+		if(i==2)
+		{
+			active_balloon[2]=1;
+			y_balloon[2]=compute_y_ballon(2);
+		}
+	}
+	if(level>=4)
+	{
+		if(i==4)
+		{
+			active_balloon[4]=1;
+			y_balloon[4]=compute_y_ballon(4);		
+		}
+	}	
+}
+
+void handle_distance(uint8_t i)
+{
+	if(level<MAX_LEVEL)
+	{
+		if(distance>=distances[level])
+		{
+			++level;
+		}
+	}
+	activate_level(i);
+	
+}
+
+
+
 #define BALLON_THRESHOLD_X 9
 
 void handle_balloons(void)
@@ -818,6 +880,7 @@ void handle_balloons(void)
 		else if(SPRX[i]<BALLON_THRESHOLD_X)
 		{
 			SPRX[i]=184;
+			handle_distance(i);
 		}
     }
 }
@@ -1015,39 +1078,6 @@ void handle_gift_collision(void)
 }
 
 
-void handle_distance(void)
-{
-	if(distance==DISTANCE_LEV_1)
-	{
-		active_balloon[8]=1;
-		y_balloon[8]=compute_y_ballon(8);
-		// SPRY[8]=y_balloon[8];
-	}
-	else if(distance==DISTANCE_LEV_2)
-	{
-		active_balloon[0]=1;
-		active_balloon[6]=1;
-		y_balloon[0]=compute_y_ballon(0);
-		y_balloon[6]=compute_y_ballon(6);
-		// SPRY[0]=y_balloon[0];		
-		// SPRY[6]=y_balloon[6];		
-	}
-	else if(distance==DISTANCE_LEV_3)
-	{
-		active_balloon[2]=1;
-		y_balloon[2]=compute_y_ballon(2);
-		// SPRY[2]=y_balloon[2];		
-	}
-	else if(distance==DISTANCE_LEV_4)
-	{
-		active_balloon[4]=1;
-		y_balloon[4]=compute_y_ballon(4);	
-		
-		// SPRY[4]=y_balloon[4];
-	}
-}
-
-
 /******************/
 int main()
 {       
@@ -1071,7 +1101,8 @@ int main()
         fast_loop=0;
         
         points = 0;
-     
+		level = 0;
+		
         energy = INITIAL_ENERGY;
         counter = 0;
         
@@ -1140,11 +1171,10 @@ int main()
                     display_score();
 					distance+=5U;
 					display_distance();
+					printd(level,3,20,YELLOW);
                     // handle_befana_color();
                 }
-                
-				handle_distance();
-				
+                				
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
             }
