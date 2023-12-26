@@ -121,12 +121,16 @@ extern uint8_t MUSIC_ON;
 // #define DISTANCE_LEV_9 5000U
 
 
+uint8_t accelleration;
 
-uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
-uint8_t active_balloon[NUMBER_OF_BALLOONS];
+#define BOOST_LEVEL 8
 
+static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
+static uint8_t active_balloon[NUMBER_OF_BALLOONS];
 
-uint8_t y_balloon[NUMBER_OF_BALLOONS];
+static uint8_t freeze;
+
+static uint8_t y_balloon[NUMBER_OF_BALLOONS];
 
 // Pre-calculated sinus values
 const uint8_t sinValues1[] = SINUS(1);
@@ -598,31 +602,6 @@ void init_player(void)
     SPRC[BEFANA_INDEX] = PINK;
 }
 
-void handle_player(void)
-{
-
-	input = joy_read(STANDARD_JOY);
-	
-	if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
-	{
-		--SPRX[BEFANA_INDEX];
-	}
-	else if(JOY_RIGHT(input) && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
-	{
-		++SPRX[BEFANA_INDEX];
-	}
-	
-	if(JOY_UP(input) && SPRY[BEFANA_INDEX]>BEFANA_MIN_Y)
-	{
-		--SPRY[BEFANA_INDEX];
-	}
-	else if(JOY_DOWN(input) && SPRY[BEFANA_INDEX]<BEFANA_MAX_Y)
-	{
-		++SPRY[BEFANA_INDEX];
-	}
-	
-	SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
-}
 
 
 void handle_stars(void)
@@ -670,6 +649,53 @@ void handle_stars(void)
     {
         POKE(FAST_STAR_TILE_OFFSET+((prev_fast_loop)<<3),0);
     }	    
+}
+
+
+void handle_befana(void)
+{
+
+	input = joy_read(STANDARD_JOY);
+	
+	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
+	{
+		--accelleration;
+		++SPRX[BEFANA_INDEX];
+		handle_stars();
+	}
+	
+	if(!freeze)
+	{
+		if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
+		{
+			--SPRX[BEFANA_INDEX];
+		}
+		else if(JOY_RIGHT(input) && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
+		{
+			++SPRX[BEFANA_INDEX];
+		}
+		
+		if(JOY_UP(input) && SPRY[BEFANA_INDEX]>BEFANA_MIN_Y)
+		{
+			--SPRY[BEFANA_INDEX];
+		}
+		else if(JOY_DOWN(input) && SPRY[BEFANA_INDEX]<BEFANA_MAX_Y)
+		{
+			++SPRY[BEFANA_INDEX];
+		}
+		
+		if(JOY_FIRE(input))
+		{
+			if(!accelleration)
+			{
+				accelleration=BOOST_LEVEL;
+			}
+		}
+		
+		SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+	}
+	
+		
 }
 
 
@@ -1000,7 +1026,6 @@ uint8_t balloon_collision(void)
     {
 		if(collision(i))
 		{
-			SPRC[BEFANA_INDEX]=RED;
 			if(harmful_balloon[i])
 			{
 				_XL_EXPLOSION_SOUND();
@@ -1016,7 +1041,12 @@ uint8_t balloon_collision(void)
 
 void handle_befana_color(void)
 {
-	if(energy<(MAX_ENERGY/4))
+	if(freeze)
+	{
+		--freeze;
+		SPRC[BEFANA_INDEX]=RED;
+	}
+	else if(energy<(MAX_ENERGY/4))
     {
         SPRC[BEFANA_INDEX]=LIGHT_GREEN;
     }
@@ -1047,17 +1077,18 @@ void display_distance(void)
 
 void decrease_energy(uint8_t amount)
 {
-    // if(energy>=amount)
-    // {
-        // energy-=amount;
-    // }
-    // else
-    // {
-        // energy=0;
-    // }
+    if(energy>=amount)
+    {
+        energy-=amount;
+    }
+    else
+    {
+        energy=0;
+    }
 	handle_befana_color();
 }
 
+#define FREEZE_DAMAGE 1
 
 void handle_balloon_collision(void)
 {
@@ -1066,6 +1097,7 @@ void handle_balloon_collision(void)
 		// ++SPRC[BEFANA_INDEX];
         SPRC[BEFANA_INDEX]=RED;
 		decrease_energy(BALLOON_DAMAGE);
+		freeze=FREEZE_DAMAGE;
         display_energy();
 	}
 }
@@ -1124,6 +1156,8 @@ int main()
         slow_loop=0;
         fast_loop=0;
         
+		freeze=0;
+		
         points = 0;
 		level = 1;
 		
@@ -1164,7 +1198,7 @@ int main()
             if (MULTIPLEX_DONE) {	
                 handle_stars();
             
-                handle_player();
+                handle_befana();
                 
                 handle_balloons();
                 // NUMSPRITES=22;
@@ -1184,7 +1218,7 @@ int main()
 					// {
 						// printd(active_balloon[j],1,120+40*j,WHITE);
 					// }
-					printd(level,1,999,WHITE);
+					// printd(level,1,999,WHITE);
 				// }
 	
                 handle_gifts();
