@@ -110,11 +110,15 @@ extern uint8_t MUSIC_ON;
 
 #define GIFT_ENERGY 20
 
-#define DISTANCE_LEV_1 100
-#define DISTANCE_LEV_2 400
-#define DISTANCE_LEV_3 700
-#define DISTANCE_LEV_4 1000
-
+#define DISTANCE_LEV_1 500U
+#define DISTANCE_LEV_2 1000U
+#define DISTANCE_LEV_3 1500U
+#define DISTANCE_LEV_4 2000U
+#define DISTANCE_LEV_5 2500U
+#define DISTANCE_LEV_6 3000U
+#define DISTANCE_LEV_7 3500U
+#define DISTANCE_LEV_8 4000U
+// #define DISTANCE_LEV_9 5000U
 
 
 
@@ -744,50 +748,23 @@ void init_balloons(void)
 			// active_balloon[i]=1;
 			// y_balloon[i]= compute_y_ballon(i);			
 			active_balloon[i]=0;
-			y_balloon[i]= 255-i*16;
-			SPRY[i]=255-i*16;
+			y_balloon[i]= 255; //-i*16;
+			SPRY[i]=255; //-i*16;
 		}
 	}	
 }
 
 
-#define MAX_LEVEL 4
-uint8_t level;
+#define MAX_LEVEL 9
+static uint8_t level;
 
-uint8_t distances[]={DISTANCE_LEV_1,DISTANCE_LEV_2,DISTANCE_LEV_3,DISTANCE_LEV_4};
+// uint16_t distances[]={DISTANCE_LEV_1,DISTANCE_LEV_2,DISTANCE_LEV_3,DISTANCE_LEV_4, DISTANCE_LEV_5, DISTANCE_LEV_6,DISTANCE_LEV_7,DISTANCE_LEV_8};
+
+// uint8_t distance_counter;
 
 void activate_level(uint8_t i)
 {
-	if(level>=1)
-	{
-		if(i==8)
-		{
-			active_balloon[8]=1;
-			y_balloon[8]=compute_y_ballon(8);
-		}
-	}
-	if(level>=2)
-	{
-		if(!i)
-		{
-			active_balloon[0]=1;
-			y_balloon[0]=compute_y_ballon(0);
-		}
-		else if(i==6)
-		{
-			active_balloon[6]=1;
-			y_balloon[6]=compute_y_ballon(6);
-		}			
-	}
-	if(level>=3)
-	{
-		if(i==2)
-		{
-			active_balloon[2]=1;
-			y_balloon[2]=compute_y_ballon(2);
-		}
-	}
-	if(level>=4)
+	if(level>=9)
 	{
 		if(i==4)
 		{
@@ -795,13 +772,45 @@ void activate_level(uint8_t i)
 			y_balloon[4]=compute_y_ballon(4);		
 		}
 	}	
+	else if(level>=7)
+	{
+		if(i==2)
+		{
+			active_balloon[2]=1;
+			y_balloon[2]=compute_y_ballon(2);
+		}
+	}
+	else if(level>=5)
+	{
+		if(i==6)
+		{
+			active_balloon[6]=1;
+			y_balloon[6]=compute_y_ballon(6);
+		}			
+	}
+	else if(level>=3)
+	{
+		if(!i)
+		{
+			active_balloon[0]=1;
+			y_balloon[0]=compute_y_ballon(0);
+		}
+	}
+	else if(level>=1)
+	{
+		if(i==8)
+		{
+			active_balloon[8]=1;
+			y_balloon[8]=compute_y_ballon(8);
+		}
+	}
 }
 
-void handle_distance(uint8_t i)
+void check_level_trigger(uint8_t i)
 {
 	if(level<MAX_LEVEL)
 	{
-		if(distance>=distances[level])
+		if(distance>=level*(uint16_t) 500U)
 		{
 			++level;
 		}
@@ -866,11 +875,26 @@ void handle_balloons(void)
 			}
 			else if((i&3)==1)
 			{
-				SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
+				if((level&1))
+				{
+					SPRY[i]=y_balloon[i]+2*shifted_sinValues3[counter];
+				}
+				else
+				{
+					SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
+				}
 			}
 			else if((i&3)==2)
 			{
-				SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter];
+				
+				if((level&1))
+				{
+					SPRY[i]=y_balloon[i]+2*shifted2_sinValues3[counter];
+				}
+				else
+				{
+					SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter];
+				}
 			}   
 			else
 			{
@@ -880,7 +904,7 @@ void handle_balloons(void)
 		else if(SPRX[i]<BALLON_THRESHOLD_X)
 		{
 			SPRX[i]=184;
-			handle_distance(i);
+			check_level_trigger(i);
 		}
     }
 }
@@ -1023,14 +1047,14 @@ void display_distance(void)
 
 void decrease_energy(uint8_t amount)
 {
-    if(energy>=amount)
-    {
-        energy-=amount;
-    }
-    else
-    {
-        energy=0;
-    }
+    // if(energy>=amount)
+    // {
+        // energy-=amount;
+    // }
+    // else
+    // {
+        // energy=0;
+    // }
 	handle_befana_color();
 }
 
@@ -1101,7 +1125,7 @@ int main()
         fast_loop=0;
         
         points = 0;
-		level = 0;
+		level = 1;
 		
         energy = INITIAL_ENERGY;
         counter = 0;
@@ -1153,8 +1177,16 @@ int main()
                 // printd(SPRY[GIFT_INDEX+3],3,200,WHITE);
 
                 // printd(PEEK(0xFA),3,0,WHITE);
-
-
+				// {
+					// uint8_t j;
+					
+					// for(j=0;j<9;++j)
+					// {
+						// printd(active_balloon[j],1,120+40*j,WHITE);
+					// }
+					printd(level,1,999,WHITE);
+				// }
+	
                 handle_gifts();
 
                 handle_balloon_collision();
@@ -1171,7 +1203,7 @@ int main()
                     display_score();
 					distance+=5U;
 					display_distance();
-					printd(level,3,20,YELLOW);
+					// printd(level,3,20,YELLOW);
                     // handle_befana_color();
                 }
                 				
