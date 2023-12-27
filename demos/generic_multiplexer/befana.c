@@ -110,23 +110,15 @@ extern uint8_t MUSIC_ON;
 
 #define GIFT_ENERGY 20
 
-// #define DISTANCE_LEV_1 500U
-// #define DISTANCE_LEV_2 1000U
-// #define DISTANCE_LEV_3 1500U
-// #define DISTANCE_LEV_4 2000U
-// #define DISTANCE_LEV_5 2500U
-// #define DISTANCE_LEV_6 3000U
-// #define DISTANCE_LEV_7 3500U
-// #define DISTANCE_LEV_8 4000U
-// #define DISTANCE_LEV_9 5000U
-
 #define LEVEL_DISTANCE 500U
+
+uint8_t forward_thrust;
 
 uint8_t accelleration;
 
 #define BOOST_LEVEL 12
 
-#define MAX_LEVEL 10
+#define MAX_LEVEL 12
 static uint8_t level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
@@ -662,6 +654,10 @@ void handle_stars(void)
 	{
 		_handle_stars();
 	}
+	if(forward_thrust)
+	{
+		_handle_stars();
+	}
 }
 
 
@@ -677,15 +673,18 @@ void handle_befana(void)
 		// handle_stars();
 	}
 	
+	forward_thrust = 0;
 	if(!freeze)
 	{
 		if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
 		{
 			--SPRX[BEFANA_INDEX];
+			
 		}
 		else if(JOY_RIGHT(input) && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 		{
 			++SPRX[BEFANA_INDEX];
+			forward_thrust = 1;
 		}
 		
 		if(JOY_UP(input) && SPRY[BEFANA_INDEX]>BEFANA_MIN_Y)
@@ -808,7 +807,7 @@ void init_balloons(void)
 
 // uint8_t distance_counter;
 
-void activate_level(uint8_t i)
+void activate_balloon(uint8_t i)
 {
 	if(level>=10)
 	{
@@ -874,9 +873,12 @@ void display_level(void)
 
 void check_level_trigger(uint8_t i)
 {
-	if(level<MAX_LEVEL)
-	{
-		if(distance>=level*(uint16_t) LEVEL_DISTANCE)
+				// ++level;
+				// display_level();
+
+	// if(level<MAX_LEVEL)
+	// {
+		if(distance>=((uint16_t) level)*(uint16_t) LEVEL_DISTANCE)
 		{
 			++level;
 			display_level();
@@ -896,8 +898,8 @@ void check_level_trigger(uint8_t i)
 				// }
 			// }
 		}
-	}
-	activate_level(i);
+	// }
+	activate_balloon(i);
 	
 }
 
@@ -905,7 +907,7 @@ void check_level_trigger(uint8_t i)
 
 #define BALLON_THRESHOLD_X 8
 
-void handle_balloons(void)
+void _handle_balloons(void)
 {
     uint8_t i;
     
@@ -991,15 +993,21 @@ void handle_balloons(void)
     }
 }
 
-
-// void handle_balloons(void)
-// {
-	// _handle_balloons();
-	// if(!(level&1))
-	// {
-		// _handle_balloons();
-	// }
-// }
+void handle_balloons(void)
+{
+	_handle_balloons();
+	if((level==2)||(level==4)||(level==8)||(level==10))
+	{
+		if(counter&1)
+		{
+			_handle_balloons();
+		}
+	}
+	else if((level==3)||(level==5)||(level>10))
+	{
+		_handle_balloons();
+	}
+}
 
 void init_gifts(void)
 {
