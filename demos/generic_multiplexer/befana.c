@@ -796,8 +796,8 @@ void init_balloons(void)
 			// y_balloon[i]= compute_y_ballon(i);			
 			active_balloon[i]=0;
 			y_balloon[i]= 255; //-i*16;
-			SPRY[i]=255; //-i*16;
 		}
+		SPRY[i]=255; //-i*16;
 	}	
 }
 
@@ -1027,6 +1027,20 @@ void init_gifts(void)
     }
 }
 
+void clear_gifts(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    {
+        // SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
+        // SPRC[GIFT_INDEX+i]=BALLOON_COLORS[i];
+        SPRY[GIFT_INDEX+i]=255;
+        // SPRM[GIFT_INDEX+i]=1;
+        // SPRX[GIFT_INDEX+i]=i*64;
+    }
+}
+
 
 void handle_gifts(void)
 {
@@ -1226,9 +1240,17 @@ int main()
 	record = 0;
     while(1)
     {
-        init_player();
         init_balloons();
-        init_gifts();
+
+		while(MULTIPLEX_DONE)
+		{
+			clear_gifts();
+			SPRY[BEFANA_INDEX]=255;
+
+			MULTIPLEX_DONE = 0;
+			SPRUPDATEFLAG = 1;
+		}
+
 
 		distance=0;
         slow_loop=0;
@@ -1242,11 +1264,7 @@ int main()
         energy = INITIAL_ENERGY;
         counter = 0;
         
-        SPRX[BEFANA_INDEX] = 100;
-        SPRY[BEFANA_INDEX] = 50;
-        POKE(MULTICOLOR_1,BROWN);
-        POKE(MULTICOLOR_2,LIGHT_GREY);
-        SPRC[BEFANA_INDEX]=PINK;
+
 
         // clear_screen();
 
@@ -1278,7 +1296,15 @@ int main()
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
-            
+        
+		init_gifts();
+        init_player();
+        SPRX[BEFANA_INDEX] = 100;
+        SPRY[BEFANA_INDEX] = 50;
+        POKE(MULTICOLOR_1,BROWN);
+        POKE(MULTICOLOR_2,LIGHT_GREY);
+        SPRC[BEFANA_INDEX]=PINK;
+		
         music_switch(0);
         while(energy) 
         {
@@ -1341,9 +1367,12 @@ int main()
 		{
 			record=points;
 		}
+		
         do
         { 
         } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
+		
+		
     }
     return 0;
 }
