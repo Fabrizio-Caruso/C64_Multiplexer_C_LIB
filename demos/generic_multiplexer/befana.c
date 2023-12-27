@@ -107,7 +107,6 @@ extern uint8_t MUSIC_ON;
 
 #define BALLOON_DAMAGE 20
 
-
 #define GIFT_ENERGY 20
 
 #define LEVEL_DISTANCE 500U
@@ -861,14 +860,19 @@ void display_distance(void)
 
 
 
-#define LEVEL_OFFSET (DISTANCE_OFFSET+4+7)
+#define LEVEL_OFFSET (DISTANCE_OFFSET+4+4)
 
 void display_level(void)
 {
     printd(level,2,LEVEL_OFFSET,CYAN);
 }
 
+#define HI_OFFSET (LEVEL_OFFSET+9)
 
+void display_hi(void)
+{
+	printd(record,5,HI_OFFSET,WHITE);
+}
 
 
 void check_level_trigger(uint8_t i)
@@ -996,14 +1000,14 @@ void _handle_balloons(void)
 void handle_balloons(void)
 {
 	_handle_balloons();
-	if((level==2)||(level==4)||(level==8)||(level==10))
+	if((level==2)||(level==4)||(level==6)||(level==8)||(level==9))
 	{
 		if(counter&1)
 		{
 			_handle_balloons();
 		}
 	}
-	else if((level==3)||(level==5)||(level>10))
+	else if((level>=10))
 	{
 		_handle_balloons();
 	}
@@ -1243,8 +1247,9 @@ int main()
 
         init_background();
 		
-        // printd(energy,3,NUMBER_OF_COLS-10,WHITE);
-		print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
+		// print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
+		POKE(SCREEN+NUMBER_OF_COLS-4,'z'-'a'+1+1);
+		POKE(COLOR+NUMBER_OF_COLS-4,RED);
         display_energy();
 		print("SCORE",5,0,CYAN);
 		
@@ -1257,6 +1262,9 @@ int main()
 
         display_score();
         // printd(0,4,6,WHITE);
+		
+		print("HI",2,HI_OFFSET-2,GREEN);
+		display_hi();
         
         music_switch(1);
         // print("PRESS FIRE TO START",18,490,WHITE);
@@ -1273,7 +1281,6 @@ int main()
                 handle_befana();
                 
                 handle_balloons();
-                // NUMSPRITES=22;
                 
                 handle_grass();
 

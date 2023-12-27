@@ -26,7 +26,7 @@
 .byte $c6,$ee,$7c,$38,$7c,$ee,$c6,$00
 .byte $cc,$cc,$cc,$78,$30,$30,$30,$00
 .byte $fe,$0e,$1c,$38,$70,$e0,$fe,$00 ; z
-    .BYTE $00,$00,$00,$08,$00,$00,$00,$00 ; small flashing star (27)
+    .BYTE $36,$7F,$7F,$7F,$3E,$1C,$08,$00 ; small flashing star (27)
     .BYTE $00,$00,$10,$28,$10,$00,$00,$00 ; big fixed star (28)
     .BYTE $00,$00,$00,$08,$00,$00,$00,$00 ; small fixed star (29)
     .BYTE $00,$00,$00,$00,$00,$00,$00,$00 ; small/big flashing star (30)
