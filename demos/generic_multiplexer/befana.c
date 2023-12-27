@@ -110,20 +110,24 @@ extern uint8_t MUSIC_ON;
 
 #define GIFT_ENERGY 20
 
-#define DISTANCE_LEV_1 500U
-#define DISTANCE_LEV_2 1000U
-#define DISTANCE_LEV_3 1500U
-#define DISTANCE_LEV_4 2000U
-#define DISTANCE_LEV_5 2500U
-#define DISTANCE_LEV_6 3000U
-#define DISTANCE_LEV_7 3500U
-#define DISTANCE_LEV_8 4000U
+// #define DISTANCE_LEV_1 500U
+// #define DISTANCE_LEV_2 1000U
+// #define DISTANCE_LEV_3 1500U
+// #define DISTANCE_LEV_4 2000U
+// #define DISTANCE_LEV_5 2500U
+// #define DISTANCE_LEV_6 3000U
+// #define DISTANCE_LEV_7 3500U
+// #define DISTANCE_LEV_8 4000U
 // #define DISTANCE_LEV_9 5000U
 
+#define LEVEL_DISTANCE 100U
 
 uint8_t accelleration;
 
 #define BOOST_LEVEL 8
+
+#define MAX_LEVEL 9
+static uint8_t level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
@@ -603,8 +607,7 @@ void init_player(void)
 }
 
 
-
-void handle_stars(void)
+void _handle_stars(void)
 {
     slow_star_mask<<=1;
 
@@ -652,6 +655,16 @@ void handle_stars(void)
 }
 
 
+void handle_stars(void)
+{
+	_handle_stars();
+	if(!(level&1))
+	{
+		_handle_stars();
+	}
+}
+
+
 void handle_befana(void)
 {
 
@@ -661,7 +674,7 @@ void handle_befana(void)
 	{
 		--accelleration;
 		++SPRX[BEFANA_INDEX];
-		handle_stars();
+		// handle_stars();
 	}
 	
 	if(!freeze)
@@ -781,9 +794,6 @@ void init_balloons(void)
 }
 
 
-#define MAX_LEVEL 9
-static uint8_t level;
-
 // uint16_t distances[]={DISTANCE_LEV_1,DISTANCE_LEV_2,DISTANCE_LEV_3,DISTANCE_LEV_4, DISTANCE_LEV_5, DISTANCE_LEV_6,DISTANCE_LEV_7,DISTANCE_LEV_8};
 
 // uint8_t distance_counter;
@@ -836,7 +846,7 @@ void check_level_trigger(uint8_t i)
 {
 	if(level<MAX_LEVEL)
 	{
-		if(distance>=level*(uint16_t) 500U)
+		if(distance>=level*(uint16_t) LEVEL_DISTANCE)
 		{
 			++level;
 		}
@@ -849,7 +859,7 @@ void check_level_trigger(uint8_t i)
 
 #define BALLON_THRESHOLD_X 9
 
-void handle_balloons(void)
+void _handle_balloons(void)
 {
     uint8_t i;
     
@@ -935,6 +945,15 @@ void handle_balloons(void)
     }
 }
 
+
+void handle_balloons(void)
+{
+	_handle_balloons();
+	if(!(level&1))
+	{
+		_handle_balloons();
+	}
+}
 
 void init_gifts(void)
 {
@@ -1236,6 +1255,10 @@ int main()
                     points+=10U;
                     display_score();
 					distance+=5U;
+					if(!(level&1))
+					{
+						distance+=5U;
+					}
 					display_distance();
 					// printd(level,3,20,YELLOW);
                     // handle_befana_color();
