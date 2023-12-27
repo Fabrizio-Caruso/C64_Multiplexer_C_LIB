@@ -201,7 +201,7 @@ IRQ1_NOTMORETHAN8:
             BEQ _NOMUSICBRN0
         .ENDIF
         LDA #<IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,    
-        JMP _SETIRQ0
+        BNE _SETIRQ0
 _NOMUSICBRN0:
         LDA #<IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ELSE
@@ -220,7 +220,7 @@ _SETIRQ0:
             BEQ _NOMUSICBRN1
         .ENDIF
         LDA #>IRQ2                      ; if music is ON then prepare vectors for IRQ2 code,
-        JMP _SETIRQ1
+        BNE _SETIRQ1
 _NOMUSICBRN1:
         LDA #>IRQ3                      ; otherwise go directly to IRQ3 (Sprites display code)
     .ELSE
