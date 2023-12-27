@@ -120,7 +120,7 @@ extern uint8_t MUSIC_ON;
 // #define DISTANCE_LEV_8 4000U
 // #define DISTANCE_LEV_9 5000U
 
-#define LEVEL_DISTANCE 100U
+#define LEVEL_DISTANCE 40U
 
 uint8_t accelleration;
 
@@ -541,8 +541,8 @@ void fill_sky(uint8_t star_offset, uint8_t last_position, uint8_t star_type)
 void init_stars(void)
 {
 
-	fill_sky(0,MAX_STAR-4, SLOW_STAR_TILE);
-	fill_sky(1,MAX_STAR, FAST_STAR_TILE);
+	fill_sky(1,MAX_STAR-4, SLOW_STAR_TILE);
+	fill_sky(2,MAX_STAR, FAST_STAR_TILE);
 	
 }
 
@@ -849,6 +849,21 @@ void check_level_trigger(uint8_t i)
 		if(distance>=level*(uint16_t) LEVEL_DISTANCE)
 		{
 			++level;
+			if(!(level&1))
+			{
+				print("EXTRA SPEED",11,960-20-6,YELLOW);
+			}
+			else
+			{
+				{
+					uint8_t j;
+					for(j=0;j<11;++j)
+					{
+						POKE(SCREEN+1000-40-20-6+j,0);
+						
+					}
+				}
+			}
 		}
 	}
 	activate_level(i);

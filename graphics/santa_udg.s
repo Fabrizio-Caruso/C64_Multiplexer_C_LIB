@@ -1,5 +1,5 @@
     ; UDGs
-    .BYTE $00,$00,$10,$28,$10,$00,$00,$00 ; big flashing star (0)
+    .BYTE $00,$00,$00,$00,$00,$00,$00,$00 ; big flashing star (0)
 .byte $38,$6c,$c6,$c6,$fe,$c6,$c6,$00 ; a
 .byte $fc,$c6,$c6,$fc,$c6,$c6,$fc,$00
 .byte $3c,$66,$c0,$c0,$c0,$66,$3c,$00
