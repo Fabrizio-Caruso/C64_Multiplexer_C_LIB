@@ -120,13 +120,13 @@ extern uint8_t MUSIC_ON;
 // #define DISTANCE_LEV_8 4000U
 // #define DISTANCE_LEV_9 5000U
 
-#define LEVEL_DISTANCE 40U
+#define LEVEL_DISTANCE 500U
 
 uint8_t accelleration;
 
 #define BOOST_LEVEL 8
 
-#define MAX_LEVEL 9
+#define MAX_LEVEL 10
 static uint8_t level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
@@ -800,7 +800,7 @@ void init_balloons(void)
 
 void activate_level(uint8_t i)
 {
-	if(level>=9)
+	if(level>=10)
 	{
 		if(i==4)
 		{
@@ -808,7 +808,7 @@ void activate_level(uint8_t i)
 			y_balloon[4]=compute_y_ballon(4);		
 		}
 	}	
-	else if(level>=7)
+	else if(level>=8)
 	{
 		if(i==2)
 		{
@@ -816,7 +816,7 @@ void activate_level(uint8_t i)
 			y_balloon[2]=compute_y_ballon(2);
 		}
 	}
-	else if(level>=5)
+	else if(level>=6)
 	{
 		if(i==6)
 		{
@@ -824,7 +824,7 @@ void activate_level(uint8_t i)
 			y_balloon[6]=compute_y_ballon(6);
 		}			
 	}
-	else if(level>=3)
+	else if(level>=4)
 	{
 		if(!i)
 		{
@@ -832,7 +832,7 @@ void activate_level(uint8_t i)
 			y_balloon[0]=compute_y_ballon(0);
 		}
 	}
-	else if(level>=1)
+	else if(level>=2)
 	{
 		if(i==8)
 		{
