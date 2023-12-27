@@ -1043,7 +1043,14 @@ void handle_gifts(void)
         // Re-position gift
         if(!SPRX[GIFT_INDEX+i])
         {
-            SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+			if(rand()&3)
+			{
+				SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+			}
+			else
+			{
+				SPRY[GIFT_INDEX+i]=255;
+			}
         }
     }
 }
