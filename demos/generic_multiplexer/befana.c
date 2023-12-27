@@ -124,7 +124,7 @@ extern uint8_t MUSIC_ON;
 
 uint8_t accelleration;
 
-#define BOOST_LEVEL 8
+#define BOOST_LEVEL 12
 
 #define MAX_LEVEL 10
 static uint8_t level;
@@ -658,7 +658,7 @@ void _handle_stars(void)
 void handle_stars(void)
 {
 	_handle_stars();
-	if(!(level&1))
+	if(accelleration)
 	{
 		_handle_stars();
 	}
@@ -733,6 +733,16 @@ void scroll_grass(void)
         
         POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(counter)&7][i]);
     }
+}
+
+
+void handle_grass(void)
+{
+	scroll_grass();
+	if(accelleration)
+	{
+		scroll_grass();
+	}
 }
 
 #define BALLOON_TOP_Y 45
@@ -842,6 +852,26 @@ void activate_level(uint8_t i)
 	}
 }
 
+
+#define DISTANCE_OFFSET 12
+
+void display_distance(void)
+{
+    printd(distance,4,DISTANCE_OFFSET,WHITE);
+}
+
+
+
+#define LEVEL_OFFSET (DISTANCE_OFFSET+4+7)
+
+void display_level(void)
+{
+    printd(level,2,LEVEL_OFFSET,CYAN);
+}
+
+
+
+
 void check_level_trigger(uint8_t i)
 {
 	if(level<MAX_LEVEL)
@@ -849,21 +879,22 @@ void check_level_trigger(uint8_t i)
 		if(distance>=level*(uint16_t) LEVEL_DISTANCE)
 		{
 			++level;
-			if(!(level&1))
-			{
-				print("EXTRA SPEED",11,960-20-6,YELLOW);
-			}
-			else
-			{
-				{
-					uint8_t j;
-					for(j=0;j<11;++j)
-					{
-						POKE(SCREEN+1000-40-20-6+j,0);
+			display_level();
+			// if(!(level&1))
+			// {
+				// print("EXTRA SPEED",11,960-20-6,YELLOW);
+			// }
+			// else
+			// {
+				// {
+					// uint8_t j;
+					// for(j=0;j<11;++j)
+					// {
+						// POKE(SCREEN+1000-40-20-6+j,0);
 						
-					}
-				}
-			}
+					// }
+				// }
+			// }
 		}
 	}
 	activate_level(i);
@@ -872,9 +903,9 @@ void check_level_trigger(uint8_t i)
 
 
 
-#define BALLON_THRESHOLD_X 9
+#define BALLON_THRESHOLD_X 8
 
-void _handle_balloons(void)
+void handle_balloons(void)
 {
     uint8_t i;
     
@@ -928,7 +959,7 @@ void _handle_balloons(void)
 			{
 				if((level&1))
 				{
-					SPRY[i]=y_balloon[i]+2*shifted_sinValues3[counter];
+					SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
 				}
 				else
 				{
@@ -940,7 +971,7 @@ void _handle_balloons(void)
 				
 				if((level&1))
 				{
-					SPRY[i]=y_balloon[i]+2*shifted2_sinValues3[counter];
+					SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter];
 				}
 				else
 				{
@@ -961,14 +992,14 @@ void _handle_balloons(void)
 }
 
 
-void handle_balloons(void)
-{
-	_handle_balloons();
-	if(!(level&1))
-	{
-		_handle_balloons();
-	}
-}
+// void handle_balloons(void)
+// {
+	// _handle_balloons();
+	// if(!(level&1))
+	// {
+		// _handle_balloons();
+	// }
+// }
 
 void init_gifts(void)
 {
@@ -1103,12 +1134,6 @@ void display_score(void)
 }
 
 
-void display_distance(void)
-{
-    printd(distance,4,11,WHITE);
-}
-
-
 void decrease_energy(uint8_t amount)
 {
     if(energy>=amount)
@@ -1216,7 +1241,12 @@ int main()
 		print("SCORE",5,0,CYAN);
 		
 		display_distance();
-		print("M",1,15,YELLOW);
+		print("M",1,DISTANCE_OFFSET+4,YELLOW);
+		
+		
+		print("LV",2,LEVEL_OFFSET-2,WHITE);
+		display_level();
+
         display_score();
         // printd(0,4,6,WHITE);
         
@@ -1237,7 +1267,7 @@ int main()
                 handle_balloons();
                 // NUMSPRITES=22;
                 
-                scroll_grass();
+                handle_grass();
 
                 // printd(SPRY[GIFT_INDEX],3,80,WHITE);
                 // printd(SPRY[GIFT_INDEX+1],3,120,WHITE);
@@ -1270,7 +1300,7 @@ int main()
                     points+=10U;
                     display_score();
 					distance+=5U;
-					if(!(level&1))
+					if(accelleration)
 					{
 						distance+=5U;
 					}
