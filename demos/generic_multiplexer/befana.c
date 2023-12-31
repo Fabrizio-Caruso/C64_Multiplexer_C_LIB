@@ -1226,6 +1226,49 @@ void handle_gift_collision(void)
 }
 
 
+// static char MESSAGE[] = "BEFANAVSCOMMODORE";
+static char MESSAGE[] = "BEFANAVSBALLOONS";
+//                       1234567890123456
+
+void init_letters()
+{
+    POKE(MULTICOLOR_1,BROWN);
+    POKE(MULTICOLOR_2,LIGHT_GREY);
+    SPRC[BEFANA_INDEX]=PINK;
+        
+    for(i=1;i<=16;++i)
+    {
+        // SPRX[i]=20; //+18*i;
+        // SPRY[i]=80+2*i;
+        SPRF[i]=GFX_START_INDEX + MESSAGE[i-1] - 'A' + 1;
+        SPRM[i]=1;
+        SPRC[i]=GREEN;
+    }
+    // SPRF[9]=GFX_START_INDEX + BEFANA;
+
+    // SPRX[9]=50;
+    // SPRY[9]=180;
+
+    for(i=1;i<=6;++i)
+    {
+        SPRX[i]=50+18*(i-1); //+18*i;
+        SPRY[i]=60+2*i;//+2*i;
+    }
+
+    for(i=7;i<=8;++i)
+    {
+        SPRX[i]=50+18*(i-7); //+18*i;
+        SPRY[i]=90+2*i;//+2*i;
+    }
+    
+    for(i=1;i<=8;++i)
+    {
+        SPRX[i+8]=10+18*i; //+18*i;
+        SPRY[i+8]=180+2*i;//+2*i;
+    } 
+}
+
+
 /******************/
 int main()
 {       
@@ -1240,12 +1283,15 @@ int main()
 	record = 0;
     while(1)
     {
-        init_balloons();
-
+        clear_gifts();
+        MULTIPLEX_DONE=1;
 		while(MULTIPLEX_DONE)
 		{
-			clear_gifts();
-			SPRY[BEFANA_INDEX]=255;
+            init_letters();
+
+            
+			// clear_gifts();
+			// SPRY[BEFANA_INDEX]=255;
 
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;
@@ -1297,6 +1343,7 @@ int main()
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
         
+        init_balloons();
 		init_gifts();
         init_player();
         SPRX[BEFANA_INDEX] = 100;
