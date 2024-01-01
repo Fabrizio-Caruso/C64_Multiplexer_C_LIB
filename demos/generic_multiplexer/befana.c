@@ -25,6 +25,8 @@ extern unsigned short SPRITE_GFX;
 
 extern uint8_t MUSIC_ON;
 
+#define TRAINER 1
+
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
 
@@ -105,17 +107,17 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MAX_Y 208
 
 
-#define BALLOON_DAMAGE 20
+#define BALLOON_DAMAGE 15
 
 #define GIFT_ENERGY 20
 
-#define LEVEL_DISTANCE 500U
+#define LEVEL_DISTANCE 250U
 
 uint8_t forward_thrust;
 
 uint8_t accelleration;
 
-#define BOOST_LEVEL 15
+#define BOOST_DURATION 15
 #define BOOST_THRESHOLD 8
 
 #define MAX_LEVEL 12
@@ -565,7 +567,7 @@ void init_background(void)
     
     init_grass();
 
-	draw_the_moon();
+	// draw_the_moon();
 	
 }
 
@@ -708,7 +710,7 @@ void handle_befana(void)
 		{
 			if(!accelleration)
 			{
-				accelleration=BOOST_LEVEL;
+				accelleration=BOOST_DURATION;
 			}
 		}
 		
@@ -878,9 +880,10 @@ void display_level(void)
 
 #define HI_OFFSET (LEVEL_OFFSET+9)
 
-void display_hi(void)
+void display_hi(uint8_t position)
 {
-	printd(record,5,HI_OFFSET,WHITE);
+    print("HI",2,position-2,GREEN);
+	printd(record,5,position,WHITE);
 }
 
 
@@ -1178,6 +1181,7 @@ void display_score(void)
 
 void decrease_energy(uint8_t amount)
 {
+    #if defined(TRAINER)
     if(energy>=amount)
     {
         energy-=amount;
@@ -1187,6 +1191,7 @@ void decrease_energy(uint8_t amount)
         energy=0;
     }
 	handle_befana_color();
+    #endif
 }
 
 #define FREEZE_DAMAGE 1
@@ -1293,20 +1298,21 @@ int main()
     while(1)
     {
         clear_gifts();
+
+        init_background();
+        
         MULTIPLEX_DONE=1;
 		while(MULTIPLEX_DONE)
 		{
             init_letters();
-        SPRY[17]=255;
-        SPRY[0]=255;
-        // SPRY[16]=255;
-            
-			// clear_gifts();
-			// SPRY[BEFANA_INDEX]=255;
+            SPRY[17]=255;
+            SPRY[0]=255;
 
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;
+            
 		}
+		clear_stars();
 
 
 		distance=0;
@@ -1320,43 +1326,42 @@ int main()
 		
         energy = INITIAL_ENERGY;
         counter = 0;
+		        
+        music_switch(1);
         
-
-
-        // clear_screen();
-
-		clear_stars();
-
-        init_background();
-		
-		// print("ENERGY",6,NUMBER_OF_COLS-1-2-6,GREEN);
+        display_hi(NUMBER_OF_COLS/2-3);
+        
+        // print("PRESS FIRE TO START",18,490,WHITE);
+        do
+        {
+            if(!(counter&31))
+            {
+                handle_stars();
+            }
+            ++counter;            
+        } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
+        
+        draw_the_moon();
+        
+        SPRY[14]=255;
+        SPRY[15]=255;
+        SPRY[16]=255;
+        
 		POKE(SCREEN+NUMBER_OF_COLS-4,'z'-'a'+1+1);
-		POKE(COLOR+NUMBER_OF_COLS-4,RED);
+		POKE(COLOR+NUMBER_OF_COLS-4,RED);        
         display_energy();
 		print("SCORE",5,0,CYAN);
 		
 		display_distance();
 		print("M",1,DISTANCE_OFFSET+4,YELLOW);
-		
+        POKE(SCREEN+DISTANCE_OFFSET+5,0);
 		
 		print("LV",2,LEVEL_OFFSET-2,WHITE);
 		display_level();
 
         display_score();
-        // printd(0,4,6,WHITE);
 		
-		print("HI",2,HI_OFFSET-2,GREEN);
-		display_hi();
-        
-        music_switch(1);
-        // print("PRESS FIRE TO START",18,490,WHITE);
-        do
-        {
-        } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
-        
-        SPRY[14]=255;
-        SPRY[15]=255;
-        SPRY[16]=255;
+		display_hi(HI_OFFSET);        
         
         init_balloons();
 		init_gifts();
@@ -1378,22 +1383,6 @@ int main()
                 handle_balloons();
                 
                 handle_grass();
-
-                // printd(SPRY[GIFT_INDEX],3,80,WHITE);
-                // printd(SPRY[GIFT_INDEX+1],3,120,WHITE);
-                // printd(SPRY[GIFT_INDEX+2],3,160,WHITE);
-                // printd(SPRY[GIFT_INDEX+3],3,200,WHITE);
-
-                // printd(PEEK(0xFA),3,0,WHITE);
-				// {
-					// uint8_t j;
-					
-					// for(j=0;j<9;++j)
-					// {
-						// printd(active_balloon[j],1,120+40*j,WHITE);
-					// }
-					// printd(level,1,999,WHITE);
-				// }
 	
                 handle_gifts();
 
@@ -1415,8 +1404,6 @@ int main()
 						distance+=5U;
 					}
 					display_distance();
-					// printd(level,3,20,YELLOW);
-                    // handle_befana_color();
                 }
                 				
                 MULTIPLEX_DONE = 0;
