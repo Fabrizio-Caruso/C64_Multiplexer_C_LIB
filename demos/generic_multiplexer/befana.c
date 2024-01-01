@@ -309,7 +309,8 @@ void init_udg(void)
 #define LIGHT_GREY  0x0F
 
 // {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
-const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, BROWN, LIGHT_GREY, CYAN};
+const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
+//{CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, BROWN, LIGHT_GREY, CYAN};
 
 #define NUMBER_OF_COLS 40
 
@@ -777,7 +778,7 @@ void init_sprite_balloons(void)
 		SPRY[i]=y_balloon[i];
 
     }
-    SPRC[NUMBER_OF_BALLOONS-1]=RED;
+    // SPRC[NUMBER_OF_BALLOONS-1]=RED;
 }
 
 
@@ -946,7 +947,7 @@ void _handle_balloons(void)
 				}
 				else
 				{
-					SPRC[8]=WHITE;
+					// SPRC[8]=WHITE;
 					if(SPRY[BEFANA_INDEX]>150)
 					{
 						y_balloon[8]=SPRY[BEFANA_INDEX]-16;
@@ -958,12 +959,12 @@ void _handle_balloons(void)
 					else if(SPRY[BEFANA_INDEX]>100)
 					{
 						y_balloon[8]=160;
-						SPRC[8]=RED;
+						// SPRC[8]=RED;
 					}
 					else
 					{
 						y_balloon[8]=80;
-						SPRC[8]=RED;
+						// SPRC[8]=RED;
 					}
 
 				}
@@ -1283,6 +1284,17 @@ void init_letters()
 }
 
 
+void hide_sprites(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<_NUMBER_OF_SPRITES_;++i)
+    {
+        SPRY[i]=255;
+    }
+}
+
+
 /******************/
 int main()
 {       
@@ -1297,7 +1309,10 @@ int main()
 	record = 0;
     while(1)
     {
+        hide_sprites();
+        
         clear_gifts();
+		clear_stars();
 
         init_background();
         
