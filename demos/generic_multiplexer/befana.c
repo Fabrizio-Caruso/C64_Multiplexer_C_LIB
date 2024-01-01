@@ -593,12 +593,17 @@ void clear_stars(void)
 }
 
 
-void init_player(void)
+void init_player(uint8_t sprite_index)
 {
-	SPRX[BEFANA_INDEX] = 40;
-	SPRY[BEFANA_INDEX] = 20;
-	SPRM[BEFANA_INDEX] = 1;
-    SPRC[BEFANA_INDEX] = PINK;
+	// SPRX[BEFANA_INDEX] = 40;
+	// SPRY[BEFANA_INDEX] = 20;
+	// SPRM[BEFANA_INDEX] = 1;
+    // SPRC[BEFANA_INDEX] = PINK;
+    
+    SPRX[sprite_index] = 30;
+    SPRY[sprite_index] = 50;
+    SPRC[sprite_index]=PINK;   
+    SPRM[sprite_index] = 1;    
 }
 
 
@@ -1291,6 +1296,13 @@ void hide_sprites(void)
     for(i=0;i<_NUMBER_OF_SPRITES_;++i)
     {
         SPRY[i]=255;
+    }    
+    MULTIPLEX_DONE=1;
+    while(MULTIPLEX_DONE)
+    {        
+
+        MULTIPLEX_DONE = 0;
+        SPRUPDATEFLAG = 1;        
     }
 }
 
@@ -1307,6 +1319,10 @@ int main()
 	NUMSPRITES = _NUMBER_OF_SPRITES_;
 
 	record = 0;
+    
+    POKE(MULTICOLOR_1,BROWN);
+    POKE(MULTICOLOR_2,LIGHT_GREY);
+    
     while(1)
     {
         hide_sprites();
@@ -1317,11 +1333,16 @@ int main()
         init_background();
         
         MULTIPLEX_DONE=1;
+        
+        init_letters();
+        init_player(0);
+        
+        SPRY[17]=120;
+        SPRF[17]=GFX_START_INDEX+BALLOON;
+        // SPRY[0]=255;    
+        SPRF[0]=GFX_START_INDEX+BEFANA;
 		while(MULTIPLEX_DONE)
 		{
-            init_letters();
-            SPRY[17]=255;
-            SPRY[0]=255;
 
 			MULTIPLEX_DONE = 0;
 			SPRUPDATEFLAG = 1;
@@ -1349,13 +1370,33 @@ int main()
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
-            if(!(counter&31))
+            SPRY[0]=106;
+            
+            SPRY[17]=44+sinValues4[(counter/4)];
+            SPRM[17]=0;
+            SPRC[17]=CYAN;
+            SPRF[17]=GFX_START_INDEX + BALLOON;
+
+            while(MULTIPLEX_DONE)
             {
                 handle_stars();
-            }
-            ++counter;            
+                if(!(counter&3))
+                {
+                    ++SPRX[0];
+                    --SPRX[17];
+                    
+                    // SPRY[17]=215+sinValues2[(counter/4)];
+                    
+                    SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
+                }
+                ++counter;     
+                MULTIPLEX_DONE = 0;
+                SPRUPDATEFLAG = 1;	
+            }                
+
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
-        
+        hide_sprites();
+
         draw_the_moon();
         
         SPRY[14]=255;
@@ -1380,12 +1421,8 @@ int main()
         
         init_balloons();
 		init_gifts();
-        init_player();
-        SPRX[BEFANA_INDEX] = 100;
-        SPRY[BEFANA_INDEX] = 50;
-        POKE(MULTICOLOR_1,BROWN);
-        POKE(MULTICOLOR_2,LIGHT_GREY);
-        SPRC[BEFANA_INDEX]=PINK;
+        init_player(BEFANA_INDEX);
+
 		
         music_switch(0);
         while(energy) 
@@ -1426,7 +1463,7 @@ int main()
             }
 
         }
-        print("GAME OVER",9,492,RED);
+        print("GAME OVER",9,494,RED);
 		if(points>record)
 		{
 			record=points;
@@ -1435,7 +1472,7 @@ int main()
         do
         { 
         } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
-		
+		hide_sprites();
 		
     }
     return 0;
