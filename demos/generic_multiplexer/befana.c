@@ -1297,7 +1297,9 @@ int main()
 		while(MULTIPLEX_DONE)
 		{
             init_letters();
-
+        SPRY[17]=255;
+        SPRY[0]=255;
+        // SPRY[16]=255;
             
 			// clear_gifts();
 			// SPRY[BEFANA_INDEX]=255;
