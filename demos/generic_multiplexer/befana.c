@@ -115,7 +115,8 @@ uint8_t forward_thrust;
 
 uint8_t accelleration;
 
-#define BOOST_LEVEL 12
+#define BOOST_LEVEL 15
+#define BOOST_THRESHOLD 8
 
 #define MAX_LEVEL 12
 static uint8_t level;
@@ -649,7 +650,11 @@ void _handle_stars(void)
 void handle_stars(void)
 {
 	_handle_stars();
-	if(accelleration)
+    if(accelleration>BOOST_THRESHOLD)
+    {
+        _handle_stars();
+    }
+	else if(accelleration)
 	{
 		_handle_stars();
 	}
@@ -669,6 +674,10 @@ void handle_befana(void)
 	{
 		--accelleration;
 		++SPRX[BEFANA_INDEX];
+        if(accelleration>BOOST_THRESHOLD)
+        {
+            ++SPRX[BEFANA_INDEX];
+        }
 		// handle_stars();
 	}
 	
@@ -1342,6 +1351,10 @@ int main()
         do
         {
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
+        
+        SPRY[14]=255;
+        SPRY[15]=255;
+        SPRY[16]=255;
         
         init_balloons();
 		init_gifts();
