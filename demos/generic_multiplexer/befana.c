@@ -25,7 +25,9 @@ extern unsigned short SPRITE_GFX;
 
 extern uint8_t MUSIC_ON;
 
-#define TRAINER 1
+#define INITIAL_LEVEL 1
+
+// #define TRAINER 1
 
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
@@ -120,7 +122,7 @@ uint8_t accelleration;
 #define BOOST_DURATION 15
 #define BOOST_THRESHOLD 8
 
-#define MAX_LEVEL 12
+#define MAX_LEVEL 99
 static uint8_t level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
@@ -159,12 +161,10 @@ const uint8_t shifted2_sinValues3[] = SHIFTED2_SINUS(3);
 
 const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
-// const uint8_t shifted_sinValues2[] = SHIFTED_SINUS(2);
-
-// const uint8_t yValues4[] = SINUS(4);
 
 
 static uint16_t distance;
+static uint16_t level_threshold;
 static uint16_t record;
 
 static uint8_t volume;
@@ -877,11 +877,11 @@ void display_distance(void)
 
 
 
-#define LEVEL_OFFSET (DISTANCE_OFFSET+4+4)
+#define LEVEL_OFFSET (DISTANCE_OFFSET+4+5)
 
 void display_level(void)
 {
-    printd(level,2,LEVEL_OFFSET,CYAN);
+    printd(level,2,LEVEL_OFFSET,WHITE);
 }
 
 #define HI_OFFSET (LEVEL_OFFSET+9)
@@ -893,35 +893,25 @@ void display_hi(uint8_t position)
 }
 
 
-void check_level_trigger(uint8_t i)
+void check_level_trigger()
 {
-				// ++level;
-				// display_level();
+    // printd(level_threshold,5,160,WHITE);
+    // printd(((uint16_t) level),5,200,WHITE);
 
-	// if(level<MAX_LEVEL)
-	// {
-		if(distance>=((uint16_t) level)*(uint16_t) LEVEL_DISTANCE)
-		{
-			++level;
-			display_level();
-			// if(!(level&1))
-			// {
-				// print("EXTRA SPEED",11,960-20-6,YELLOW);
-			// }
-			// else
-			// {
-				// {
-					// uint8_t j;
-					// for(j=0;j<11;++j)
-					// {
-						// POKE(SCREEN+1000-40-20-6+j,0);
-						
-					// }
-				// }
-			// }
-		}
-	// }
-	activate_balloon(i);
+    
+    if((distance>=level_threshold)&&(level<MAX_LEVEL))
+    {
+        ++level;
+        display_level();
+        level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+    }
+    // else if(level==10)
+    // {
+        // print("DEBUG",5,280,WHITE);
+        
+    // }
+
+	// activate_balloon(i);
 	
 }
 
@@ -952,7 +942,6 @@ void _handle_balloons(void)
 				}
 				else
 				{
-					// SPRC[8]=WHITE;
 					if(SPRY[BEFANA_INDEX]>150)
 					{
 						y_balloon[8]=SPRY[BEFANA_INDEX]-16;
@@ -964,12 +953,10 @@ void _handle_balloons(void)
 					else if(SPRY[BEFANA_INDEX]>100)
 					{
 						y_balloon[8]=160;
-						// SPRC[8]=RED;
 					}
 					else
 					{
 						y_balloon[8]=80;
-						// SPRC[8]=RED;
 					}
 
 				}
@@ -1007,10 +994,11 @@ void _handle_balloons(void)
 				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
 			}
 		}
-		else if(SPRX[i]<BALLON_THRESHOLD_X)
+        else if(SPRX[i]<BALLON_THRESHOLD_X)
 		{
 			SPRX[i]=184;
-			check_level_trigger(i);
+            activate_balloon(i);
+
 		}
     }
 }
@@ -1025,7 +1013,7 @@ void handle_balloons(void)
 			_handle_balloons();
 		}
 	}
-	else if((level>=10))
+	else if((level>=10) && !(level&1))
 	{
 		_handle_balloons();
 	}
@@ -1187,7 +1175,7 @@ void display_score(void)
 
 void decrease_energy(uint8_t amount)
 {
-    #if defined(TRAINER)
+    #if !defined(TRAINER)
     if(energy>=amount)
     {
         energy-=amount;
@@ -1196,8 +1184,9 @@ void decrease_energy(uint8_t amount)
     {
         energy=0;
     }
-	handle_befana_color();
     #endif
+    
+	handle_befana_color();
 }
 
 #define FREEZE_DAMAGE 1
@@ -1351,14 +1340,15 @@ int main()
 		clear_stars();
 
 
-		distance=0;
+		distance=(INITIAL_LEVEL-1)*LEVEL_DISTANCE;
+        level_threshold = (INITIAL_LEVEL)*LEVEL_DISTANCE;
         slow_loop=0;
         fast_loop=0;
         
 		freeze=0;
 		
         points = 0;
-		level = 1;
+		level = INITIAL_LEVEL;
 		
         energy = INITIAL_ENERGY;
         counter = 0;
@@ -1411,8 +1401,9 @@ int main()
 		display_distance();
 		print("M",1,DISTANCE_OFFSET+4,YELLOW);
         POKE(SCREEN+DISTANCE_OFFSET+5,0);
+        POKE(SCREEN+DISTANCE_OFFSET+6,0);
 		
-		print("LV",2,LEVEL_OFFSET-2,WHITE);
+		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
 
         display_score();
@@ -1433,6 +1424,8 @@ int main()
                 handle_befana();
                 
                 handle_balloons();
+                
+                check_level_trigger();
                 
                 handle_grass();
 	
