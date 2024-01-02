@@ -204,6 +204,7 @@ void music_switch(uint8_t toggle)
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
 #define BALLOON_INDEX 0
 #define GIFT_INDEX (BEFANA_INDEX+1)
+#define SMOKE_INDEX 14
 
 static uint8_t counter;
 static uint8_t energy;
@@ -227,7 +228,8 @@ static uint16_t points = 0;
 #define HAPPYNEWYEAR_POS (SCREEN+6)
 #define MOON_OFFSET (40*2+36)
 
-
+#define ENERGY_ICON ('z'-'a'+1+1)
+// #define BOOST_TILE ('z'-'a'+1+1)
 
 // $D018 = 53272
 // -----------------
@@ -680,14 +682,26 @@ void handle_befana(void)
 	
 	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 	{
+        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-8;
+        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX];     
+        
 		--accelleration;
 		++SPRX[BEFANA_INDEX];
         if(accelleration>BOOST_THRESHOLD)
         {
             ++SPRX[BEFANA_INDEX];
+            
+        }
+        else
+        {
+            SPRY[SMOKE_INDEX]=255;
         }
 		// handle_stars();
 	}
+    else
+    {
+        SPRY[SMOKE_INDEX]=255;  
+    }
 	
 	forward_thrust = 0;
 	if(!freeze)
@@ -1389,11 +1403,15 @@ int main()
 
         draw_the_moon();
         
-        SPRY[14]=255;
-        SPRY[15]=255;
-        SPRY[16]=255;
+        // SPRY[14]=255;
+        // SPRY[15]=255;
+        // SPRY[16]=255;
         
-		POKE(SCREEN+NUMBER_OF_COLS-4,'z'-'a'+1+1);
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+BEFANA;
+        SPRM[SMOKE_INDEX]=1;
+        SPRC[SMOKE_INDEX]=YELLOW;
+        
+		POKE(SCREEN+NUMBER_OF_COLS-4,ENERGY_ICON);
 		POKE(COLOR+NUMBER_OF_COLS-4,RED);        
         display_energy();
 		print("SCORE",5,0,CYAN);
