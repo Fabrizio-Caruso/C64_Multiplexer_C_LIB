@@ -684,7 +684,7 @@ void handle_befana(void)
 	
 	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 	{
-        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14;
+        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
         SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]+2; // TODO: this could be done in the sprite shape     
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
 		--accelleration;
@@ -1267,7 +1267,6 @@ void init_letters()
         // SPRY[i]=80+2*i;
         SPRF[i]=GFX_START_INDEX + MESSAGE[i-1] - 'A' + 1;
         SPRM[i]=1;
-        SPRC[i]=GREEN;
     }
     // SPRF[9]=GFX_START_INDEX + BEFANA;
 
@@ -1278,18 +1277,21 @@ void init_letters()
     {
         SPRX[i]=45+18*(i-1); //+18*i;
         SPRY[i]=70+i+sinValues8[counter];//+2*i;
+        SPRC[i]=GREEN;
     }
 
     for(i=7;i<=8;++i)
     {
         SPRX[i]=75+18*(i-7); //+18*i;
         SPRY[i]=115+i+sinValues8[counter];;//+2*i;
+        SPRC[i]=RED;
     }
     
     for(i=1;i<=8;++i)
     {
         SPRX[i+8]=10+18*i; //+18*i;
         SPRY[i+8]=170+i+sinValues8[counter];;//+2*i;
+        SPRC[i+8]=CYAN;
     } 
 }
 
@@ -1371,7 +1373,7 @@ int main()
 		        
         music_switch(1);
         
-        display_hi(NUMBER_OF_COLS/2-3);
+        display_hi(NUMBER_OF_COLS/2-2);
         SPRX[18]=128;
 
         // print("PRESS FIRE TO START",18,490,WHITE);
