@@ -141,7 +141,7 @@ const uint8_t sinValues3[] = SINUS(3);
 
 const uint8_t sinValues4[] = SINUS(4);
 
-// const uint8_t sinValues8[] = SINUS(8);
+const uint8_t sinValues8[] = SINUS(8);
 
 const uint8_t shifted_sinValues1[] = SHIFTED_SINUS(1);
 
@@ -1277,19 +1277,19 @@ void init_letters()
     for(i=1;i<=6;++i)
     {
         SPRX[i]=45+18*(i-1); //+18*i;
-        SPRY[i]=80+i;//+2*i;
+        SPRY[i]=70+i+sinValues8[counter];//+2*i;
     }
 
     for(i=7;i<=8;++i)
     {
         SPRX[i]=75+18*(i-7); //+18*i;
-        SPRY[i]=125+i;//+2*i;
+        SPRY[i]=115+i+sinValues8[counter];;//+2*i;
     }
     
     for(i=1;i<=8;++i)
     {
         SPRX[i+8]=10+18*i; //+18*i;
-        SPRY[i+8]=180+i;//+2*i;
+        SPRY[i+8]=170+i+sinValues8[counter];;//+2*i;
     } 
 }
 
@@ -1399,6 +1399,7 @@ int main()
                     SPRX[18]-=2;
                     SPRF[18]=GFX_START_INDEX + GIFT + (SPRX[0]%3);
                     
+                    init_letters();
                     // SPRY[17]=215+sinValues2[(counter/4)];
                     
                     SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
