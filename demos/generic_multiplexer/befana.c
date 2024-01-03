@@ -1022,7 +1022,7 @@ void _handle_balloons(void)
 void handle_balloons(void)
 {
 	_handle_balloons();
-	if((level==2)||(level==4)||(level==6)||(level==8)||(level==9))
+	if((level==2)||(level==4)||(level==6)||(level==8))
 	{
 		if(counter&1)
 		{
