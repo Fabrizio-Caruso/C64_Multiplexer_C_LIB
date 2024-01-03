@@ -206,6 +206,8 @@ void music_switch(uint8_t toggle)
 #define GIFT_INDEX (BEFANA_INDEX+1)
 #define SMOKE_INDEX 14
 
+#define SMOKE 60
+
 static uint8_t counter;
 static uint8_t energy;
 static uint16_t points = 0;
@@ -682,9 +684,9 @@ void handle_befana(void)
 	
 	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 	{
-        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-8;
-        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX];     
-        
+        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14;
+        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]+2; // TODO: this could be done in the sprite shape     
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
 		--accelleration;
 		++SPRX[BEFANA_INDEX];
         if(accelleration>BOOST_THRESHOLD)
@@ -1407,7 +1409,7 @@ int main()
         // SPRY[15]=255;
         // SPRY[16]=255;
         
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+BEFANA;
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
         SPRM[SMOKE_INDEX]=1;
         SPRC[SMOKE_INDEX]=YELLOW;
         
