@@ -1372,7 +1372,8 @@ int main()
         music_switch(1);
         
         display_hi(NUMBER_OF_COLS/2-3);
-        
+        SPRX[18]=128;
+
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
@@ -1382,6 +1383,11 @@ int main()
             SPRM[17]=0;
             SPRC[17]=CYAN;
             SPRF[17]=GFX_START_INDEX + BALLOON;
+            
+            SPRY[18]=216;
+            // SPRF[18]=GFX_START_INDEX + GIFT;
+            SPRC[18]=RED;
+            SPRM[18]=1;
 
             while(MULTIPLEX_DONE)
             {
@@ -1390,6 +1396,8 @@ int main()
                 {
                     ++SPRX[0];
                     --SPRX[17];
+                    SPRX[18]-=2;
+                    SPRF[18]=GFX_START_INDEX + GIFT + (SPRX[0]%3);
                     
                     // SPRY[17]=215+sinValues2[(counter/4)];
                     
