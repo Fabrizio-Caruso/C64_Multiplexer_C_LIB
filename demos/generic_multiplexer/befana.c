@@ -688,7 +688,7 @@ void handle_befana(void)
 	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 	{
         SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
-        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]+2; // TODO: this could be done in the sprite shape     
+        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
 		--accelleration;
 		++SPRX[BEFANA_INDEX];
@@ -1417,7 +1417,7 @@ int main()
                 }
                 else if(counter<192)
                 {
-                    print(" USE FIRE TO BOOST  ",20,1000-40+10,RED);
+                    print(" USE FIRE TO BOOST  ",20,1000-40+10,YELLOW);
                 }
                 else
                 {
@@ -1441,7 +1441,7 @@ int main()
         // SPRY[16]=255;
         
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
-        SPRM[SMOKE_INDEX]=1;
+        SPRM[SMOKE_INDEX]=0;
         SPRC[SMOKE_INDEX]=YELLOW;
         
 		POKE(SCREEN+NUMBER_OF_COLS-4,ENERGY_ICON);
