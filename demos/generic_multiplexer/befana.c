@@ -457,8 +457,13 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
         if(str[k]!=' ')
         {
             POKE(SCREEN+offset+k,str[k]-'A'+1);
-            POKE(COLOR+offset+k,col);
+
         }
+        else
+        {
+            POKE(SCREEN+offset+k,0);
+        }
+        POKE(COLOR+offset+k,col);        
     }
 }
 
@@ -570,8 +575,6 @@ void init_background(void)
 
 	init_stars();
     
-    init_grass();
-
 	// draw_the_moon();
 	
 }
@@ -1263,15 +1266,9 @@ void init_letters()
         
     for(i=1;i<=16;++i)
     {
-        // SPRX[i]=20; //+18*i;
-        // SPRY[i]=80+2*i;
         SPRF[i]=GFX_START_INDEX + MESSAGE[i-1] - 'A' + 1;
         SPRM[i]=1;
     }
-    // SPRF[9]=GFX_START_INDEX + BEFANA;
-
-    // SPRX[9]=50;
-    // SPRY[9]=180;
 
     for(i=1;i<=6;++i)
     {
@@ -1283,14 +1280,14 @@ void init_letters()
     for(i=7;i<=8;++i)
     {
         SPRX[i]=75+18*(i-7); //+18*i;
-        SPRY[i]=115+i+sinValues8[counter];;//+2*i;
+        SPRY[i]=105+i+sinValues8[counter];;//+2*i;
         SPRC[i]=RED;
     }
     
     for(i=1;i<=8;++i)
     {
         SPRX[i+8]=10+18*i; //+18*i;
-        SPRY[i+8]=170+i+sinValues8[counter];;//+2*i;
+        SPRY[i+8]=153+i+sinValues8[counter];;//+2*i;
         SPRC[i+8]=CYAN;
     } 
 }
@@ -1344,6 +1341,7 @@ int main()
         init_letters();
         init_player(0);
         
+        
         SPRY[17]=120;
         SPRF[17]=GFX_START_INDEX+BALLOON;
         // SPRY[0]=255;    
@@ -1375,11 +1373,12 @@ int main()
         
         display_hi(NUMBER_OF_COLS/2-2);
         SPRX[18]=128;
-
+        
+        // print("FETCH THE GIFT BOXES",20,SCREEN+1000-200+10,WHITE);
         // print("PRESS FIRE TO START",18,490,WHITE);
         do
         {
-            SPRY[0]=106;
+            SPRY[0]=128;
             
             SPRY[17]=44+sinValues4[(counter/4)];
             SPRM[17]=0;
@@ -1407,11 +1406,32 @@ int main()
                     SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
                 }
                 ++counter;     
+                
+                if(counter<64)
+                {
+                    print(" AVOID THE BALLOONS ",20,1000-40+10,CYAN);
+                }
+                else if(counter<128)
+                {
+                    print("FETCH THE GIFT BOXES",20,1000-40+10,GREEN);
+                }
+                else if(counter<192)
+                {
+                    print(" USE FIRE TO BOOST  ",20,1000-40+10,RED);
+                }
+                else
+                {
+                    print("PRESS FIRE TO START ",20,1000-40+10,WHITE);
+                }
+                
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
             }                
 
         } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
+        
+        init_grass();
+
         hide_sprites();
 
         draw_the_moon();
