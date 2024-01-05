@@ -28,6 +28,7 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_LEVEL 1
 
 // #define TRAINER 1
+#define BETA_VERSION 1
 
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
@@ -170,6 +171,8 @@ static uint16_t record;
 static uint8_t volume;
 
 #define VOLUME_REG 0xD418 
+
+#define SPRITE_BACKGROUND_PRIORITY 0xD01B
 
 void music_switch(uint8_t toggle)
 {
@@ -570,6 +573,8 @@ void init_background(void)
 	clear_screen();
 	
     init_udg();
+
+    POKE(SPRITE_BACKGROUND_PRIORITY,0x00);    
     
 	set_background_colors();
 
@@ -918,7 +923,7 @@ void check_level_trigger()
     // printd(((uint16_t) level),5,200,WHITE);
 
     
-    if((distance>=level_threshold)&&(level<MAX_LEVEL))
+    if((distance>=level_threshold))
     {
         ++level;
         display_level();
@@ -1025,14 +1030,14 @@ void _handle_balloons(void)
 void handle_balloons(void)
 {
 	_handle_balloons();
-	if((level==2)||(level==4)||(level==6)||(level==8))
+	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
 		if(counter&1)
 		{
 			_handle_balloons();
 		}
 	}
-	else if((level>=10) && !(level&1))
+	else if((level>=12) && !(level&1))
 	{
 		_handle_balloons();
 	}
@@ -1452,6 +1457,11 @@ int main()
                     print("PRESS FIRE TO START ",20,1000-40+10,WHITE);
                 }
                 
+                #if defined(BETA_VERSION)
+                    
+                    print("BETA VERSION", 12, 1000-12-40,WHITE);
+                #endif
+                
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
             }                
@@ -1495,7 +1505,7 @@ int main()
 
 		
         music_switch(0);
-        while(energy) 
+        while(energy && (level<=MAX_LEVEL)) 
         {
             if (MULTIPLEX_DONE) {	
                 handle_stars();
@@ -1503,9 +1513,7 @@ int main()
                 handle_befana();
                 
                 handle_balloons();
-                
-                check_level_trigger();
-                
+                                
                 handle_grass();
 	
                 handle_gifts();
@@ -1531,21 +1539,62 @@ int main()
 					}
 					display_distance();
                 }
-                				
+                check_level_trigger();
+		
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;	
             }
 
         }
+        
+        POKE(SPRITE_BACKGROUND_PRIORITY,0xFF);    
+        
         print("GAME OVER",9,494,RED);
 		if(points>record)
 		{
 			record=points;
 		}
-		
-        do
-        { 
-        } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
+        distance=0;
+
+        if(energy)
+        {
+            music_switch(1);
+
+            do
+            { 
+                ++distance;
+                ++counter;
+                
+                if((counter&31)<16)
+                {
+                    print("JOURNEY COMPLETED",17,494-80-4,YELLOW);
+                }
+                else
+                {
+                    print("JOURNEY COMPLETED",17,494-80-4,CYAN);
+                }
+
+         
+                level=12;
+                clear_gifts();
+                while(MULTIPLEX_DONE)
+                {
+                    handle_balloons();
+                    handle_balloons();
+                    SPRUPDATEFLAG=1;
+                    MULTIPLEX_DONE=0;
+                }
+                
+            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<150));
+        }
+        else
+        {
+            do
+            {
+                ++distance;
+            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<80));
+            
+        }
 		hide_sprites();
 		
     }
