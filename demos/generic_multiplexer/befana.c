@@ -111,7 +111,7 @@ extern uint8_t MUSIC_ON;
 
 #define BALLOON_DAMAGE 15
 
-#define GIFT_ENERGY 20
+#define GIFT_ENERGY 25
 
 #define LEVEL_DISTANCE 250U
 
@@ -122,7 +122,7 @@ uint8_t accelleration;
 #define BOOST_DURATION 15
 #define BOOST_THRESHOLD 8
 
-#define MAX_LEVEL 99
+#define MAX_LEVEL 20
 static uint8_t level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
@@ -961,23 +961,23 @@ void _handle_balloons(void)
 				}
 				else
 				{
-					if(SPRY[BEFANA_INDEX]>150)
+					if(SPRY[BEFANA_INDEX]>170)
 					{
 						y_balloon[8]=SPRY[BEFANA_INDEX]-16;
 					}
-					else if(SPRY[BEFANA_INDEX]<70)     
+					else if(SPRY[BEFANA_INDEX]<85)     
 					{
 						y_balloon[8]=SPRY[BEFANA_INDEX];                        
 					}
-					else if(SPRY[BEFANA_INDEX]>100)
+					else if(SPRY[BEFANA_INDEX]>135)
 					{
-						y_balloon[8]=160;
+						y_balloon[8]=170;
 					}
 					else
 					{
-						y_balloon[8]=80;
+						y_balloon[8]=90;
 					}
-
+                    
 				}
 				SPRX[i]=184;
 			}
@@ -1066,7 +1066,8 @@ void clear_gifts(void)
     }
 }
 
-
+#define FEWEST_GIFTS_THRESHOLD 3
+#define FEWER_GIFTS_THRESHOLD 7
 void handle_gifts(void)
 {
     uint8_t i;
@@ -1082,14 +1083,41 @@ void handle_gifts(void)
         // Re-position gift
         if(!SPRX[GIFT_INDEX+i])
         {
-			if(rand()&3)
-			{
-				SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
-			}
-			else
-			{
-				SPRY[GIFT_INDEX+i]=255;
-			}
+            if(level<=FEWEST_GIFTS_THRESHOLD)
+            {
+                if(!(rand()&3))
+                {
+                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+                }
+                else
+                {
+                    SPRY[GIFT_INDEX+i]=255;
+                }
+            }
+            else if(level<=FEWER_GIFTS_THRESHOLD)
+            {
+                if(rand()&1)
+                {
+                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+                }
+                else
+                {
+                    SPRY[GIFT_INDEX+i]=255;
+                }
+                
+            }
+            else
+            {
+                if(rand()&3)
+                {
+                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+                }
+                else
+                {
+                    SPRY[GIFT_INDEX+i]=255;
+                }  
+            }
+            
         }
     }
 }
@@ -1487,6 +1515,8 @@ int main()
                 handle_gift_collision();
 
                 ++counter;
+                
+                // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
                 
                 if(!(counter&31))
                 {
