@@ -1445,7 +1445,7 @@ int main()
                 }
                 else if(counter<192)
                 {
-                    print(" USE FIRE TO BOOST  ",20,1000-40+10,YELLOW);
+                    print(" USE FIRE FOR BOOST ",20,1000-40+10,YELLOW);
                 }
                 else
                 {
