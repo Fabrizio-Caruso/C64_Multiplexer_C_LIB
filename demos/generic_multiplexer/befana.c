@@ -1320,7 +1320,14 @@ void init_letters()
     for(i=1;i<=8;++i)
     {
         SPRX[i+8]=10+18*i; //+18*i;
-        SPRY[i+8]=153+i+sinValues8[counter];;//+2*i;
+        if(i&1)
+        {
+            SPRY[i+8]=153+sinValues8[counter];;//+2*i;
+        }
+        else
+        {
+            SPRY[i+8]=153+8+sinValues8[counter];;//+2*i;
+        }
         SPRC[i+8]=CYAN;
     } 
 }
