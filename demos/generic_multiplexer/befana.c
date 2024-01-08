@@ -163,6 +163,9 @@ const uint8_t shifted2_sinValues3[] = SHIFTED2_SINUS(3);
 const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
 
+static uint8_t no_gift;
+static uint8_t gift;
+
 
 static uint16_t distance;
 static uint16_t level_threshold;
@@ -316,7 +319,7 @@ void init_udg(void)
 #define LIGHT_GREY  0x0F
 
 // {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
-const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
+const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_GREEN, RED, LIGHT_GREY, CYAN};
 //{CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, BROWN, LIGHT_GREY, CYAN};
 
 #define NUMBER_OF_COLS 40
@@ -1073,6 +1076,12 @@ void clear_gifts(void)
 
 #define FEWEST_GIFTS_THRESHOLD 3
 #define FEWER_GIFTS_THRESHOLD 7
+
+
+#define MAX_NO_GIFT_THRESHOLD 5
+#define MAX_GIFT_THRESHOLD 3
+
+
 void handle_gifts(void)
 {
     uint8_t i;
@@ -1090,18 +1099,22 @@ void handle_gifts(void)
         {
             if(level<=FEWEST_GIFTS_THRESHOLD)
             {
-                if(!(rand()&3))
+                if((gift<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_gift>MAX_NO_GIFT_THRESHOLD)))
                 {
                     SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+					no_gift=0;
+					++gift;
                 }
                 else
                 {
                     SPRY[GIFT_INDEX+i]=255;
+					++no_gift;
+					gift=0;
                 }
             }
             else if(level<=FEWER_GIFTS_THRESHOLD)
             {
-                if(rand()&1)
+                if((gift<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_gift>MAX_NO_GIFT_THRESHOLD)))
                 {
                     SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
                 }
@@ -1111,9 +1124,9 @@ void handle_gifts(void)
                 }
                 
             }
-            else
+            else // Very high and difficult levels 8-20
             {
-                if(rand()&3)
+                if((gift<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_gift>MAX_NO_GIFT_THRESHOLD)))
                 {
                     SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
                 }
@@ -1184,8 +1197,56 @@ uint8_t balloon_collision(void)
 		{
 			if(harmful_balloon[i])
 			{
-				_XL_EXPLOSION_SOUND();
+				uint8_t color ;
+				uint8_t j;
+				
+				color = SPRC[i];
 				harmful_balloon[i]=0;
+
+				// for(j=0;j<8;++j)
+				// {
+					SPRC[i]=WHITE;
+					
+					// MULTIPLEX_DONE=0;
+					while(MULTIPLEX_DONE)
+					{
+						MULTIPLEX_DONE=0;
+						SPRUPDATEFLAG=1;
+					}
+				
+					_XL_EXPLOSION_SOUND();
+
+					for(j=0;j<150;++j)
+					{
+					}
+					SPRC[i]=YELLOW;
+					
+					// MULTIPLEX_DONE=0;
+					while(MULTIPLEX_DONE)
+					{
+						MULTIPLEX_DONE=0;
+						SPRUPDATEFLAG=1;
+					}
+				
+					_XL_EXPLOSION_SOUND();
+
+					for(j=0;j<150;++j)
+					{
+					}					
+					
+					// while(1)
+					// {
+					// }
+					SPRC[i]=color;
+					
+					MULTIPLEX_DONE=0;
+					while(MULTIPLEX_DONE)
+					{
+						MULTIPLEX_DONE=0;
+						SPRUPDATEFLAG=1;
+					}
+				// }
+				
 				return 1;
 			}
 		}
@@ -1408,7 +1469,9 @@ int main()
 		
         energy = INITIAL_ENERGY;
         counter = 0;
-		        
+		no_gift = 0;
+		gift = 0;
+		
         music_switch(1);
         
         display_hi(NUMBER_OF_COLS/2-2);
@@ -1531,6 +1594,9 @@ int main()
 
                 ++counter;
                 
+				// printd(no_gift,3,120,WHITE);
+				// printd(gift,3,200,WHITE);
+
                 // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
                 
                 if(!(counter&31))
