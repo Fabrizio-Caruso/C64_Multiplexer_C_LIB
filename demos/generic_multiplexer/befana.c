@@ -28,6 +28,7 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_LEVEL 1
 
 // #define TRAINER 1
+
 #define BETA_VERSION 1
 
 #define INITIAL_ENERGY 100
@@ -829,18 +830,21 @@ void init_balloons(void)
     for(i=0;i<NUMBER_OF_BALLOONS;++i)
 	{
 		harmful_balloon[i]=1;
+        #if INITIAL_LEVEL>1
+			active_balloon[i]=1;
+			y_balloon[i]= compute_y_ballon(i);        
+        #else
 		if(i&1)
 		{
 			active_balloon[i]=1;
 			y_balloon[i]= compute_y_ballon(i);
 		}
 		else
-		{
-			// active_balloon[i]=1;
-			// y_balloon[i]= compute_y_ballon(i);			
+		{		
 			active_balloon[i]=0;
 			y_balloon[i]= 255; //-i*16;
 		}
+        #endif
 		SPRY[i]=255; //-i*16;
 	}	
 }
@@ -1040,10 +1044,14 @@ void handle_balloons(void)
 			_handle_balloons();
 		}
 	}
-	else if((level>=12) && !(level&1))
+	else if((level>=12) && (!(level&1)) && (counter&3))
 	{
 		_handle_balloons();
 	}
+    else if(level==MAX_LEVEL)
+    {
+		_handle_balloons();        
+    }
 }
 
 void init_gifts(void)
