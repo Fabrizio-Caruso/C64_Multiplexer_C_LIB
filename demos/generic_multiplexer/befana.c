@@ -27,7 +27,7 @@ extern uint8_t MUSIC_ON;
 
 #define INITIAL_LEVEL 1
 
-// #define TRAINER 1
+#define TRAINER 1
 
 #define BETA_VERSION 1
 
@@ -101,7 +101,7 @@ extern uint8_t MUSIC_ON;
 
 #define NUMBER_OF_BALLOONS 9
 
-#define NUMBER_OF_GIFTS 4
+#define NUMBER_OF_ITEMS 4
 
 
 #define BEFANA_MIN_X 36
@@ -126,6 +126,8 @@ uint8_t accelleration;
 
 #define MAX_LEVEL 20
 static uint8_t level;
+
+static uint8_t armor_level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
@@ -164,8 +166,8 @@ const uint8_t shifted2_sinValues3[] = SHIFTED2_SINUS(3);
 const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
 
 
-static uint8_t no_gift;
-static uint8_t gift;
+static uint8_t no_item;
+static uint8_t item;
 
 
 static uint16_t distance;
@@ -210,7 +212,7 @@ void music_switch(uint8_t toggle)
 
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
 #define BALLOON_INDEX 0
-#define GIFT_INDEX (BEFANA_INDEX+1)
+#define ITEM_INDEX (BEFANA_INDEX+1)
 #define SMOKE_INDEX 14
 
 #define SMOKE 60
@@ -262,11 +264,15 @@ void init_udg(void)
 #define BALLOON ('9' + 1)
 #define COMMODORE_LOGO ('9' + 2)
 
+#define BEFANA_ARMOR (- 'A' + 1 + 'Z' + 11)
+
 #define BEFANA_LEFT_TO_RIGHT (- 'A' + 1 + 'Z' + 1)
-#define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
+// #define BEFANA_RIGHT_TO_LEFT (- 'A' + 1 + 'Z' + 11)
 #define BEFANA BEFANA_LEFT_TO_RIGHT
 
 #define GIFT (- 'A' + 1 + 'Z' + 15)
+
+#define SHIELD ('0' - 1)
 
 #define SANTA (- 'A' + 1 + 'Z' + 5)
 
@@ -312,9 +318,13 @@ void init_udg(void)
 #define CYAN        0x03
 #define PURPLE      0x04
 #define GREEN       0x05
+#define BLUE        0x06
 #define YELLOW      0x07
+#define ORANGE      0x08
 #define BROWN       0x09
 #define PINK        0x0A
+#define DARK_GREY   0x0B
+#define GREY        0x0C
 #define LIGHT_GREEN 0x0D
 #define LIGHT_BLUE  0x0E
 #define LIGHT_GREY  0x0F
@@ -694,24 +704,33 @@ void handle_befana(void)
 
 	input = joy_read(STANDARD_JOY);
 	
-	if(accelleration && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
-	{
-        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
-        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
-		--accelleration;
-		++SPRX[BEFANA_INDEX];
-        if(accelleration>BOOST_THRESHOLD)
-        {
-            ++SPRX[BEFANA_INDEX];
-            
-        }
-        else
-        {
-            SPRY[SMOKE_INDEX]=255;
-        }
-		// handle_stars();
-	}
+	if(accelleration)
+		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
+		{
+			SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
+			SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+			SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
+
+			--accelleration;
+			++SPRX[BEFANA_INDEX];
+			if(accelleration>BOOST_THRESHOLD)
+			{
+				++SPRX[BEFANA_INDEX];
+			}
+			else
+			{
+				SPRY[SMOKE_INDEX]=255;
+			}
+			if(!accelleration)
+			{
+				SPRC[BEFANA_INDEX]=PINK;
+			}
+			// handle_stars();
+		}
+		else
+		{
+			accelleration=0;
+		}
     else
     {
         SPRY[SMOKE_INDEX]=255;  
@@ -748,7 +767,18 @@ void handle_befana(void)
 			}
 		}
 		
-		SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+		if(armor_level)
+		{
+			SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA_ARMOR+((counter/4)&3);
+		}
+		else
+		{
+			SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);			
+		}
+			
+
+		// Armored befana
+		// 
 	}
 	
 		
@@ -1054,31 +1084,31 @@ void handle_balloons(void)
     }
 }
 
-void init_gifts(void)
+void init_items(void)
 {
     uint8_t i;
     
-    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    for(i=0;i<NUMBER_OF_ITEMS;++i)
     {
-        SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
-        SPRC[GIFT_INDEX+i]=BALLOON_COLORS[i];
-        SPRY[GIFT_INDEX+i]=80+40*i;
-        SPRM[GIFT_INDEX+i]=1;
-        SPRX[GIFT_INDEX+i]=i*64;
+        SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
+        SPRC[ITEM_INDEX+i]=BALLOON_COLORS[i];
+        SPRY[ITEM_INDEX+i]=80+40*i;
+        SPRM[ITEM_INDEX+i]=1;
+        SPRX[ITEM_INDEX+i]=i*64;
     }
 }
 
-void clear_gifts(void)
+void clear_items(void)
 {
     uint8_t i;
     
-    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    for(i=0;i<NUMBER_OF_ITEMS;++i)
     {
-        // SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT;
-        // SPRC[GIFT_INDEX+i]=BALLOON_COLORS[i];
-        SPRY[GIFT_INDEX+i]=255;
-        // SPRM[GIFT_INDEX+i]=1;
-        // SPRX[GIFT_INDEX+i]=i*64;
+        // SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
+        // SPRC[ITEM_INDEX+i]=BALLOON_COLORS[i];
+        SPRY[ITEM_INDEX+i]=255;
+        // SPRM[ITEM_INDEX+i]=1;
+        // SPRX[ITEM_INDEX+i]=i*64;
     }
 }
 
@@ -1086,62 +1116,100 @@ void clear_gifts(void)
 #define FEWER_GIFTS_THRESHOLD 7
 
 
-#define MAX_NO_GIFT_THRESHOLD 5
+#define MAX_no_item_THRESHOLD 5
 #define MAX_GIFT_THRESHOLD 3
 
 
-void handle_gifts(void)
+static uint8_t item_type[NUMBER_OF_ITEMS];
+
+#define GIFT_ITEM 0
+#define SHIELD_ITEM 1
+
+
+void spawn_item(uint8_t i)
+{
+	SPRY[ITEM_INDEX+i]=100+i*40-(rand()&0x1F);
+	no_item=0;
+	++item;
+	
+	// if(!(rand()&1))
+	// {
+		item_type[i]=SHIELD_ITEM;
+		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
+	// }
+	// else
+	// {
+		// item_type[i]=GIFT_ITEM;
+		// SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
+	// }	
+}
+
+
+void unspawn_item(uint8_t i)
+{
+	SPRY[ITEM_INDEX+i]=255;
+	++no_item;
+	item=0;	
+}
+
+
+void handle_items(void)
 {
     uint8_t i;
     
-    for(i=0;i<NUMBER_OF_GIFTS;++i)
+    for(i=0;i<NUMBER_OF_ITEMS;++i)
     {
-        --SPRX[GIFT_INDEX+i];
+        --SPRX[ITEM_INDEX+i];
         if(!(counter&3))
         {
-            SPRF[GIFT_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+			if(item_type[i]==GIFT_ITEM)
+			{
+				// TODO: Fix non-rotating items
+				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+			}
+			else if(item_type[i]==SHIELD_ITEM)
+			{// TODO: To optimize
+				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
+			}
         }
         
-        // Re-position gift
-        if(!SPRX[GIFT_INDEX+i])
+        // Re-position item
+        if(!SPRX[ITEM_INDEX+i])
         {
+
             if(level<=FEWEST_GIFTS_THRESHOLD)
             {
-                if((gift<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_gift>MAX_NO_GIFT_THRESHOLD)))
+                if((item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_no_item_THRESHOLD)))
                 {
-                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
-					no_gift=0;
-					++gift;
+					spawn_item(i);
                 }
                 else
                 {
-                    SPRY[GIFT_INDEX+i]=255;
-					++no_gift;
-					gift=0;
+					unspawn_item(i);
                 }
             }
             else if(level<=FEWER_GIFTS_THRESHOLD)
             {
-                if((gift<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_gift>MAX_NO_GIFT_THRESHOLD)))
+                if((item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_no_item_THRESHOLD)))
                 {
-                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+					spawn_item(i);
                 }
                 else
                 {
-                    SPRY[GIFT_INDEX+i]=255;
+					unspawn_item(i);
                 }
                 
             }
             else // Very high and difficult levels 8-20
             {
-                if((gift<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_gift>MAX_NO_GIFT_THRESHOLD)))
+                if((item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_no_item_THRESHOLD)))
                 {
-                    SPRY[GIFT_INDEX+i]=100+i*40-(rand()&0x1F);
+					spawn_item(i);
                 }
                 else
                 {
-                    SPRY[GIFT_INDEX+i]=255;
-                }  
+					unspawn_item(i);
+                }
             }
             
         }
@@ -1152,7 +1220,7 @@ void handle_gifts(void)
 #define COLLISION_BOX_Y 12
 
 
-uint8_t collision(uint8_t i)
+uint8_t sprite_collision(uint8_t i)
 {
     uint8_t x;
 	uint8_t y;
@@ -1201,7 +1269,7 @@ uint8_t balloon_collision(void)
 {
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-		if(collision(i))
+		if(sprite_collision(i))
 		{
 			if(harmful_balloon[i])
 			{
@@ -1271,6 +1339,10 @@ void handle_befana_color(void)
 		--freeze;
 		SPRC[BEFANA_INDEX]=RED;
 	}
+	else if(armor_level)
+	{
+		SPRC[BEFANA_INDEX]=GREY;
+	}	
 	else if(energy<(MAX_ENERGY/4))
     {
         SPRC[BEFANA_INDEX]=LIGHT_GREEN;
@@ -1312,13 +1384,33 @@ void decrease_energy(uint8_t amount)
 
 #define FREEZE_DAMAGE 1
 
+void decrease_armor(uint8_t amount)
+{
+	if(armor_level>amount)
+	{
+		armor_level-=amount;
+	}
+	else
+	{
+		armor_level=0;
+		SPRC[BEFANA_INDEX]=PINK;
+	}
+}
+
 void handle_balloon_collision(void)
 {
 	if(balloon_collision())
 	{
 		// ++SPRC[BEFANA_INDEX];
         SPRC[BEFANA_INDEX]=RED;
-		decrease_energy(BALLOON_DAMAGE);
+		if(armor_level)
+		{
+			decrease_armor(BALLOON_DAMAGE);
+		}
+		else
+		{
+			decrease_energy(BALLOON_DAMAGE);
+		}
 		freeze=FREEZE_DAMAGE;
         display_energy();
 	}
@@ -1335,22 +1427,30 @@ void increase_energy(uint8_t amount)
 }
 
 
-void handle_gift_collision(void)
+#define ARMOR_RECHARGE 30
+
+void handle_item_collision(void)
 {
     uint8_t i;
     
-
-    for(i=GIFT_INDEX;i<=GIFT_INDEX+NUMBER_OF_GIFTS-1;++i)
+    for(i=0;i<=NUMBER_OF_ITEMS-1;++i)
     {
-        if(collision(i))
+        if(sprite_collision(ITEM_INDEX+i))
         {
+			if(item_type[i]==GIFT_ITEM)
+			{
+				increase_energy(GIFT_ENERGY);
+				display_energy();
+				points+=100;
+				display_score();
+			}
+			else if(item_type[i]==SHIELD_ITEM)
+			{
+				armor_level = ARMOR_RECHARGE;
+			}
 			_XL_ZAP_SOUND();
-            increase_energy(GIFT_ENERGY);
-            display_energy();
-            points+=100;
-            display_score();
-            SPRY[i]=255;
-            return;
+			SPRY[ITEM_INDEX+i]=255;
+			return;
         }
 	}
 }
@@ -1362,7 +1462,7 @@ static char MESSAGE[] = "BEFANAVSBALLOONS";
 
 void init_letters()
 {
-    POKE(MULTICOLOR_1,BROWN);
+    POKE(MULTICOLOR_1,ORANGE);
     POKE(MULTICOLOR_2,LIGHT_GREY);
     SPRC[BEFANA_INDEX]=PINK;
         
@@ -1433,14 +1533,11 @@ int main()
 
 	record = 0;
     
-    POKE(MULTICOLOR_1,BROWN);
-    POKE(MULTICOLOR_2,LIGHT_GREY);
-    
     while(1)
     {
         hide_sprites();
         
-        clear_gifts();
+        clear_items();
 		clear_stars();
 
         init_background();
@@ -1477,13 +1574,15 @@ int main()
 		
         energy = INITIAL_ENERGY;
         counter = 0;
-		no_gift = 0;
-		gift = 0;
+		no_item = 0;
+		item = 0;
 		
         music_switch(1);
         
         display_hi(NUMBER_OF_COLS/2-2);
         SPRX[18]=128;
+		
+		armor_level = 0;
         
         // print("FETCH THE GIFT BOXES",20,SCREEN+1000-200+10,WHITE);
         // print("PRESS FIRE TO START",18,490,WHITE);
@@ -1578,7 +1677,7 @@ int main()
 		display_hi(HI_OFFSET);        
         
         init_balloons();
-		init_gifts();
+		init_items();
         init_player(BEFANA_INDEX);
 
 		
@@ -1594,18 +1693,19 @@ int main()
                                 
                 handle_grass();
 	
-                handle_gifts();
+                handle_items();
 
                 handle_balloon_collision();
                 
-                handle_gift_collision();
+                handle_item_collision();
 
                 ++counter;
                 
-				// printd(no_gift,3,120,WHITE);
-				// printd(gift,3,200,WHITE);
+				// printd(no_item,3,120,WHITE);
+				// printd(item,3,200,WHITE);
 
                 // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
+                printd(armor_level,3,120,WHITE);
                 
                 if(!(counter&31))
                 {
@@ -1619,6 +1719,14 @@ int main()
 						distance+=5U;
 					}
 					display_distance();
+					// if(armor_level)
+					// {
+						// --armor_level;
+						// if(!armor_level)
+						// {
+							// SPRC[BEFANA_INDEX]=PINK;
+						// }
+					// }
                 }
                 check_level_trigger();
 		
@@ -1657,7 +1765,7 @@ int main()
 
          
                 level=12;
-                clear_gifts();
+                clear_items();
                 while(MULTIPLEX_DONE)
                 {
                     handle_balloons();
