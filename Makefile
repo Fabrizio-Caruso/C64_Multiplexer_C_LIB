@@ -5,13 +5,13 @@ DEMOS_PATH ?= ./demos
 GRAPHICS_PATH ?= ./graphics
 SID_PATH ?= ./sid
 BUILD_PATH ?= ./build
-
+GAMES_PATH ?= ./games
 
 GEN_MPLX_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/graphics.s
 SNOW_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics.s
 SNOW_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg.s
 SNOW_UDG_ASM_FILES2=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/snow_flakes_graphics_udg2.s
-SANTA_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/santa_graphics_udg.s
+BEFANA_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GAMES_PATH)/befana/befana_graphics_udg.s
 
 
 COMMODORE_UDG_ASM_FILES=$(SOURCE_PATH)/generic_multiplexer.s $(GRAPHICS_PATH)/commodore_graphics_udg.s
@@ -138,8 +138,8 @@ befana:
 	--asm-define MUSIC_CODE=1 --asm-define MUSIC_SWITCH=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \
-	$(DEMOS_PATH)/generic_multiplexer/befana.c \
-	$(SANTA_UDG_ASM_FILES) \
+	$(GAMES_PATH)/befana/befana.c \
+	$(BEFANA_UDG_ASM_FILES) \
 	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
 	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
@@ -412,6 +412,7 @@ clean:
 	rm -rf *.prg
 	rm -rf $(SOURCE_PATH)/*.o
 	rm -rf $(DEMOS_PATH)/*.o
+	rm -rf $(GAMES_PATH)/*.o
 	rm -rf ./build/*
 	rm -rf main.s
 
