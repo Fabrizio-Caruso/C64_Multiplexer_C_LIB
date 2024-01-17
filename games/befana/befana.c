@@ -124,6 +124,8 @@ uint8_t accelleration;
 #define BOOST_DURATION 15
 #define BOOST_THRESHOLD 8
 
+#define BULLET ('9'+1)
+
 #define MAX_LEVEL 20
 static uint8_t level;
 
@@ -272,7 +274,11 @@ void init_udg(void)
 
 #define GIFT (- 'A' + 1 + 'Z' + 15)
 
+#define FIRE ('0' - 2)
+
 #define SHIELD ('0' - 1)
+
+// #define FIRE ('0' - 1 - 5)
 
 #define SANTA (- 'A' + 1 + 'Z' + 5)
 
@@ -1126,25 +1132,34 @@ static uint8_t item_type[NUMBER_OF_ITEMS];
 
 #define GIFT_ITEM 0
 #define SHIELD_ITEM 1
-
+#define FIRE_ITEM 2
 
 void spawn_item(uint8_t i)
 {
+	uint8_t rnd; 
+	
+	rnd = rand()&3;
+	
 	SPRY[ITEM_INDEX+i]=100+i*40-(rand()&0x1F);
 	
-	if(!(rand()&3))
+	if(!rnd)
 	{
 		item_type[i]=SHIELD_ITEM;
 		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
 		// TODO: update counters?
 	}
-	else
+	else if(rnd==1)
+	{
+		item_type[i]=FIRE_ITEM;
+		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
+	}
+	else 
 	{
 		item_type[i]=GIFT_ITEM;
 		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
 		no_item=0;
 		++item;
-	}	
+	}		
 }
 
 
@@ -1175,6 +1190,10 @@ void handle_items(void)
 			else if(item_type[i]==SHIELD_ITEM)
 			{// TODO: To optimize
 				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
+			}
+			else if(item_type[i]==FIRE_ITEM)
+			{// TODO: To optimize
+				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
 			}
         }
         
@@ -1453,6 +1472,8 @@ void handle_item_collision(void)
 			{
 				armor_level = ARMOR_RECHARGE;
 			}
+			// TODO: Implement fire activation here
+			
 			_XL_ZAP_SOUND();
 			SPRY[ITEM_INDEX+i]=255;
 			return;
