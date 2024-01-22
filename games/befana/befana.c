@@ -129,7 +129,20 @@ uint8_t accelleration;
 #define MAX_LEVEL 20
 static uint8_t level;
 
+#define MAX_ACTIVE_BULLETS 6
+
 static uint8_t armor_level;
+
+static uint8_t remaining_bullets;
+static uint8_t active_bullets;
+
+static uint8_t bullet_x[MAX_ACTIVE_BULLETS];
+static uint8_t bullet_y[MAX_ACTIVE_BULLETS];
+static uint8_t bullet_background[MAX_ACTIVE_BULLETS];
+static uint8_t bullet_tile[MAX_ACTIVE_BULLETS];
+
+
+#define bullet_active bullet_y
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
@@ -244,16 +257,6 @@ static uint16_t points = 0;
 #define ENERGY_ICON ('z'-'a'+1+1)
 // #define BOOST_TILE ('z'-'a'+1+1)
 
-// $D018 = 53272
-// -----------------
-void init_udg(void)
-{
-    POKE(56576u,3);
-	POKE(0xD018,PEEK(0xD018)|8);
-	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
-	POKE(648,192);
-}
-
 
 #if !defined(YEAR_LOW)
 	#define YEAR_LOW '4'
@@ -345,6 +348,9 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 
 #define FAST_STAR_TILE (SLOW_STAR_TILE+NUMBER_OF_COLS)
 
+#define DISTANCE_OFFSET 12
+#define LEVEL_OFFSET (DISTANCE_OFFSET+4+5)
+#define HI_OFFSET (LEVEL_OFFSET+9)
 
 static uint8_t slow_loop = 0;
 static uint8_t fast_loop = 20;
@@ -359,6 +365,85 @@ static uint8_t input;
 
 static uint8_t prev_slow_loop;
 static uint8_t prev_fast_loop;
+
+
+// $D018 = 53272
+// -----------------
+void init_udg(void)
+{
+    POKE(56576u,3);
+	POKE(0xD018,PEEK(0xD018)|8);
+	POKE(0xD018,PEEK(0xD018)&(255-4-2));    
+	POKE(648,192);
+}
+
+
+void init_bullets(void)
+{
+	uint8_t i;
+	
+	for(i=0;i<MAX_ACTIVE_BULLETS;++i)
+	{
+		bullet_active[i]=0;
+	}
+}
+
+
+uint8_t find_inactive_bullet(void)
+{
+	uint8_t i;
+	
+	for(i=0;i<MAX_ACTIVE_BULLETS;++i)
+	{
+		if(!bullet_active[i])
+		{
+			return i;
+		}
+	}
+	return MAX_ACTIVE_BULLETS;
+}
+
+
+void handle_bullet(uint8_t i)
+{
+	uint8_t bullet_cell;
+	
+	// Compute previous position
+	bullet_cell = SCREEN+bullet_x[i]+bullet_y[i]*NUMBER_OF_COLS;
+	
+	// Restore previous tile
+	POKE(bullet_cell,bullet_background[i]);
+	
+	// Move bullet forward
+	++bullet_x[i];
+	++bullet_cell;
+
+	// Store (next) previous position
+	bullet_background[i]=PEEK(bullet_cell);
+	
+	if(bullet_x[i]<NUMBER_OF_COLS-1)
+	{
+		// Draw new bullet position
+		POKE(bullet_cell,bullet_tile[i]);
+		
+		// Disable bullet
+		bullet_active[i]=0;
+	}
+}
+
+
+void handle_bullets(void)
+{
+	uint8_t i;
+	
+	for(i=0; i<MAX_ACTIVE_BULLETS;++i)
+	{
+		if(bullet_active[i])
+		{
+			handle_bullet(i);
+		}
+	}
+}
 
 
 void _set_noise(void)
@@ -705,6 +790,23 @@ void handle_stars(void)
 }
 
 
+void display_energy(void)
+{
+    printd(energy,3,NUMBER_OF_COLS-1-2,WHITE);
+}
+
+
+void display_remaining_bullets(void)
+{
+    printd(remaining_bullets,2,HI_OFFSET-5,WHITE);
+}
+
+void display_score(void)
+{
+    printd(points,5,5,WHITE);
+}
+
+
 void handle_befana(void)
 {
 
@@ -767,9 +869,20 @@ void handle_befana(void)
 		
 		if(JOY_FIRE(input))
 		{
-			if(!accelleration)
+			if(!remaining_bullets && !armor_level)
 			{
-				accelleration=BOOST_DURATION;
+				if(!accelleration)
+				{
+					accelleration=BOOST_DURATION;
+				}
+			}
+			else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
+			{
+				--remaining_bullets;
+				++active_bullets;
+				
+				display_remaining_bullets();
+				_XL_SHOOT_SOUND();
 			}
 		}
 		
@@ -935,23 +1048,17 @@ void activate_balloon(uint8_t i)
 }
 
 
-#define DISTANCE_OFFSET 12
-
 void display_distance(void)
 {
     printd(distance,4,DISTANCE_OFFSET,WHITE);
 }
 
 
-
-#define LEVEL_OFFSET (DISTANCE_OFFSET+4+5)
-
 void display_level(void)
 {
     printd(level,2,LEVEL_OFFSET,WHITE);
 }
 
-#define HI_OFFSET (LEVEL_OFFSET+9)
 
 void display_hi(uint8_t position)
 {
@@ -1367,26 +1474,14 @@ void handle_befana_color(void)
 	// {
 		// SPRC[BEFANA_INDEX]=GREY;
 	// }	
-	else if(energy<(MAX_ENERGY/4))
+	else if(remaining_bullets)
     {
-        SPRC[BEFANA_INDEX]=PURPLE;
+        SPRC[BEFANA_INDEX]=BLUE;
     }
     else
     {
         SPRC[BEFANA_INDEX]=BROWN;
     }
-}
-
-
-void display_energy(void)
-{
-    printd(energy,3,NUMBER_OF_COLS-1-2,WHITE);
-}
-
-
-void display_score(void)
-{
-    printd(points,5,5,WHITE);
 }
 
 
@@ -1452,6 +1547,7 @@ void increase_energy(uint8_t amount)
 
 
 #define ARMOR_RECHARGE 30
+#define BULLET_RECHARGE 20
 
 void handle_item_collision(void)
 {
@@ -1471,6 +1567,11 @@ void handle_item_collision(void)
 			else if(item_type[i]==SHIELD_ITEM)
 			{
 				armor_level = ARMOR_RECHARGE;
+			}
+			else if(item_type[i]==FIRE_ITEM)
+			{
+				remaining_bullets = BULLET_RECHARGE;
+				display_remaining_bullets();
 			}
 			// TODO: Implement fire activation here
 			
@@ -1609,6 +1710,7 @@ int main()
         SPRX[18]=128;
 		
 		armor_level = 0;
+		remaining_bullets = 0;
         
         // print("FETCH THE GIFT BOXES",20,SCREEN+1000-200+10,WHITE);
         // print("PRESS FIRE TO START",18,490,WHITE);
@@ -1699,6 +1801,7 @@ int main()
 		display_level();
 
         display_score();
+		display_remaining_bullets();
 		
 		display_hi(HI_OFFSET);        
         
