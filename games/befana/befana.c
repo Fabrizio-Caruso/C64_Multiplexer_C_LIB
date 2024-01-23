@@ -404,6 +404,19 @@ uint8_t find_inactive_bullet(void)
 }
 
 
+void initialize_bullet(uint8_t i)
+{
+    bullet_active[i]=1;
+
+    // TODO: BOGUS values
+    bullet_tile[i] = BULLET;
+    bullet_x[i] = 0;
+    bullet_y[i] = 10;
+    
+    bullet_background[i] = PEEK(SCREEN+bullet_x[i]+NUMBER_OF_COLS*bullet_y[i]);
+}
+
+
 void handle_bullet(uint8_t i)
 {
 	uint8_t bullet_cell;
@@ -880,6 +893,8 @@ void handle_befana(void)
 			{
 				--remaining_bullets;
 				++active_bullets;
+                
+                initialize_bullet(find_inactive_bullet());
 				
 				display_remaining_bullets();
 				_XL_SHOOT_SOUND();
@@ -1835,6 +1850,8 @@ int main()
 
                 // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
                 // printd(armor_level,3,120,WHITE);
+                
+                handle_bullets();
                 
                 if(!(counter&31))
                 {
