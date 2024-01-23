@@ -411,7 +411,7 @@ void initialize_bullet(uint8_t i)
     // TODO: BOGUS values
     bullet_tile[i] = BULLET;
     bullet_x[i] = 0;
-    bullet_y[i] = 10;
+    bullet_y[i] = 10+i;
     
     bullet_background[i] = PEEK(SCREEN+bullet_x[i]+NUMBER_OF_COLS*bullet_y[i]);
 }
