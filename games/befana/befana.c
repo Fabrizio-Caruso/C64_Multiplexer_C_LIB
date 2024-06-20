@@ -291,16 +291,12 @@ static uint16_t points = 0;
 #define MULTICOLOR_2 0xD026
 
 // Characters for flashing stars
-#define BIG_FLASHING_STAR 0
-#define FLASHING_STAR 30
-#define SMALL_FLASHING_STAR 27
-
-// Characters for fixed stars
-#define SMALL_FIXED_STAR 28
-#define BIG_FIXED_STAR 29
-
-// Characters for comets
-#define COMET 33
+// #define BIG_FLASHING_STAR 0
+// #define FLASHING_STAR 30
+// #define SMALL_FLASHING_STAR 27
+// #define SMALL_FIXED_STAR 28
+// #define BIG_FIXED_STAR 29
+// #define COMET 33
 
 /*
 0	$00	black
@@ -378,6 +374,23 @@ void init_udg(void)
 }
 
 
+// Print a 16-bit number on screen memory
+void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
+{
+	uint8_t i;
+	uint8_t digit;
+	
+	for(i=0;i<length;++i)
+	{
+		digit = (uint8_t) ((val)%10);
+		val-= digit;
+		val/=10;
+		
+		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
+		POKE(COLOR+offset+length-1-i, color);
+	}
+}
+
 void init_bullets(void)
 {
 	uint8_t i;
@@ -421,6 +434,11 @@ void handle_bullet(uint8_t i)
 {
 	uint8_t bullet_cell;
 	
+//    void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
+
+    printd(i,2,40+i*40,WHITE);
+    printd(bullet_x[i],2,6+40+i*40,WHITE);
+    
 	// Compute previous position
 	bullet_cell = SCREEN+bullet_x[i]+bullet_y[i]*NUMBER_OF_COLS;
 	
@@ -438,10 +456,18 @@ void handle_bullet(uint8_t i)
 	{
 		// Draw new bullet position
 		POKE(bullet_cell,bullet_tile[i]);
+        
+        // TODO: BOGUS for debugging
+        POKE(bullet_cell,BULLET);
+
 		
+
+	}
+    else
+    {
 		// Disable bullet
 		bullet_active[i]=0;
-	}
+    }
 }
 
 
@@ -589,24 +615,6 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
 }
 
 
-// Print a 16-bit number on screen memory
-void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
-{
-	uint8_t i;
-	uint8_t digit;
-	
-	for(i=0;i<length;++i)
-	{
-		digit = (uint8_t) ((val)%10);
-		val-= digit;
-		val/=10;
-		
-		POKE(SCREEN+offset+length-1-i, (uint8_t) (digit+(uint8_t) 48u));
-		POKE(COLOR+offset+length-1-i, color);
-	}
-}
-
-
 void draw_the_moon(void)
 {
     for(i=1;i<4;++i)
@@ -682,6 +690,11 @@ void init_grass(void)
         POKE(SCREEN+1000-40+i,GRASS_TILE);
         POKE(COLOR+1000-40+i,GREEN);
     }
+
+    // TODO: BOGUS for debugging -> Test OK
+    // POKE(SCREEN,BULLET);
+    // POKE(COLOR,WHITE);
+    // while(1){};
 }
 
 
@@ -809,10 +822,10 @@ void display_energy(void)
 }
 
 
-void display_remaining_bullets(void)
-{
-    printd(remaining_bullets,2,HI_OFFSET-5,WHITE);
-}
+// void display_remaining_bullets(void)
+// {
+    // printd(remaining_bullets,2,HI_OFFSET-5,WHITE);
+// }
 
 void display_score(void)
 {
@@ -882,23 +895,23 @@ void handle_befana(void)
 		
 		if(JOY_FIRE(input))
 		{
-			if(!remaining_bullets && !armor_level)
+			if(!remaining_bullets)
 			{
 				if(!accelleration)
 				{
 					accelleration=BOOST_DURATION;
 				}
 			}
-			else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
-			{
-				--remaining_bullets;
-				++active_bullets;
+			// else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
+			// {
+				// --remaining_bullets;
+				// ++active_bullets;
                 
-                initialize_bullet(find_inactive_bullet());
+                // initialize_bullet(find_inactive_bullet());
 				
-				display_remaining_bullets();
-				_XL_SHOOT_SOUND();
-			}
+				// display_remaining_bullets();
+				// _XL_SHOOT_SOUND();
+			// }
 		}
 		
 		if(armor_level)
@@ -1270,11 +1283,11 @@ void spawn_item(uint8_t i)
 		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
 		// TODO: update counters?
 	}
-	else if(rnd==1)
-	{
-		item_type[i]=FIRE_ITEM;
-		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
-	}
+	// else if(rnd==1)
+	// {
+		// item_type[i]=FIRE_ITEM;
+		// SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
+	// }
 	else 
 	{
 		item_type[i]=GIFT_ITEM;
@@ -1562,7 +1575,7 @@ void increase_energy(uint8_t amount)
 
 
 #define ARMOR_RECHARGE 30
-#define BULLET_RECHARGE 20
+#define BULLET_RECHARGE 99
 
 void handle_item_collision(void)
 {
@@ -1583,11 +1596,11 @@ void handle_item_collision(void)
 			{
 				armor_level = ARMOR_RECHARGE;
 			}
-			else if(item_type[i]==FIRE_ITEM)
-			{
-				remaining_bullets = BULLET_RECHARGE;
-				display_remaining_bullets();
-			}
+			// else if(item_type[i]==FIRE_ITEM)
+			// {
+				// remaining_bullets = BULLET_RECHARGE;
+				// display_remaining_bullets();
+			// }
 			// TODO: Implement fire activation here
 			
 			_XL_ZAP_SOUND();
@@ -1688,7 +1701,7 @@ int main()
         
         init_letters();
         init_player(0);
-        
+        init_bullets();
         
         SPRY[17]=120;
         SPRF[17]=GFX_START_INDEX+BALLOON;
@@ -1718,6 +1731,7 @@ int main()
         counter = 0;
 		no_item = 0;
 		item = 0;
+        active_bullets = 0;
 		
         music_switch(1);
         
@@ -1816,7 +1830,7 @@ int main()
 		display_level();
 
         display_score();
-		display_remaining_bullets();
+		// display_remaining_bullets();
 		
 		display_hi(HI_OFFSET);        
         
@@ -1851,7 +1865,8 @@ int main()
                 // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
                 // printd(armor_level,3,120,WHITE);
                 
-                handle_bullets();
+                // TODO: Implement/fix this
+                // handle_bullets();
                 
                 if(!(counter&31))
                 {
