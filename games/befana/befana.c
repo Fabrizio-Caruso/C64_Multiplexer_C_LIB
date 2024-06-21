@@ -1219,7 +1219,7 @@ void handle_balloons(void)
 	{
 		_handle_balloons();
 	}
-    else if(level==MAX_LEVEL)
+    else if(level>=MAX_LEVEL-2)
     {
 		_handle_balloons();        
     }
