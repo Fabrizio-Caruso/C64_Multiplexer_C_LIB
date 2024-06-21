@@ -1557,8 +1557,8 @@ void handle_balloon_collision(void)
 		else
 		{
 			decrease_energy(BALLOON_DAMAGE);
+            freeze=FREEZE_DAMAGE;
 		}
-		freeze=FREEZE_DAMAGE;
         display_energy();
 	}
 }
