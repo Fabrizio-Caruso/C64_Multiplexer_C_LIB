@@ -34,6 +34,14 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
 
+#define GIFT_POINTS 200
+#define ARMOR_POINTS 50
+
+#define ARMOR_RECHARGE 30
+#define BULLET_RECHARGE 99
+
+#define MAX_ARMOR 45
+
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
 #pragma zpsym ("MULTIPLEX_DONE")
@@ -1574,8 +1582,15 @@ void increase_energy(uint8_t amount)
 }
 
 
-#define ARMOR_RECHARGE 30
-#define BULLET_RECHARGE 99
+void increase_armor(uint8_t amount)
+{
+    armor_level+=amount;
+    if(armor_level>MAX_ARMOR)
+    {
+        armor_level = MAX_ARMOR;
+    }
+}
+
 
 void handle_item_collision(void)
 {
@@ -1589,12 +1604,14 @@ void handle_item_collision(void)
 			{
 				increase_energy(GIFT_ENERGY);
 				display_energy();
-				points+=100;
+				points+=GIFT_POINTS;
 				display_score();
 			}
 			else if(item_type[i]==SHIELD_ITEM)
 			{
-				armor_level = ARMOR_RECHARGE;
+				points+=ARMOR_POINTS;
+				increase_armor(ARMOR_RECHARGE);
+				// armor_level = ARMOR_RECHARGE;
 			}
 			// else if(item_type[i]==FIRE_ITEM)
 			// {
