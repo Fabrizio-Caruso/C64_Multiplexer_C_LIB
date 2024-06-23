@@ -34,8 +34,8 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_ENERGY 100
 #define MAX_ENERGY 200
 
-#define GIFT_POINTS 200
-#define ARMOR_POINTS 50
+#define GIFT_POINTS  250
+#define ARMOR_POINTS 100
 
 #define ARMOR_RECHARGE 30
 #define BULLET_RECHARGE 99
@@ -1889,14 +1889,24 @@ int main()
                 {
                     decrease_energy(1);
                     display_energy();
-                    points+=10U;
-                    display_score();
+                    points+=5U;
 					distance+=5U;
 					if(accelleration)
 					{
 						distance+=5U;
+						points+=5U;
+						if(accelleration>BOOST_THRESHOLD)
+						{
+							points+=5U;
+						}
+						if(forward_thrust)
+						{
+							points+=5U;
+						}
 					}
 					display_distance();
+					display_score();
+
 					// if(armor_level)
 					// {
 						// --armor_level;
