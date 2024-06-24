@@ -1135,9 +1135,8 @@ void _handle_balloons(void)
     
     for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
     {
-		// TODO: This should be optimized because we move all balloons when we may just more one offset
+		// TODO: This should be optimized because
 		--SPRX[i];
-		
 		if(active_balloon[i])
 		{
 			if(SPRX[i]<BALLON_THRESHOLD_X)
@@ -1168,7 +1167,6 @@ void _handle_balloons(void)
 					{
 						y_balloon[8]=90;
 					}
-                    
 				}
 				SPRX[i]=184;
 			}
@@ -1203,6 +1201,13 @@ void _handle_balloons(void)
 			{
 				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
 			}
+			if(level&1)
+			{
+				if((i>=8)&&(counter&1))
+				{
+					--SPRX[i];
+				}
+			}
 		}
         else if(SPRX[i]<BALLON_THRESHOLD_X)
 		{
@@ -1215,6 +1220,18 @@ void _handle_balloons(void)
 
 void handle_balloons(void)
 {
+	uint8_t i;
+	
+    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    {
+	if(accelleration)
+	{
+		// if(counter&1)
+		// {
+			--SPRX[i];
+		// }		
+	}
+	}
 	_handle_balloons();
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
