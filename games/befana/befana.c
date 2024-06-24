@@ -107,7 +107,7 @@ extern uint8_t MUSIC_ON;
 #define STANDARD_JOY 2
 
 
-#define NUMBER_OF_BALLOONS 9
+#define NUMBER_OF_BALLOONS 10
 
 #define NUMBER_OF_ITEMS 4
 
@@ -236,7 +236,7 @@ void music_switch(uint8_t toggle)
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
 #define BALLOON_INDEX 0
 #define ITEM_INDEX (BEFANA_INDEX+1)
-#define SMOKE_INDEX 14
+#define SMOKE_INDEX (ITEM_INDEX+NUMBER_OF_ITEMS)
 
 #define SMOKE 60
 
@@ -399,30 +399,30 @@ void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
 	}
 }
 
-void init_bullets(void)
-{
-	uint8_t i;
+// void init_bullets(void)
+// {
+	// uint8_t i;
 	
-	for(i=0;i<MAX_ACTIVE_BULLETS;++i)
-	{
-		bullet_active[i]=0;
-	}
-}
+	// for(i=0;i<MAX_ACTIVE_BULLETS;++i)
+	// {
+		// bullet_active[i]=0;
+	// }
+// }
 
 
-uint8_t find_inactive_bullet(void)
-{
-	uint8_t i;
+// uint8_t find_inactive_bullet(void)
+// {
+	// uint8_t i;
 	
-	for(i=0;i<MAX_ACTIVE_BULLETS;++i)
-	{
-		if(!bullet_active[i])
-		{
-			return i;
-		}
-	}
-	return MAX_ACTIVE_BULLETS;
-}
+	// for(i=0;i<MAX_ACTIVE_BULLETS;++i)
+	// {
+		// if(!bullet_active[i])
+		// {
+			// return i;
+		// }
+	// }
+	// return MAX_ACTIVE_BULLETS;
+// }
 
 
 void initialize_bullet(uint8_t i)
@@ -1019,7 +1019,7 @@ void init_balloons(void)
 			active_balloon[i]=1;
 			y_balloon[i]= compute_y_ballon(i);        
         #else
-		if(i&1)
+		if((i&1)&&(i<9))
 		{
 			active_balloon[i]=1;
 			y_balloon[i]= compute_y_ballon(i);
@@ -1735,7 +1735,7 @@ int main()
         
         init_letters();
         init_player(0);
-        init_bullets();
+        // init_bullets();
         
         SPRY[17]=120;
         SPRF[17]=GFX_START_INDEX+BALLOON;
@@ -1770,7 +1770,8 @@ int main()
         music_switch(1);
         
         display_hi(NUMBER_OF_COLS/2-2);
-        SPRX[18]=128;
+		SPRX[17]=150;
+        SPRX[18]=166;
 		
 		armor_level = 0;
 		remaining_bullets = 0;
