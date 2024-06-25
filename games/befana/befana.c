@@ -1000,9 +1000,16 @@ void init_sprite_balloons(void)
 }
 
 
-uint8_t compute_y_ballon(uint8_t i)
+uint8_t compute_y_balloon(uint8_t i)
 {
-	return 40+i*22;
+    if(i<=8)
+    {
+        return 40+i*22;
+    }
+    else
+    {
+        return 110;
+    }
 }
 
 
@@ -1017,12 +1024,12 @@ void init_balloons(void)
 		harmful_balloon[i]=1;
         #if INITIAL_LEVEL>1
 			active_balloon[i]=1;
-			y_balloon[i]= compute_y_ballon(i);        
+			y_balloon[i]= compute_y_balloon(i);        
         #else
-		if((i&1)&&(i<9))
+		if((i&1)&&(i<=9))
 		{
 			active_balloon[i]=1;
-			y_balloon[i]= compute_y_ballon(i);
+			y_balloon[i]= compute_y_balloon(i);
 		}
 		else
 		{		
@@ -1041,12 +1048,18 @@ void init_balloons(void)
 
 void activate_balloon(uint8_t i)
 {
+    if(i==9)
+    {
+        active_balloon[9]=1;
+        y_balloon[9]=compute_y_balloon(9);
+    }
+    
 	if(level>=10)
 	{
 		if(i==4)
 		{
 			active_balloon[4]=1;
-			y_balloon[4]=compute_y_ballon(4);		
+			y_balloon[4]=compute_y_balloon(4);		
 		}
 	}	
 	else if(level>=8)
@@ -1054,7 +1067,7 @@ void activate_balloon(uint8_t i)
 		if(i==2)
 		{
 			active_balloon[2]=1;
-			y_balloon[2]=compute_y_ballon(2);
+			y_balloon[2]=compute_y_balloon(2);
 		}
 	}
 	else if(level>=6)
@@ -1062,7 +1075,7 @@ void activate_balloon(uint8_t i)
 		if(i==6)
 		{
 			active_balloon[6]=1;
-			y_balloon[6]=compute_y_ballon(6);
+			y_balloon[6]=compute_y_balloon(6);
 		}			
 	}
 	else if(level>=4)
@@ -1070,7 +1083,7 @@ void activate_balloon(uint8_t i)
 		if(!i)
 		{
 			active_balloon[0]=1;
-			y_balloon[0]=compute_y_ballon(0);
+			y_balloon[0]=compute_y_balloon(0);
 		}
 	}
 	else if(level>=2)
@@ -1078,9 +1091,20 @@ void activate_balloon(uint8_t i)
 		if(i==8)
 		{
 			active_balloon[8]=1;
-			y_balloon[8]=compute_y_ballon(8);
+			y_balloon[8]=compute_y_balloon(8);
 		}
 	}
+
+    // if(level&1)
+    // {
+        // active_balloon[9]=1;
+        // y_balloon[9]=compute_y_balloon(9);
+    // }
+    // else
+    // {
+        // active_balloon[9]=0;
+        
+    // }
 }
 
 
@@ -1151,22 +1175,30 @@ void _handle_balloons(void)
 				}
 				else
 				{
-					if(SPRY[BEFANA_INDEX]>170)
-					{
-						y_balloon[8]=SPRY[BEFANA_INDEX]-16;
-					}
-					else if(SPRY[BEFANA_INDEX]<85)     
-					{
-						y_balloon[8]=SPRY[BEFANA_INDEX];                        
-					}
-					else if(SPRY[BEFANA_INDEX]>135)
-					{
-						y_balloon[8]=170;
-					}
-					else
-					{
-						y_balloon[8]=90;
-					}
+                    if(i==8)
+                    {
+                        if(SPRY[BEFANA_INDEX]>170)
+                        {
+                            y_balloon[8]=SPRY[BEFANA_INDEX]-16;
+                        }
+                        else if(SPRY[BEFANA_INDEX]<85)     
+                        {
+                            y_balloon[8]=SPRY[BEFANA_INDEX];                        
+                        }
+                        else if(SPRY[BEFANA_INDEX]>135)
+                        {
+                            y_balloon[8]=170;
+                        }
+                        else
+                        {
+                            y_balloon[8]=90;
+                        }
+                    
+                    }
+                    else
+                    {
+                        y_balloon[9]=80+(counter&7)*8;
+                    }
 				}
 				SPRX[i]=184;
 			}
