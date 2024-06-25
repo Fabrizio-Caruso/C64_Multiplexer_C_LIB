@@ -129,8 +129,8 @@ uint8_t forward_thrust;
 
 uint8_t accelleration;
 
-#define BOOST_DURATION 15
-#define BOOST_THRESHOLD 8
+#define BOOST_DURATION 12
+#define BOOST_THRESHOLD 7
 
 #define BULLET ('9'+1)
 
@@ -1261,6 +1261,10 @@ void handle_balloons(void)
 		// if(counter&1)
 		// {
 			--SPRX[i];
+            if(accelleration>BOOST_THRESHOLD)
+            {
+                --SPRX[i];
+            }
 		// }		
 	}
 	}
