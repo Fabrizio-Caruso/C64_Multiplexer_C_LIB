@@ -352,9 +352,11 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 
 #define FAST_STAR_TILE (SLOW_STAR_TILE+NUMBER_OF_COLS)
 
-#define DISTANCE_OFFSET 12
-#define LEVEL_OFFSET (DISTANCE_OFFSET+4+5)
-#define HI_OFFSET (LEVEL_OFFSET+9)
+#define DISTANCE_OFFSET 11
+#define LEVEL_OFFSET (DISTANCE_OFFSET+3+5)
+#define ARMOR_OFFSET ((LEVEL_OFFSET)+4)
+#define HI_OFFSET (NUMBER_OF_COLS-10)
+#define INITIAL_HI_OFFSET (NUMBER_OF_COLS/2-2)
 
 static uint8_t slow_loop = 0;
 static uint8_t fast_loop = 20;
@@ -1129,8 +1131,6 @@ void display_level(void)
 }
 
 
-#define ARMOR_OFFSET ((LEVEL_OFFSET)+3)
-
 void display_armor(void)
 {
     printd(armor_level,2,ARMOR_OFFSET,WHITE);
@@ -1829,7 +1829,7 @@ int main()
 		
         music_switch(1);
         
-        display_hi(NUMBER_OF_COLS/2-2);
+        display_hi(INITIAL_HI_OFFSET);
 		SPRX[17]=150;
         SPRX[18]=166;
 		
@@ -1903,9 +1903,14 @@ int main()
 
         draw_the_moon();
         
+        print("     ",5,INITIAL_HI_OFFSET,WHITE);
+
         // SPRY[14]=255;
         // SPRY[15]=255;
         // SPRY[16]=255;
+        
+        // do{
+        // } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
         
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
         SPRM[SMOKE_INDEX]=0;
