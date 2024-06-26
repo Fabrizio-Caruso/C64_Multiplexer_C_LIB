@@ -1026,7 +1026,12 @@ void init_balloons(void)
 			active_balloon[i]=1;
 			y_balloon[i]= compute_y_balloon(i);        
         #else
-		if((i&1)&&(i<=9))
+        if(i==9)
+        {
+            active_balloon[i]=0;
+			y_balloon[i]= 255; //-i*16;
+        }
+		else if((i&1))
 		{
 			active_balloon[i]=1;
 			y_balloon[i]= compute_y_balloon(i);
@@ -1048,13 +1053,9 @@ void init_balloons(void)
 
 void activate_balloon(uint8_t i)
 {
-    if(i==9)
-    {
-        active_balloon[9]=1;
-        y_balloon[9]=compute_y_balloon(9);
-    }
+
     
-	if(level>=10)
+	if(level>=12)
 	{
 		if(i==4)
 		{
@@ -1062,7 +1063,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[4]=compute_y_balloon(4);		
 		}
 	}	
-	else if(level>=8)
+	else if(level>=10)
 	{
 		if(i==2)
 		{
@@ -1070,7 +1071,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[2]=compute_y_balloon(2);
 		}
 	}
-	else if(level>=6)
+	else if(level>=8)
 	{
 		if(i==6)
 		{
@@ -1078,7 +1079,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[6]=compute_y_balloon(6);
 		}			
 	}
-	else if(level>=4)
+	else if(level>=6)
 	{
 		if(!i)
 		{
@@ -1086,6 +1087,14 @@ void activate_balloon(uint8_t i)
 			y_balloon[0]=compute_y_balloon(0);
 		}
 	}
+    else if(level>=4)
+        {
+        if(i==9)
+        {
+            active_balloon[9]=1;
+            y_balloon[9]=compute_y_balloon(9);
+        }
+    }
 	else if(level>=2)
 	{
 		if(i==8)
@@ -1202,7 +1211,11 @@ void _handle_balloons(void)
 				}
 				SPRX[i]=184;
 			}
-			if(!(i&3))
+            if(i==9)
+            {
+                SPRY[i]=y_balloon[i]+sinValues1[counter];
+            }
+			else if(!(i&3))
 			{
 				SPRY[i]=y_balloon[i]+sinValues3[counter];
 			}
