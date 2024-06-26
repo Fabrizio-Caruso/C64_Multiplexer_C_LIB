@@ -119,7 +119,7 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MAX_Y 208
 
 
-#define BALLOON_DAMAGE 15
+#define BALLOON_DAMAGE 14
 
 #define GIFT_ENERGY 25
 
@@ -1055,7 +1055,7 @@ void activate_balloon(uint8_t i)
 {
 
     
-	if(level>=12)
+	if(level>=13)
 	{
 		if(i==4)
 		{
@@ -1063,7 +1063,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[4]=compute_y_balloon(4);		
 		}
 	}	
-	else if(level>=10)
+	else if(level>=11)
 	{
 		if(i==2)
 		{
@@ -1071,7 +1071,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[2]=compute_y_balloon(2);
 		}
 	}
-	else if(level>=8)
+	else if(level>=9)
 	{
 		if(i==6)
 		{
@@ -1079,7 +1079,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[6]=compute_y_balloon(6);
 		}			
 	}
-	else if(level>=6)
+	else if(level>=7)
 	{
 		if(!i)
 		{
@@ -1087,7 +1087,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[0]=compute_y_balloon(0);
 		}
 	}
-    else if(level>=4)
+    else if(level>=5)
         {
         if(i==9)
         {
@@ -1095,7 +1095,7 @@ void activate_balloon(uint8_t i)
             y_balloon[9]=compute_y_balloon(9);
         }
     }
-	else if(level>=2)
+	else if(level>=3)
 	{
 		if(i==8)
 		{
