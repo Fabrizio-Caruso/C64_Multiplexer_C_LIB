@@ -1811,7 +1811,6 @@ int main()
 		}
 		clear_stars();
 
-
 		distance=(INITIAL_LEVEL-1)*LEVEL_DISTANCE;
         level_threshold = (INITIAL_LEVEL)*LEVEL_DISTANCE;
         slow_loop=0;
@@ -2042,14 +2041,14 @@ int main()
                     MULTIPLEX_DONE=0;
                 }
                 
-            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<150));
+            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<25000));
         }
         else
         {
             do
             {
                 ++distance;
-            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<80));
+            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<25000));
             
         }
 		hide_sprites();
