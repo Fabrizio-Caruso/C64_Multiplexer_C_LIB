@@ -37,10 +37,10 @@ extern uint8_t MUSIC_ON;
 #define GIFT_POINTS  250
 #define ARMOR_POINTS 100
 
-#define ARMOR_RECHARGE 30
+#define ARMOR_RECHARGE 2
 #define BULLET_RECHARGE 99
 
-#define MAX_ARMOR 45
+#define MAX_ARMOR 3
 
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
@@ -1129,6 +1129,15 @@ void display_level(void)
 }
 
 
+#define ARMOR_OFFSET ((LEVEL_OFFSET)+3)
+
+void display_armor(void)
+{
+    printd(armor_level,2,ARMOR_OFFSET,WHITE);
+}
+
+
+
 void display_hi(uint8_t position)
 {
     print("HI",2,position-2,GREEN);
@@ -1604,6 +1613,7 @@ void decrease_energy(uint8_t amount)
 }
 
 #define FREEZE_DAMAGE 1
+#define BALLOON_ARMOR_DAMAGE 1
 
 void decrease_armor(uint8_t amount)
 {
@@ -1626,14 +1636,15 @@ void handle_balloon_collision(void)
         SPRC[BEFANA_INDEX]=RED;
 		if(armor_level)
 		{
-			decrease_armor(BALLOON_DAMAGE);
+			decrease_armor(BALLOON_ARMOR_DAMAGE);
+            display_armor();
 		}
 		else
 		{
 			decrease_energy(BALLOON_DAMAGE);
             freeze=FREEZE_DAMAGE;
+            display_energy();
 		}
-        display_energy();
 	}
 }
 
@@ -1677,6 +1688,7 @@ void handle_item_collision(void)
 			{
 				points+=ARMOR_POINTS;
 				increase_armor(ARMOR_RECHARGE);
+                display_armor();
 				// armor_level = ARMOR_RECHARGE;
 			}
 			// else if(item_type[i]==FIRE_ITEM)
@@ -1912,6 +1924,7 @@ int main()
 		
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
+        display_armor();
 
         display_score();
 		// display_remaining_bullets();
