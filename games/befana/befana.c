@@ -78,6 +78,18 @@ extern uint8_t MUSIC_ON;
     32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
     9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F
 
+
+#define ONE_SHIFTED3_SINUS(F) \
+    64/F, 63/F, 63/F, 62/F, 61/F, 60/F, 58/F, 56/F, \
+    54/F, 52/F, 49/F, 47/F, 44/F, 41/F, 38/F, 35/F, \
+    32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
+    9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
+    0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F, \
+    32/F, 35/F, 38/F, 41/F, 44/F, 47/F, 49/F, 52/F, \
+    54/F, 56/F, 58/F, 60/F, 61/F, 62/F, 63/F, 63/F
+
+
 #define SINUS(F) \
 { \
 	ONE_SINUS(F), \
@@ -101,6 +113,14 @@ extern uint8_t MUSIC_ON;
 	ONE_SHIFTED2_SINUS(F), \
 	ONE_SHIFTED2_SINUS(F), \
 	ONE_SHIFTED2_SINUS(F) \
+}
+
+#define SHIFTED3_SINUS(F) \
+{ \
+	ONE_SHIFTED3_SINUS(F), \
+	ONE_SHIFTED3_SINUS(F), \
+	ONE_SHIFTED3_SINUS(F), \
+	ONE_SHIFTED3_SINUS(F) \
 }
 
 #include<joystick.h>
@@ -187,6 +207,15 @@ const uint8_t shifted2_sinValues2[] = SHIFTED2_SINUS(2);
 const uint8_t shifted2_sinValues3[] = SHIFTED2_SINUS(3);
 
 const uint8_t shifted2_sinValues4[] = SHIFTED2_SINUS(4);
+
+
+const uint8_t shifted3_sinValues1[] = SHIFTED3_SINUS(1);
+
+const uint8_t shifted3_sinValues2[] = SHIFTED3_SINUS(2);
+
+const uint8_t shifted3_sinValues3[] = SHIFTED3_SINUS(3);
+
+const uint8_t shifted3_sinValues4[] = SHIFTED3_SINUS(4);
 
 
 static uint8_t no_item;
@@ -1224,11 +1253,11 @@ void _handle_balloons(void)
             {
                 SPRY[i]=y_balloon[i]+sinValues1[counter];
             }
-			else if(!(i&3))
+			else if(!(i&7))
 			{
 				SPRY[i]=y_balloon[i]+sinValues3[counter];
 			}
-			else if((i&3)==1)
+			else if((i&7)==1)
 			{
 				if((level&1))
 				{
@@ -1239,7 +1268,7 @@ void _handle_balloons(void)
 					SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
 				}
 			}
-			else if((i&3)==2)
+			else if((i&7)==2)
 			{
 				
 				if((level&1))
@@ -1251,9 +1280,25 @@ void _handle_balloons(void)
 					SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter];
 				}
 			}   
+			else if((i&7)==3)
+			{
+				SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter];
+			}
+			else if((i&7)==4)
+			{
+				SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter];
+			}
+			else if((i&7)==5)
+			{
+				SPRY[i]=y_balloon[i]+shifted3_sinValues2[counter];
+			}
+			else if((i&7)==6)
+			{
+				SPRY[i]=y_balloon[i]+shifted3_sinValues1[counter];
+			}
 			else
 			{
-				SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
+				SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter];
 			}
 			if(level&1)
 			{
@@ -1609,7 +1654,6 @@ void decrease_energy(uint8_t amount)
     }
     #endif
     
-	handle_befana_color();
 }
 
 #define FREEZE_DAMAGE 1
@@ -1969,27 +2013,33 @@ int main()
                 // TODO: Implement/fix this
                 // handle_bullets();
                 
+				if(!(counter&7))
+				{
+					points+=1U;
+					handle_befana_color();
+					display_score();
+				}
                 if(!(counter&31))
                 {
                     decrease_energy(1);
                     display_energy();
-                    points+=5U;
 					distance+=5U;
-					if(accelleration)
-					{
-						distance+=5U;
-						points+=5U;
-						if(accelleration>BOOST_THRESHOLD)
-						{
-							points+=5U;
-						}
-						if(forward_thrust)
-						{
-							points+=5U;
-						}
-					}
+
+					// if(accelleration)
+					// {
+						// distance+=5U;
+						// points+=5U;
+						// if(accelleration>BOOST_THRESHOLD)
+						// {
+							// points+=5U;
+						// }
+						// if(forward_thrust)
+						// {
+							// points+=5U;
+						// }
+					// }
 					display_distance();
-					display_score();
+
 
 					// if(armor_level)
 					// {
