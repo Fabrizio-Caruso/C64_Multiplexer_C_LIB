@@ -32,15 +32,15 @@ extern uint8_t MUSIC_ON;
 #define BETA_VERSION 1
 
 #define INITIAL_ENERGY 100
-#define MAX_ENERGY 200
+#define MAX_ENERGY 99
 
 #define GIFT_POINTS  250
 #define ARMOR_POINTS 100
 
-#define ARMOR_RECHARGE 2
+#define ARMOR_RECHARGE 1
 #define BULLET_RECHARGE 99
 
-#define MAX_ARMOR 3
+#define MAX_ARMOR 9
 
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
@@ -857,7 +857,7 @@ void handle_stars(void)
 
 void display_energy(void)
 {
-    printd(energy,3,NUMBER_OF_COLS-1-2,WHITE);
+    printd(energy,2,NUMBER_OF_COLS-1-2,WHITE);
 }
 
 
@@ -1162,7 +1162,7 @@ void display_level(void)
 
 void display_armor(void)
 {
-    printd(armor_level,2,ARMOR_OFFSET,WHITE);
+    printd(armor_level,1,ARMOR_OFFSET,WHITE);
 }
 
 
@@ -1452,7 +1452,7 @@ void handle_items(void)
 			}
 			else if(item_type[i]==SHIELD_ITEM)
 			{// TODO: To optimize
-				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
+				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD-((counter/4)&3);
 			}
 			else if(item_type[i]==FIRE_ITEM)
 			{// TODO: To optimize
@@ -2019,7 +2019,7 @@ int main()
 					handle_befana_color();
 					display_score();
 				}
-                if(!(counter&31))
+                if(!(counter&63))
                 {
                     decrease_energy(1);
                     display_energy();
