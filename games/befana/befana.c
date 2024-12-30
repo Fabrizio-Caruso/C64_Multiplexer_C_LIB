@@ -31,11 +31,11 @@ extern uint8_t MUSIC_ON;
 
 #define BETA_VERSION 1
 
-#define INITIAL_ENERGY 100
+#define INITIAL_ENERGY 99
 #define MAX_ENERGY 99
 
-#define GIFT_POINTS  250
-#define ARMOR_POINTS 100
+#define GIFT_POINTS  200
+#define ARMOR_POINTS 50
 
 #define ARMOR_RECHARGE 1
 #define BULLET_RECHARGE 99
@@ -56,7 +56,7 @@ extern uint8_t MUSIC_ON;
     32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
     9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
     0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 281
 
 #define ONE_SHIFTED_SINUS(F) \
     32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
@@ -132,14 +132,14 @@ extern uint8_t MUSIC_ON;
 #define NUMBER_OF_ITEMS 4
 
 
-#define BEFANA_MIN_X 36
+#define BEFANA_MIN_X 12
 #define BEFANA_MAX_X 140
 
 #define BEFANA_MIN_Y 55
-#define BEFANA_MAX_Y 208
+#define BEFANA_MAX_Y 216
 
 
-#define BALLOON_DAMAGE 14
+#define BALLOON_DAMAGE 10
 
 #define GIFT_ENERGY 25
 
@@ -161,13 +161,13 @@ static uint8_t level;
 
 static uint8_t armor_level;
 
-static uint8_t remaining_bullets;
-static uint8_t active_bullets;
+// static uint8_t remaining_bullets;
+// static uint8_t active_bullets;
 
-static uint8_t bullet_x[MAX_ACTIVE_BULLETS];
-static uint8_t bullet_y[MAX_ACTIVE_BULLETS];
-static uint8_t bullet_background[MAX_ACTIVE_BULLETS];
-static uint8_t bullet_tile[MAX_ACTIVE_BULLETS];
+// static uint8_t bullet_x[MAX_ACTIVE_BULLETS];
+// static uint8_t bullet_y[MAX_ACTIVE_BULLETS];
+// static uint8_t bullet_background[MAX_ACTIVE_BULLETS];
+// static uint8_t bullet_tile[MAX_ACTIVE_BULLETS];
 
 
 #define bullet_active bullet_y
@@ -456,19 +456,19 @@ void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
 // }
 
 
-void initialize_bullet(uint8_t i)
-{
-    bullet_active[i]=1;
+// void initialize_bullet(uint8_t i)
+// {
+    // bullet_active[i]=1;
 
-    // TODO: BOGUS values
-    bullet_tile[i] = BULLET;
-    bullet_x[i] = 0;
-    bullet_y[i] = 10+i;
+    // bullet_tile[i] = BULLET;
+    // bullet_x[i] = 0;
+    // bullet_y[i] = 10+i;
     
-    bullet_background[i] = PEEK(SCREEN+bullet_x[i]+NUMBER_OF_COLS*bullet_y[i]);
-}
+    // bullet_background[i] = PEEK(SCREEN+bullet_x[i]+NUMBER_OF_COLS*bullet_y[i]);
+// }
 
 
+/*
 void handle_bullet(uint8_t i)
 {
 	uint8_t bullet_cell;
@@ -522,7 +522,7 @@ void handle_bullets(void)
 		}
 	}
 }
-
+*/
 
 void _set_noise(void)
 {
@@ -934,13 +934,13 @@ void handle_befana(void)
 		
 		if(JOY_FIRE(input))
 		{
-			if(!remaining_bullets)
-			{
+			// if(!remaining_bullets)
+			// {
 				if(!accelleration)
 				{
 					accelleration=BOOST_DURATION;
 				}
-			}
+			// }
 			// else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
 			// {
 				// --remaining_bullets;
@@ -1215,7 +1215,7 @@ void _handle_balloons(void)
 				harmful_balloon[i]=1;
 				if(i<8)
 				{
-					y_balloon[i]=62+(i&3)*32+(rand()&0x1F);
+					y_balloon[i]=16+(i&3)*48+(rand()&0x1F);
 
 					SPRC[i]=BALLOON_COLORS[rand()&7];
 
@@ -1630,10 +1630,10 @@ void handle_befana_color(void)
 	// {
 		// SPRC[BEFANA_INDEX]=GREY;
 	// }	
-	else if(remaining_bullets)
-    {
-        SPRC[BEFANA_INDEX]=BLUE;
-    }
+	// else if(remaining_bullets)
+    // {
+        // SPRC[BEFANA_INDEX]=BLUE;
+    // }
     else
     {
         SPRC[BEFANA_INDEX]=BROWN;
@@ -1869,7 +1869,7 @@ int main()
         counter = 0;
 		no_item = 0;
 		item = 0;
-        active_bullets = 0;
+        // active_bullets = 0;
 		
         music_switch(1);
         
@@ -1878,7 +1878,7 @@ int main()
         SPRX[18]=166;
 		
 		armor_level = 0;
-		remaining_bullets = 0;
+		// remaining_bullets = 0;
         
         // print("FETCH THE GIFT BOXES",20,SCREEN+1000-200+10,WHITE);
         // print("PRESS FIRE TO START",18,490,WHITE);
