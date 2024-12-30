@@ -132,11 +132,11 @@ extern uint8_t MUSIC_ON;
 #define NUMBER_OF_ITEMS 4
 
 
-#define BEFANA_MIN_X 12
-#define BEFANA_MAX_X 140
+#define BEFANA_MIN_X 14
+#define BEFANA_MAX_X 120
 
-#define BEFANA_MIN_Y 55
-#define BEFANA_MAX_Y 216
+#define BEFANA_MIN_Y 60
+#define BEFANA_MAX_Y 214
 
 
 #define BALLOON_DAMAGE 10
@@ -383,8 +383,8 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 
 #define DISTANCE_OFFSET 11
 #define LEVEL_OFFSET (DISTANCE_OFFSET+3+5)
-#define ARMOR_OFFSET ((LEVEL_OFFSET)+4)
-#define HI_OFFSET (NUMBER_OF_COLS-10)
+#define ARMOR_OFFSET ((LEVEL_OFFSET)+8)
+#define HI_OFFSET (NUMBER_OF_COLS-9)
 #define INITIAL_HI_OFFSET (NUMBER_OF_COLS/2-2)
 
 static uint8_t slow_loop = 0;
@@ -857,7 +857,7 @@ void handle_stars(void)
 
 void display_energy(void)
 {
-    printd(energy,2,NUMBER_OF_COLS-1-2,WHITE);
+    printd(energy,2,NUMBER_OF_COLS-2,WHITE);
 }
 
 
@@ -1226,7 +1226,7 @@ void _handle_balloons(void)
                     {
                         if(SPRY[BEFANA_INDEX]>170)
                         {
-                            y_balloon[8]=SPRY[BEFANA_INDEX]-16;
+                            y_balloon[8]=SPRY[BEFANA_INDEX];
                         }
                         else if(SPRY[BEFANA_INDEX]<85)     
                         {
@@ -1252,6 +1252,10 @@ void _handle_balloons(void)
             if(i==9)
             {
                 SPRY[i]=y_balloon[i]+sinValues1[counter];
+            }
+            else if(i==8)
+            {
+                SPRY[i]=y_balloon[i]; //+sinValues4[counter];
             }
 			else if(!(i&7))
 			{
@@ -1886,7 +1890,7 @@ int main()
         {
             SPRY[0]=128;
             
-            SPRY[17]=44+sinValues4[(counter/4)];
+            SPRY[17]=50;//+sinValues3[(counter/4)];
             SPRM[17]=0;
             SPRC[17]=CYAN;
             SPRF[17]=GFX_START_INDEX + BALLOON;
@@ -1960,8 +1964,8 @@ int main()
         SPRM[SMOKE_INDEX]=0;
         SPRC[SMOKE_INDEX]=YELLOW;
         
-		POKE(SCREEN+NUMBER_OF_COLS-4,ENERGY_ICON);
-		POKE(COLOR+NUMBER_OF_COLS-4,RED);        
+		POKE(SCREEN+NUMBER_OF_COLS-3,ENERGY_ICON);
+		POKE(COLOR+NUMBER_OF_COLS-3,RED);        
         display_energy();
 		print("SCORE",5,0,CYAN);
 		
@@ -1972,6 +1976,8 @@ int main()
 		
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
+        
+        print("ARMOR",5,ARMOR_OFFSET-5,LIGHT_GREY);
         display_armor();
 
         display_score();
