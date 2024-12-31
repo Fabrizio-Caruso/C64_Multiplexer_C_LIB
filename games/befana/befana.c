@@ -56,7 +56,7 @@ extern uint8_t MUSIC_ON;
     32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
     9/F, 7/F, 5/F, 3/F, 2/F, 1/F, 0/F, 0/F, \
     0/F, 0/F, 0/F, 1/F, 2/F, 3/F, 5/F, 7/F, \
-    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 281
+    9/F, 11/F, 14/F, 16/F, 19/F, 22/F, 25/F, 28/F
 
 #define ONE_SHIFTED_SINUS(F) \
     32/F, 28/F, 25/F, 22/F, 19/F, 16/F, 14/F, 11/F, \
@@ -139,11 +139,13 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MAX_Y 214
 
 
+// #define BALLOON_DAMAGE 10
 #define BALLOON_DAMAGE 10
+
 
 #define GIFT_ENERGY 25
 
-#define LEVEL_DISTANCE 250U
+#define LEVEL_DISTANCE 50U
 
 uint8_t forward_thrust;
 
@@ -263,7 +265,6 @@ void music_switch(uint8_t toggle)
 #define GFX_START_INDEX (GFX_START/0x40U)
 
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
-#define BALLOON_INDEX 0
 #define ITEM_INDEX (BEFANA_INDEX+1)
 #define SMOKE_INDEX (ITEM_INDEX+NUMBER_OF_ITEMS)
 
@@ -1011,7 +1012,7 @@ void init_sprite_balloons(void)
 {
     uint8_t i;
     
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
 		
         SPRF[i]=GFX_START_INDEX + BALLOON;
@@ -1134,17 +1135,6 @@ void activate_balloon(uint8_t i)
 			y_balloon[8]=compute_y_balloon(8);
 		}
 	}
-
-    // if(level&1)
-    // {
-        // active_balloon[9]=1;
-        // y_balloon[9]=compute_y_balloon(9);
-    // }
-    // else
-    // {
-        // active_balloon[9]=0;
-        
-    // }
 }
 
 
@@ -1204,7 +1194,7 @@ void _handle_balloons(void)
 {
     uint8_t i;
     
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
 		// TODO: This should be optimized because
 		--SPRX[i];
@@ -1215,7 +1205,7 @@ void _handle_balloons(void)
 				harmful_balloon[i]=1;
 				if(i<8)
 				{
-					y_balloon[i]=16+(i&3)*48+(rand()&0x1F);
+					y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
 
 					SPRC[i]=BALLOON_COLORS[rand()&7];
 
@@ -1242,34 +1232,34 @@ void _handle_balloons(void)
                         }
                     
                     }
-                    else
+                    else 
                     {
-                        y_balloon[9]=80+(counter&7)*8;
+                        y_balloon[i]=80+(counter&7)*8;
                     }
 				}
 				SPRX[i]=184;
 			}
             if(i==9)
             {
-                SPRY[i]=y_balloon[i]+sinValues1[counter];
+                SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
             }
             else if(i==8)
             {
-                SPRY[i]=y_balloon[i]; //+sinValues4[counter];
+                SPRY[i]=y_balloon[i]+sinValues4[counter]; // TODO: BROKEN
             }
 			else if(!(i&7))
 			{
-				SPRY[i]=y_balloon[i]+sinValues3[counter];
+				SPRY[i]=y_balloon[i]+sinValues3[counter]; // TODO: BROKEN
 			}
 			else if((i&7)==1)
 			{
 				if((level&1))
 				{
-					SPRY[i]=y_balloon[i]+shifted_sinValues2[counter];
+					SPRY[i]=y_balloon[i]+shifted_sinValues2[counter]; // OK
 				}
 				else
 				{
-					SPRY[i]=y_balloon[i]+shifted_sinValues3[counter];
+					SPRY[i]=y_balloon[i]+shifted_sinValues3[counter]; // OK
 				}
 			}
 			else if((i&7)==2)
@@ -1277,32 +1267,32 @@ void _handle_balloons(void)
 				
 				if((level&1))
 				{
-					SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter];
+					SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
 				}
 				else
 				{
-					SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter];
+					SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
 				}
 			}   
 			else if((i&7)==3)
 			{
-				SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter];
+				SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter]; // OK
 			}
 			else if((i&7)==4)
 			{
-				SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter];
+				SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter]; // OK
 			}
 			else if((i&7)==5)
 			{
-				SPRY[i]=y_balloon[i]+shifted3_sinValues2[counter];
+				SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
 			}
 			else if((i&7)==6)
 			{
-				SPRY[i]=y_balloon[i]+shifted3_sinValues1[counter];
+				SPRY[i]=y_balloon[i] +shifted3_sinValues1[counter]; // OK
 			}
 			else
 			{
-				SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter];
+				SPRY[i]=y_balloon[i] +shifted2_sinValues3[counter]; // OK
 			}
 			if(level&1)
 			{
@@ -1316,7 +1306,6 @@ void _handle_balloons(void)
 		{
 			SPRX[i]=184;
             activate_balloon(i);
-
 		}
     }
 }
@@ -1325,19 +1314,19 @@ void handle_balloons(void)
 {
 	uint8_t i;
 	
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-	if(accelleration)
-	{
-		// if(counter&1)
-		// {
-			--SPRX[i];
-            if(accelleration>BOOST_THRESHOLD)
-            {
+        if(accelleration)
+        {
+            // if(counter&1)
+            // {
                 --SPRX[i];
-            }
-		// }		
-	}
+                if(accelleration>BOOST_THRESHOLD)
+                {
+                    --SPRX[i];
+                }
+            // }		
+        }
 	}
 	_handle_balloons();
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
@@ -1558,7 +1547,7 @@ uint8_t sprite_collision(uint8_t i)
 
 uint8_t balloon_collision(void)
 {
-    for(i=BALLOON_INDEX;i<=BALLOON_INDEX+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
 		if(sprite_collision(i))
 		{
@@ -1890,7 +1879,7 @@ int main()
         {
             SPRY[0]=128;
             
-            SPRY[17]=50;//+sinValues3[(counter/4)];
+            SPRY[17]=44+sinValues4[(counter/4)];
             SPRM[17]=0;
             SPRC[17]=CYAN;
             SPRF[17]=GFX_START_INDEX + BALLOON;
