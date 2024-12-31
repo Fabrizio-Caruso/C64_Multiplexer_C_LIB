@@ -145,7 +145,7 @@ extern uint8_t MUSIC_ON;
 
 #define GIFT_ENERGY 25
 
-#define LEVEL_DISTANCE 50U
+#define LEVEL_DISTANCE 100U
 
 uint8_t forward_thrust;
 
