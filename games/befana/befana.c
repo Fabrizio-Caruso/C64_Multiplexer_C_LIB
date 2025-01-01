@@ -1916,7 +1916,7 @@ int main()
                 }
                 else if(counter<192)
                 {
-                    print(" USE FIRE TO BOOST  ",20,1000-40+10,YELLOW);
+                    print("PRESS FIRE TO BOOST ",20,1000-40+10,YELLOW);
                 }
                 else
                 {
@@ -2062,13 +2062,15 @@ int main()
 		}
         distance=0;
 
-        if(energy)
-        {
-            music_switch(1);
 
-            do
-            { 
-                ++distance;
+
+        do
+        { 
+            ++distance;
+            
+            if(energy)
+            {
+                music_switch(1);
                 ++counter;
                 
                 if((counter&31)<16)
@@ -2080,27 +2082,21 @@ int main()
                     print("JOURNEY COMPLETED",17,494-80-4,CYAN);
                 }
 
-         
+     
                 level=12;
                 clear_items();
-                while(MULTIPLEX_DONE)
-                {
-                    handle_balloons();
-                    handle_balloons();
-                    SPRUPDATEFLAG=1;
-                    MULTIPLEX_DONE=0;
-                }
-                
-            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<25000));
-        }
-        else
-        {
-            do
+            }
+            while(MULTIPLEX_DONE)
             {
-                ++distance;
-            } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<25000));
+                handle_balloons();
+                handle_balloons();
+                SPRUPDATEFLAG=1;
+                MULTIPLEX_DONE=0;
+            }
             
-        }
+        } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<25000));
+        
+
 		hide_sprites();
 		
     }
