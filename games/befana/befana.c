@@ -25,10 +25,10 @@ extern unsigned short SPRITE_GFX;
 
 extern uint8_t MUSIC_ON;
 
-#define INITIAL_LEVEL 1 
+#define INITIAL_LEVEL 1
 
 // #define BALLOON_DAMAGE 10
-#define BALLOON_DAMAGE 10
+#define BALLOON_DAMAGE 12
 
 
 // #define TRAINER 1
@@ -155,8 +155,8 @@ uint8_t cool_down;
 
 #define MAX_COOL_DOWN 254
 
-#define BOOST_DURATION 12
-#define BOOST_THRESHOLD 7
+#define BOOST_DURATION 11
+#define BOOST_THRESHOLD 9
 
 #define BULLET ('9'+1)
 
@@ -274,6 +274,7 @@ void music_switch(uint8_t toggle)
 #define SMOKE_INDEX (ITEM_INDEX+NUMBER_OF_ITEMS)
 
 #define SMOKE 60
+#define SHIELD_INDEX ('A'-1)
 
 static uint8_t counter;
 static uint8_t energy;
@@ -680,7 +681,7 @@ void draw_the_moon(void)
 
 void display_boost(void)
 {
-        print("BOOST",5,BOOST_OFFSET,YELLOW);
+        print("SHOCK",5,BOOST_OFFSET,YELLOW);
 }
 
 void erase_boost(void)
@@ -860,6 +861,23 @@ void _handle_stars(void)
 }
 
 
+void display_shield(void)
+{
+    if(counter&3)
+    {
+        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]+6+2*(counter&1);
+        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+0;
+    }
+    else
+    {
+        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14;
+        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
+    }
+
+}
+
 
 void display_smoke(void)
 {
@@ -920,7 +938,8 @@ void handle_befana(void)
 	if(accelleration)
 		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 		{
-            display_smoke();
+            display_shield();
+            // display_smoke();
 
 			--accelleration;
 			++SPRX[BEFANA_INDEX];
@@ -1235,11 +1254,14 @@ void check_level_trigger()
     if((distance>=level_threshold))
     {
         ++level;
-        display_level();
-        level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
-        display_new_level();
+        if(level<=MAX_LEVEL)
+        {
+            display_level();
+            level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+            display_new_level();
+        }
     }
-    else if(distance==level_threshold-LEVEL_DISTANCE+20)
+    else if(distance==level_threshold-LEVEL_DISTANCE+15)
     {
         erase_new_level();
     }
@@ -1422,7 +1444,7 @@ void handle_balloons(void)
     }
 }
 
-const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, RED, BLUE};
+const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, GREEN, CYAN};
 
 void init_items(void)
 {
@@ -2010,19 +2032,19 @@ int main()
                 
                 if(counter<64)
                 {
-                    print(" AVOID THE BALLOONS ",20,1000-40+10,CYAN);
+                    print("   AVOID THE BALLOONS  ",23,1000-40+8,CYAN);
                 }
                 else if(counter<128)
                 {
-                    print("FETCH THE GIFT BOXES",20,1000-40+10,GREEN);
+                    print("  FETCH THE GIFT BOXES ",23,1000-40+8,GREEN);
                 }
                 else if(counter<192)
                 {
-                    print("PRESS FIRE TO BOOST ",20,1000-40+10,YELLOW);
+                    print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
                 }
                 else
                 {
-                    print("PRESS FIRE TO START ",20,1000-40+10,WHITE);
+                    print("  PRESS FIRE TO START  ",23,1000-40+8,WHITE);
                 }
                 
                 #if defined(BETA_VERSION)
@@ -2171,12 +2193,17 @@ int main()
 
         music_switch(1);
 
-        // if(energy)
-        // {
+        if(!energy)
+        {
             clear_items();
-        // }
+        }
+        SPRC[BEFANA_INDEX] = RED;
+        erase_new_level();
+        
         do
         { 
+            while(MULTIPLEX_DONE)
+            {
             ++distance;
 
             ++counter;
@@ -2188,7 +2215,7 @@ int main()
 
                 if(energy)
                 {
-                    print("JOURNEY COMPLETED",17,494-80-4,YELLOW);
+                    print("JOURNEY COMPLETED",17,494-80-3,YELLOW);
                 }
             }
             else
@@ -2197,14 +2224,28 @@ int main()
 
                 if(energy)
                 {
-                    print("JOURNEY COMPLETED",17,494-80-4,CYAN);
+                    print("JOURNEY COMPLETED",17,494-80-3,CYAN);
                 }
             }
 
-            while(MULTIPLEX_DONE)
-            {
+
                 handle_balloons();
-                handle_balloons();
+                if(energy)
+                {
+                    uint8_t i; 
+                    
+                    handle_balloons();
+                    handle_balloons();
+                    SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+                    for(i=0;i<NUMBER_OF_ITEMS;++i)
+                    {
+                        SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+                        // SPRC[ITEM_INDEX+i]=item_colors[i];
+                        // SPRY[ITEM_INDEX+i]=80+40*i;
+                        // SPRM[ITEM_INDEX+i]=1;
+                        --SPRX[ITEM_INDEX+i];
+                    }
+                }
                 SPRUPDATEFLAG=1;
                 MULTIPLEX_DONE=0;
             }
