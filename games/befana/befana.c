@@ -153,7 +153,7 @@ uint8_t forward_thrust;
 uint8_t accelleration;
 uint8_t cool_down;
 
-#define MAX_COOL_DOWN 180
+#define MAX_COOL_DOWN 250
 
 #define BOOST_DURATION 12
 #define BOOST_THRESHOLD 7
@@ -1211,6 +1211,20 @@ void display_hi(uint8_t position)
 	printd(record,5,position,WHITE);
 }
 
+#define NEW_LEVEL_OFFSET (440+15)
+
+
+void display_new_level(void)
+{
+    print("LEVEL",5,NEW_LEVEL_OFFSET,WHITE);
+    printd(level,2,NEW_LEVEL_OFFSET+6,WHITE);
+}
+
+void erase_new_level(void)
+{
+    print("         ",8,NEW_LEVEL_OFFSET,WHITE);
+}
+
 
 void check_level_trigger()
 {
@@ -1223,6 +1237,11 @@ void check_level_trigger()
         ++level;
         display_level();
         level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+        display_new_level();
+    }
+    else if(distance==level_threshold-LEVEL_DISTANCE+20)
+    {
+        erase_new_level();
     }
     // else if(level==10)
     // {
@@ -1264,7 +1283,7 @@ void _handle_balloons(void)
                     {
                         if(SPRY[BEFANA_INDEX]>170)
                         {
-                            y_balloon[8]=SPRY[BEFANA_INDEX];
+                            y_balloon[8]=SPRY[BEFANA_INDEX]-16;
                         }
                         else if(SPRY[BEFANA_INDEX]<85)     
                         {
@@ -1293,11 +1312,11 @@ void _handle_balloons(void)
             }
             else if(i==8)
             {
-                SPRY[i]=y_balloon[i]+sinValues4[counter]; // TODO: BROKEN
+                SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
             }
 			else if(!(i&7))
 			{
-				SPRY[i]=y_balloon[i]+sinValues3[counter]; // TODO: BROKEN
+				SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
 			}
 			else if((i&7)==1)
 			{
@@ -1359,7 +1378,7 @@ void _handle_balloons(void)
         else if(falling_balloon[i])
         {
             --SPRX[i];
-            if(SPRY[i]<240)
+            if(SPRY[i]<250)
             {
                 SPRY[i]+=3;
             }
@@ -2062,6 +2081,7 @@ int main()
 
 		
         music_switch(0);
+        display_new_level();
         while(energy && (level<=MAX_LEVEL)) 
         {
             if (MULTIPLEX_DONE) {	
@@ -2160,7 +2180,7 @@ int main()
             if((counter&31)<16)
             {
                 
-                print("GAME OVER",9,494,RED);
+                print("GAME OVER",9,495,RED);
 
                 if(energy)
                 {
@@ -2169,7 +2189,7 @@ int main()
             }
             else
             {
-                print("GAME OVER",9,494,YELLOW);
+                print("GAME OVER",9,495,YELLOW);
 
                 if(energy)
                 {
