@@ -144,7 +144,7 @@ extern uint8_t MUSIC_ON;
 #define BEFANA_MAX_Y 214
 
 
-#define GIFT_ENERGY 25
+#define GIFT_ENERGY 20
 
 #define LEVEL_DISTANCE 100U
 
@@ -153,7 +153,7 @@ uint8_t forward_thrust;
 uint8_t accelleration;
 uint8_t cool_down;
 
-#define MAX_COOL_DOWN 250
+#define MAX_COOL_DOWN 254
 
 #define BOOST_DURATION 12
 #define BOOST_THRESHOLD 7
@@ -804,7 +804,7 @@ void init_player(uint8_t sprite_index)
     // SPRC[BEFANA_INDEX] = PINK;
     
     SPRX[sprite_index] = 30;
-    SPRY[sprite_index] = 50;
+    SPRY[sprite_index] = 100;
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
@@ -1778,6 +1778,10 @@ void handle_balloon_collision(void)
                 decrease_energy(BALLOON_DAMAGE);
                 freeze=FREEZE_DAMAGE;
                 display_energy();
+                if(cool_down>1)
+                {
+                    cool_down=MAX_COOL_DOWN;
+                }
             }
         }
 	}
