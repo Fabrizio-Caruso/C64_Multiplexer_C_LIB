@@ -1,0 +1,15 @@
+BEFANA VS BALLOONS
+
+
+In Italian folklore and folk customs, the Befana is a witch-like old woman who delivers gifts to children 
+throughout Italy on Epiphany Eve (the night of January 5).
+
+
+Gameplay:
+
+You control Befana. The goal of the game is to avoid the balloons and take as many gift boxes as possible.
+Each gift box restores some of your energy.
+You die when your energy is depleted. Your energy decreases slowly over time. It decrease more when a balloon hits you.
+You can protect yourself by catching the armor item.
+
+The game has 20 level and it ends after completing the 20th level.
