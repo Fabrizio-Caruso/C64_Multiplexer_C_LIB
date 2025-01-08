@@ -130,6 +130,21 @@ xmas:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
+xmas2025: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) $(EXPANDXCFG) \
+	--asm-define MAXSPR=22 -D_NUMBER_OF_SPRITES_=22  -D_SPRITE_SEPARATION_=30 \
+	--asm-define MUSIC_CODE=1 \
+	--asm-define MULTICOLOR=1 -DYEAR_LOW='5'+48 -DXMAS \
+	-DSPRITES_AT_2800 \
+	$(DEMOS_PATH)/generic_multiplexer/xmas.c \
+	$(SNOW_UDG_ASM_FILES2) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
+
 # 	--asm-define DEBUG=1
 # 	--asm-define MUSIC_SWITCH=1
 befana: 

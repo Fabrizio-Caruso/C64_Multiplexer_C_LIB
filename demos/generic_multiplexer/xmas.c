@@ -1086,14 +1086,14 @@ void handle_sprite_change(void)
 			
 			SPRF[SANTA_INDEX]=GFX_START_INDEX + SANTA;
 			SPRF[REINDEER_INDEX]=GFX_START_INDEX + REINDEER;
-			SPRF[BEFANA_INDEX]=GFX_START_INDEX + BEFANA;	
+			SPRF[BEFANA_INDEX]=GFX_START_INDEX + BEFANA;
 			XB = 15;
 			
 			SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'H';
 			SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'A';
 			SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'P';
 			SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';	
-				
+
 			SPRF[ 8]=GFX_START_INDEX + '2';//'Z' - 'A' + 25; // 2
 			SPRF[ 9]=GFX_START_INDEX + '0'; // 0
 			SPRF[10]=GFX_START_INDEX + YEAR_HIGH; // 2
@@ -1132,21 +1132,41 @@ void handle_sprite_change(void)
 			if(cycle&1)
 			{
 				
+                #if defined(XMAS)
+				SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'M';
+				SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'E';
+				SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'R';
+				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'R';
+                
+				SPRF[SANTA_INDEX]=GFX_START_INDEX + PRESENT;
+				SPRF[REINDEER_INDEX]=GFX_START_INDEX + PRESENT;
+				SPRF[BEFANA_INDEX]=GFX_START_INDEX + PRESENT;
+
+                #else
 				SPRF[ 0] = GFX_START_INDEX - 'A' + 1 + 'H';
 				SPRF[ 1] = GFX_START_INDEX - 'A' + 1 + 'A';
 				SPRF[ 2] = GFX_START_INDEX - 'A' + 1 + 'P';
-				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';				
+				SPRF[ 3] = GFX_START_INDEX - 'A' + 1 + 'P';
 				// SPRY[ 4] = GFX_START_INDEX - 'A' + 1 + 'N';
 
 				SPRF[SANTA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'N';					
 				SPRF[REINDEER_INDEX]=GFX_START_INDEX - 'A' + 1 + 'E';
 				SPRF[BEFANA_INDEX]=GFX_START_INDEX - 'A' + 1 + 'W';
-				
+				#endif
+                
+                #if defined(XMAS)
+				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'X';
+				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'M';
+				SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
+				SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'S';
+                #else
 				SPRF[ 8]=GFX_START_INDEX - 'A' + 1 + 'Y';
 				SPRF[ 9]=GFX_START_INDEX - 'A' + 1 + 'E';
 				SPRF[10]=GFX_START_INDEX - 'A' + 1 + 'A';
 				SPRF[11]=GFX_START_INDEX - 'A' + 1 + 'R';
 				
+                #endif
+                
 				SPRY[12]=255;
 				SPRY[13]=255;
 				
@@ -1160,10 +1180,18 @@ void handle_sprite_change(void)
 				SPRC[BOTTOM_PRESENT_INDEX] = PURPLE;
 				SPRC[TOP_PRESENT_INDEX] = GREEN;
 				flip = 1;
+                
+                #if defined(XMAS)
+				for(i=0;i<3;++i)
+				{
+					SPRX[i+5]=X_OFFSET+i*22+20;
+				}
+                #else
 				for(i=0;i<3;++i)
 				{
 					SPRX[i+5]=X_OFFSET+i*22;
-				} 	
+				}
+                #endif
 			}
 			else
 			{
