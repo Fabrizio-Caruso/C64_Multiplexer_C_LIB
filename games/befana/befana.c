@@ -153,6 +153,9 @@ uint8_t forward_thrust;
 uint8_t accelleration;
 uint8_t cool_down;
 
+#define GAME_OVER_TIME 120
+// #define TITLE_SCREEN_TIME 100
+
 #define MAX_COOL_DOWN 254
 
 #define BOOST_DURATION 11
@@ -894,23 +897,7 @@ void hide_smoke(void)
 
 
 
-void handle_stars(void)
-{
-	_handle_stars();
-    if(accelleration>BOOST_THRESHOLD)
-    {
-        _handle_stars();
-    }
-	else if(accelleration)
-	{
-		_handle_stars();
-	}
-	if(forward_thrust)
-	{
-        display_smoke();
-		_handle_stars();
-	}
-}
+
 
 
 void display_energy(void)
@@ -1408,6 +1395,16 @@ void _handle_balloons(void)
     }
 }
 
+void move_balloons(void)
+{
+	uint8_t i;
+	
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    {
+        --SPRX[i];
+    }
+}
+
 void handle_balloons(void)
 {
 	uint8_t i;
@@ -1443,6 +1440,31 @@ void handle_balloons(void)
 		_handle_balloons();        
     }
 }
+
+
+void handle_stars(void)
+{
+	_handle_stars();
+    if(accelleration>BOOST_THRESHOLD)
+    {
+        _handle_stars();
+    }
+	else if(accelleration)
+	{
+		_handle_stars();
+	}
+	if(forward_thrust)
+	{
+        if(!(counter&1))
+        {
+            move_balloons();
+            // handle_balloons();
+        }
+        display_smoke();
+		_handle_stars();
+	}
+}
+
 
 const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, GREEN, CYAN};
 
@@ -1931,6 +1953,81 @@ void hide_sprites(void)
 }
 
 
+void print_press_fire(void)
+{
+    print("  PRESS FIRE TO START  ",23,1000-40+8,WHITE);
+}
+
+
+void title_screen(void)
+{
+    distance = 0;
+    
+    
+    do
+    {
+        SPRY[0]=128;
+        
+        SPRY[17]=44+sinValues4[(counter/4)];
+        SPRM[17]=0;
+        SPRC[17]=CYAN;
+        SPRF[17]=GFX_START_INDEX + BALLOON;
+        
+        SPRY[18]=216;
+        SPRC[18]=RED;
+        SPRM[18]=1;
+
+        while(MULTIPLEX_DONE)
+        {
+            handle_stars();
+            if(!(counter&3))
+            {
+                ++SPRX[0];
+                --SPRX[17];
+                SPRX[18]-=2;
+                SPRF[18]=GFX_START_INDEX + GIFT + (SPRX[0]%3);
+                
+                init_letters();
+                // SPRY[17]=215+sinValues2[(counter/4)];
+                
+                SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
+            }
+            ++counter;     
+            if(distance<=192)
+            {
+                ++distance;
+            }
+            
+            if(counter<64)
+            {
+                print("   AVOID THE BALLOONS  ",23,1000-40+8,CYAN);
+            }
+            else if(counter<128)
+            {
+                print("  FETCH THE GIFT BOXES ",23,1000-40+8,GREEN);
+            }
+            else if(counter<192)
+            {
+                print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
+            }
+            else
+            {
+                print_press_fire();
+            }
+            
+            #if defined(BETA_VERSION)
+                
+                print("BETA VERSION", 12, 1000-12-40,WHITE);
+            #endif
+            
+            MULTIPLEX_DONE = 0;
+            SPRUPDATEFLAG = 1;	
+        }                
+
+    } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<192)); 
+}
+
+
 /******************/
 int main()
 {       
@@ -1995,68 +2092,8 @@ int main()
         SPRX[18]=166;
 		
 		armor_level = 0;
-		// remaining_bullets = 0;
-        
-        // print("FETCH THE GIFT BOXES",20,SCREEN+1000-200+10,WHITE);
-        // print("PRESS FIRE TO START",18,490,WHITE);
-        do
-        {
-            SPRY[0]=128;
-            
-            SPRY[17]=44+sinValues4[(counter/4)];
-            SPRM[17]=0;
-            SPRC[17]=CYAN;
-            SPRF[17]=GFX_START_INDEX + BALLOON;
-            
-            SPRY[18]=216;
-            // SPRF[18]=GFX_START_INDEX + GIFT;
-            SPRC[18]=RED;
-            SPRM[18]=1;
 
-            while(MULTIPLEX_DONE)
-            {
-                handle_stars();
-                if(!(counter&3))
-                {
-                    ++SPRX[0];
-                    --SPRX[17];
-                    SPRX[18]-=2;
-                    SPRF[18]=GFX_START_INDEX + GIFT + (SPRX[0]%3);
-                    
-                    init_letters();
-                    // SPRY[17]=215+sinValues2[(counter/4)];
-                    
-                    SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
-                }
-                ++counter;     
-                
-                if(counter<64)
-                {
-                    print("   AVOID THE BALLOONS  ",23,1000-40+8,CYAN);
-                }
-                else if(counter<128)
-                {
-                    print("  FETCH THE GIFT BOXES ",23,1000-40+8,GREEN);
-                }
-                else if(counter<192)
-                {
-                    print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
-                }
-                else
-                {
-                    print("  PRESS FIRE TO START  ",23,1000-40+8,WHITE);
-                }
-                
-                #if defined(BETA_VERSION)
-                    
-                    print("BETA VERSION", 12, 1000-12-40,WHITE);
-                #endif
-                
-                MULTIPLEX_DONE = 0;
-                SPRUPDATEFLAG = 1;	
-            }                
-
-        } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
+        title_screen();
         
         init_grass();
 
@@ -2138,40 +2175,16 @@ int main()
                 
 				if(!(counter&7))
 				{
-					points+=1U;
 					handle_befana_color();
-					display_score();
+
 				}
                 if(!(counter&63))
                 {
+                    points+=5U;
+					display_score();
                     decrease_energy(1);
                     display_energy();
 					distance+=5U;
-
-					// if(accelleration)
-					// {
-						// distance+=5U;
-						// points+=5U;
-						// if(accelleration>BOOST_THRESHOLD)
-						// {
-							// points+=5U;
-						// }
-						// if(forward_thrust)
-						// {
-							// points+=5U;
-						// }
-					// }
-					// display_distance();
-
-
-					// if(armor_level)
-					// {
-						// --armor_level;
-						// if(!armor_level)
-						// {
-							// SPRC[BEFANA_INDEX]=PINK;
-						// }
-					// }
                 }
                 check_level_trigger();
 		
@@ -2204,8 +2217,10 @@ int main()
         { 
             while(MULTIPLEX_DONE)
             {
-            ++distance;
-
+            if(distance<=GAME_OVER_TIME)
+            {
+                ++distance;
+            }
             ++counter;
 
             if((counter&31)<16)
@@ -2249,12 +2264,15 @@ int main()
                 SPRUPDATEFLAG=1;
                 MULTIPLEX_DONE=0;
             }
-            
-        } while(!JOY_FIRE(joy_read(STANDARD_JOY)));
+            if(distance==GAME_OVER_TIME)
+            {
+                print_press_fire();
+            }
+        } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance < GAME_OVER_TIME));
         
 
 		hide_sprites();
-		
+        forward_thrust = 0;
     }
     return 0;
 }
