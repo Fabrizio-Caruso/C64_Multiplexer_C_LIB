@@ -153,7 +153,7 @@ uint8_t forward_thrust;
 uint8_t accelleration;
 uint8_t cool_down;
 
-#define GAME_OVER_TIME 120
+#define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
 #define MAX_COOL_DOWN 254
@@ -1458,6 +1458,7 @@ void handle_stars(void)
         if(!(counter&1))
         {
             move_balloons();
+            handle_grass();
             // handle_balloons();
         }
         display_smoke();
