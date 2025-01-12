@@ -38,9 +38,9 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_ENERGY 99
 #define MAX_ENERGY 99
 
-#define GIFT_POINTS  100
-#define BALLOON_POINTS 50
-#define ARMOR_POINTS 25
+#define GIFT_POINTS  200
+#define BALLOON_POINTS 100
+#define ARMOR_POINTS 50
 
 #define ARMOR_RECHARGE 1
 #define BULLET_RECHARGE 99
@@ -150,16 +150,17 @@ extern uint8_t MUSIC_ON;
 
 uint8_t forward_thrust;
 
-uint8_t accelleration;
+uint8_t shock;
 uint8_t cool_down;
 
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
 #define MAX_COOL_DOWN 254
+#define GIFT_COOL_DOWN_BONUS 50
 
-#define BOOST_DURATION 11
-#define BOOST_THRESHOLD 9
+#define SHOCK_DURATION 11
+#define SHOCK_THRESHOLD 9
 
 #define BULLET ('9'+1)
 
@@ -302,7 +303,7 @@ static uint16_t points = 0;
 #define MOON_OFFSET (40*2+36)
 
 #define ENERGY_ICON ('z'-'a'+1+1)
-// #define BOOST_TILE ('z'-'a'+1+1)
+// #define SHOCK_TILE ('z'-'a'+1+1)
 
 
 #if !defined(YEAR_LOW)
@@ -395,7 +396,7 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 #define LEVEL_OFFSET (DISTANCE_OFFSET+2)
 #define ARMOR_OFFSET ((LEVEL_OFFSET)+14)
 
-#define BOOST_OFFSET (LEVEL_OFFSET+3)
+#define SHOCK_OFFSET (LEVEL_OFFSET+3)
 #define HI_OFFSET (NUMBER_OF_COLS-9)
 #define INITIAL_HI_OFFSET (NUMBER_OF_COLS/2-2)
 
@@ -682,14 +683,14 @@ void draw_the_moon(void)
 
 
 
-void display_boost(void)
+void display_shock(void)
 {
-        print("SHOCK",5,BOOST_OFFSET,YELLOW);
+        print("SHOCK",5,SHOCK_OFFSET,YELLOW);
 }
 
-void erase_boost(void)
+void erase_shock(void)
 {
-        print("     ",5,BOOST_OFFSET,YELLOW);
+        print("     ",5,SHOCK_OFFSET,YELLOW);
 }
 
 void set_background_colors(void)
@@ -922,15 +923,15 @@ void handle_befana(void)
 
 	input = joy_read(STANDARD_JOY);
 	
-	if(accelleration)
+	if(shock)
 		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 		{
             display_shield();
             // display_smoke();
 
-			--accelleration;
+			--shock;
 			++SPRX[BEFANA_INDEX];
-			if(accelleration>BOOST_THRESHOLD)
+			if(shock>SHOCK_THRESHOLD)
 			{
 				++SPRX[BEFANA_INDEX];
 			}
@@ -938,7 +939,7 @@ void handle_befana(void)
 			{
                 // hide_smoke();
 			}
-			// if(!accelleration)
+			// if(!shock)
 			// {
 				// SPRC[BEFANA_INDEX]=PINK;
 			// }
@@ -946,7 +947,7 @@ void handle_befana(void)
 		}
 		else
 		{
-			accelleration=0;
+			shock=0;
 		}
     else if(!forward_thrust)
     {
@@ -981,19 +982,19 @@ void handle_befana(void)
         }
         if(cool_down==1)
         {
-            display_boost();
+            display_shock();
             --cool_down;
         }
 		if(JOY_FIRE(input) && !cool_down)
 		{
 			// if(!remaining_bullets)
 			// {
-				if(!accelleration)
+				if(!shock)
 				{
-					accelleration=BOOST_DURATION;
+					shock=SHOCK_DURATION;
                     cool_down=MAX_COOL_DOWN;
                     SPRC[BEFANA_INDEX]=PURPLE;
-                    erase_boost();
+                    erase_shock();
 				}
 			// }
 			// else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
@@ -1053,7 +1054,7 @@ void scroll_grass(void)
 void handle_grass(void)
 {
 	scroll_grass();
-	if(accelleration)
+	if(shock)
 	{
 		scroll_grass();
 	}
@@ -1411,12 +1412,12 @@ void handle_balloons(void)
 	
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-        if(accelleration)
+        if(shock)
         {
             // if(counter&1)
             // {
                 --SPRX[i];
-                if(accelleration>BOOST_THRESHOLD)
+                if(shock>SHOCK_THRESHOLD)
                 {
                     --SPRX[i];
                 }
@@ -1445,24 +1446,24 @@ void handle_balloons(void)
 void handle_stars(void)
 {
 	_handle_stars();
-    if(accelleration>BOOST_THRESHOLD)
+    if(shock>SHOCK_THRESHOLD)
     {
-        _handle_stars();
+        move_balloons();
     }
-	else if(accelleration)
+	else if(shock)
 	{
-		_handle_stars();
+		move_balloons();
 	}
 	if(forward_thrust)
 	{
         if(!(counter&1))
         {
             move_balloons();
-            handle_grass();
             // handle_balloons();
         }
         display_smoke();
-		_handle_stars();
+        _handle_stars();
+        scroll_grass();
 	}
 }
 
@@ -1679,7 +1680,7 @@ uint8_t balloon_collision(void)
 				
 				color = SPRC[i];
 				harmful_balloon[i]=0;
-                if(!accelleration)
+                if(!shock)
                 {
 				// for(j=0;j<8;++j)
 				// {
@@ -1742,7 +1743,7 @@ void handle_befana_color(void)
 		--freeze;
 		SPRC[BEFANA_INDEX]=YELLOW;
 	}
-    else if(accelleration)
+    else if(shock)
     {
         SPRC[BEFANA_INDEX]=PURPLE;
     }
@@ -1792,6 +1793,17 @@ void decrease_armor(uint8_t amount)
 	}
 }
 
+
+
+void decrease_cool_down(void)
+{
+    if(cool_down>GIFT_COOL_DOWN_BONUS+1)
+    {
+        cool_down-=GIFT_COOL_DOWN_BONUS;
+    }
+}
+
+
 void handle_balloon_collision(void)
 {
     uint8_t balloon;
@@ -1799,7 +1811,7 @@ void handle_balloon_collision(void)
     balloon = balloon_collision();
 	if(balloon<255)
 	{
-        if(accelleration)
+        if(shock)
         {
             // y_balloon[balloon] = 255;
             falling_balloon[balloon] = 1;
@@ -1866,7 +1878,8 @@ uint8_t handle_item_collision(void)
 				increase_energy(GIFT_ENERGY);
 				display_energy();
 				points+=GIFT_POINTS;
-				display_score();
+				// display_score();
+                decrease_cool_down();
 			}
 			else if(item_type[i]==SHIELD_ITEM)
 			{
@@ -1875,6 +1888,7 @@ uint8_t handle_item_collision(void)
                 display_armor();
 				// armor_level = ARMOR_RECHARGE;
 			}
+            display_score();
 			// else if(item_type[i]==FIRE_ITEM)
 			// {
 				// remaining_bullets = BULLET_RECHARGE;
@@ -1994,7 +2008,7 @@ void title_screen(void)
                 SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
             }
             ++counter;     
-            if(distance<=192)
+            if(distance<=128)
             {
                 ++distance;
             }
@@ -2005,15 +2019,15 @@ void title_screen(void)
             }
             else if(counter<128)
             {
-                print("  FETCH THE GIFT BOXES ",23,1000-40+8,GREEN);
+                print_press_fire();
             }
             else if(counter<192)
             {
-                print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
+                print("  FETCH THE GIFT BOXES ",23,1000-40+8,GREEN);
             }
             else
             {
-                print_press_fire();
+                print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
             }
             
             #if defined(BETA_VERSION)
@@ -2024,8 +2038,7 @@ void title_screen(void)
             MULTIPLEX_DONE = 0;
             SPRUPDATEFLAG = 1;	
         }                
-
-    } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<192)); 
+    } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<64)); 
 }
 
 
@@ -2096,6 +2109,8 @@ int main()
 
         title_screen();
         
+        distance = 0;
+        
         init_grass();
 
         hide_sprites();
@@ -2128,7 +2143,7 @@ int main()
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
 
-        display_boost();
+        display_shock();
         
         print("ARMOR",5,ARMOR_OFFSET-5,LIGHT_GREY);
         display_armor();
@@ -2148,7 +2163,8 @@ int main()
         display_new_level();
         while(energy && (level<=MAX_LEVEL)) 
         {
-            if (MULTIPLEX_DONE) {	
+            if (MULTIPLEX_DONE) {
+                // printd(cool_down,3,40,WHITE);
                 handle_stars();
             
                 handle_befana();
