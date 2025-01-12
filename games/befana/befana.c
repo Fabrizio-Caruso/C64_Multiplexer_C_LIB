@@ -38,7 +38,7 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_ENERGY 99
 #define MAX_ENERGY 99
 
-#define GIFT_POINTS  200
+#define GIFT_POINTS  150
 #define BALLOON_POINTS 100
 #define ARMOR_POINTS 50
 
@@ -281,6 +281,7 @@ void music_switch(uint8_t toggle)
 #define SHIELD_INDEX ('A'-1)
 
 static uint8_t counter;
+static uint8_t grass_counter;
 static uint8_t energy;
 static uint16_t points = 0;
 
@@ -1046,18 +1047,19 @@ void scroll_grass(void)
     for(i=0;i<7;++i)
     {
         
-        POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(counter)&7][i]);
+        POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(grass_counter)&7][i]);
     }
+    ++grass_counter;
 }
 
 
 void handle_grass(void)
 {
 	scroll_grass();
-	if(shock)
-	{
-		scroll_grass();
-	}
+	// if(shock)
+	// {
+		// scroll_grass();
+	// }
 }
 
 #define BALLOON_TOP_Y 45
@@ -1416,11 +1418,11 @@ void handle_balloons(void)
         {
             // if(counter&1)
             // {
+            --SPRX[i];
+            if(shock>SHOCK_THRESHOLD)
+            {
                 --SPRX[i];
-                if(shock>SHOCK_THRESHOLD)
-                {
-                    --SPRX[i];
-                }
+            }
             // }		
         }
 	}
@@ -2095,6 +2097,7 @@ int main()
 		
         energy = INITIAL_ENERGY;
         counter = 0;
+        grass_counter = 0;
 		no_item = 0;
 		item = 0;
         // active_bullets = 0;
@@ -2234,52 +2237,51 @@ int main()
         { 
             while(MULTIPLEX_DONE)
             {
-            if(distance<=GAME_OVER_TIME)
-            {
-                ++distance;
-            }
-            ++counter;
-
-            if((counter&31)<16)
-            {
-                
-                print("GAME OVER",9,495,RED);
-
-                if(energy)
+                if(distance<=GAME_OVER_TIME)
                 {
-                    print("JOURNEY COMPLETED",17,494-80-3,YELLOW);
+                    ++distance;
                 }
-            }
-            else
-            {
-                print("GAME OVER",9,495,YELLOW);
+                ++counter;
 
-                if(energy)
+                if((counter&31)<16)
                 {
-                    print("JOURNEY COMPLETED",17,494-80-3,CYAN);
-                }
-            }
-
-
-                handle_balloons();
-                if(energy)
-                {
-                    uint8_t i; 
                     
-                    handle_balloons();
-                    handle_balloons();
-                    SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
-                    for(i=0;i<NUMBER_OF_ITEMS;++i)
+                    print("GAME OVER",9,495,RED);
+
+                    if(energy)
                     {
-                        SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
-                        // SPRC[ITEM_INDEX+i]=item_colors[i];
-                        // SPRY[ITEM_INDEX+i]=80+40*i;
-                        // SPRM[ITEM_INDEX+i]=1;
-                        --SPRX[ITEM_INDEX+i];
+                        print("JOURNEY COMPLETED",17,494-80-3,YELLOW);
                     }
                 }
-                SPRUPDATEFLAG=1;
-                MULTIPLEX_DONE=0;
+                else
+                {
+                    print("GAME OVER",9,495,YELLOW);
+
+                    if(energy)
+                    {
+                        print("JOURNEY COMPLETED",17,494-80-3,CYAN);
+                    }
+                }
+
+                    handle_balloons();
+                    if(energy)
+                    {
+                        uint8_t i; 
+                        
+                        handle_balloons();
+                        handle_balloons();
+                        SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
+                        for(i=0;i<NUMBER_OF_ITEMS;++i)
+                        {
+                            SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+                            // SPRC[ITEM_INDEX+i]=item_colors[i];
+                            // SPRY[ITEM_INDEX+i]=80+40*i;
+                            // SPRM[ITEM_INDEX+i]=1;
+                            --SPRX[ITEM_INDEX+i];
+                        }
+                    }
+                    SPRUPDATEFLAG=1;
+                    MULTIPLEX_DONE=0;
             }
             if(distance==GAME_OVER_TIME)
             {
