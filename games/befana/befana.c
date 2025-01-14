@@ -2086,6 +2086,8 @@ void title_screen(void)
 
 #define SANTA_THRESHOLD 1
 uint8_t santa_x;
+uint8_t santa_bonus;
+
 
 void handle_santa_trigger(void)
 {
@@ -2094,14 +2096,20 @@ void handle_santa_trigger(void)
         shocked_balloons = 0;
         santa = 1;
         santa_x = 0;
+        santa_bonus = 1;
     }
 }
 
 
+#define SANTA_POINTS 200
+
 void handle_santa(void)
 {
-    if(santa)
+    if(santa && (!(counter&3)))
     {
+        uint8_t befana_x;
+        uint8_t befana_y; 
+        
         SPRF[17] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
         SPRY[17] = 224;
         SPRX[17] = santa_x;
@@ -2113,17 +2121,33 @@ void handle_santa(void)
         SPRX[18] = santa_x+12;
         SPRM[18] = 1;
         
-        if(!(counter&3))
-        {
-            ++santa_x;
-        }
-        // while(1){};
+        
+        ++santa_x;
+        
         
         if(santa_x==184)
         {
             santa = 0;
         }
+        
+        befana_x = SPRX[BEFANA_INDEX];
+        befana_y = SPRY[BEFANA_INDEX];
+        
+        if(befana_x>=santa_x-8 && befana_x<=santa_x+8 && befana_y>=210 && santa_bonus)
+        {
+            _XL_PING_SOUND();
+            santa_bonus = 0;
+            decrease_cool_down();
+            decrease_cool_down();
+            decrease_cool_down();
+            points+=SANTA_POINTS;
+            display_score();
+            increase_energy(GIFT_ENERGY*2);
+            display_energy();
+        }
     }
+    
+
 }
 
 
