@@ -151,7 +151,7 @@ extern uint8_t MUSIC_ON;
 uint8_t forward_thrust;
 
 uint8_t shock;
-uint8_t cool_down;
+uint8_t shock_cool_down;
 
 uint8_t shocked_balloons;
 uint8_t santa;
@@ -820,7 +820,7 @@ void init_player(uint8_t sprite_index)
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
-    cool_down = 0;
+    shock_cool_down = 0;
 }
 
 
@@ -931,9 +931,10 @@ void handle_befana(void)
 	input = joy_read(STANDARD_JOY);
 	
 	if(shock)
+    {
+        display_shield();
 		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 		{
-            display_shield();
             // display_smoke();
 
 			--shock;
@@ -948,6 +949,7 @@ void handle_befana(void)
 		{
 			shock=0;
 		}
+    }
     else if(!forward_thrust)
     {
         hide_smoke();
@@ -975,23 +977,23 @@ void handle_befana(void)
 		{
 			++SPRY[BEFANA_INDEX];
 		}
-		if(cool_down>1)
+		if(shock_cool_down>1)
         {
-            --cool_down;
+            --shock_cool_down;
         }
-        if(cool_down==1)
+        if(shock_cool_down==1)
         {
             display_shock();
-            --cool_down;
+            --shock_cool_down;
         }
-		if(JOY_FIRE(input) && !cool_down)
+		if(JOY_FIRE(input) && !shock_cool_down)
 		{
 			// if(!remaining_bullets)
 			// {
 				if(!shock)
 				{
 					shock=SHOCK_DURATION;
-                    cool_down=MAX_COOL_DOWN;
+                    shock_cool_down=MAX_COOL_DOWN;
                     SPRC[BEFANA_INDEX]=PURPLE;
                     erase_shock();
 				}
@@ -1409,22 +1411,15 @@ void move_balloons(void)
 
 void handle_balloons(void)
 {
-	uint8_t i;
+	// uint8_t i;
 	
-    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
-    {
-        if(shock)
-        {
-            // if(counter&1)
-            // {
-            --SPRX[i];
-            if(shock>SHOCK_THRESHOLD)
-            {
-                --SPRX[i];
-            }
-            // }		
-        }
-	}
+    // for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    // {
+        // if(shock)
+        // {
+            // --SPRX[i];
+        // }
+	// }
 	_handle_balloons();
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
@@ -1796,11 +1791,11 @@ void decrease_armor(uint8_t amount)
 
 
 
-void decrease_cool_down(void)
+void decrease_shock_cool_down(void)
 {
-    if(cool_down>GIFT_COOL_DOWN_BONUS+1)
+    if(shock_cool_down>GIFT_COOL_DOWN_BONUS+1)
     {
-        cool_down-=GIFT_COOL_DOWN_BONUS;
+        shock_cool_down-=GIFT_COOL_DOWN_BONUS;
     }
 }
 
@@ -1823,6 +1818,7 @@ void handle_dead_balloons(void)
         else if(dead_balloon[i])
         {
             dead_balloon[i] = 0;
+            harmful_balloon[i] = 1;
             SPRF[i]=GFX_START_INDEX + BALLOON;
         }
     }
@@ -1863,6 +1859,8 @@ void handle_balloon_collision(void)
         }
         else
         {
+            freeze=FREEZE_DAMAGE;
+
             falling_balloon[balloon] = 1;
 
             // ++SPRC[BEFANA_INDEX];
@@ -1875,11 +1873,10 @@ void handle_balloon_collision(void)
             else
             {
                 decrease_energy(BALLOON_DAMAGE);
-                freeze=FREEZE_DAMAGE;
                 display_energy();
-                if(cool_down>1)
+                if(shock_cool_down>1)
                 {
-                    cool_down=MAX_COOL_DOWN;
+                    shock_cool_down=MAX_COOL_DOWN;
                 }
             }
         }
@@ -1921,7 +1918,7 @@ uint8_t handle_item_collision(void)
 				display_energy();
 				points+=GIFT_POINTS;
 				// display_score();
-                decrease_cool_down();
+                decrease_shock_cool_down();
 			}
 			else if(item_type[i]==SHIELD_ITEM)
 			{
@@ -2084,7 +2081,9 @@ void title_screen(void)
 }
 
 
-#define SANTA_THRESHOLD 1
+#define SANTA_THRESHOLD 3
+#define SANTA_CHARGE 40
+
 uint8_t santa_x;
 uint8_t santa_bonus;
 
@@ -2093,15 +2092,16 @@ void handle_santa_trigger(void)
 {
     if(!santa && (shocked_balloons>=SANTA_THRESHOLD))
     {
-        shocked_balloons = 0;
+        shocked_balloons = 0 + level/8;
         santa = 1;
         santa_x = 0;
-        santa_bonus = 1;
+        santa_bonus = SANTA_CHARGE;
     }
 }
 
 
-#define SANTA_POINTS 200
+#define SANTA_POINTS 5
+#define SANTA_ENERGY 1
 
 void handle_santa(void)
 {
@@ -2133,16 +2133,21 @@ void handle_santa(void)
         befana_x = SPRX[BEFANA_INDEX];
         befana_y = SPRY[BEFANA_INDEX];
         
-        if(befana_x>=santa_x-8 && befana_x<=santa_x+8 && befana_y>=210 && santa_bonus)
+        if(befana_x>=santa_x-12 && befana_x<=santa_x+12 && befana_y>=BEFANA_MAX_Y-12 && santa_bonus)
         {
             _XL_PING_SOUND();
-            santa_bonus = 0;
-            decrease_cool_down();
-            decrease_cool_down();
-            decrease_cool_down();
+            if(counter&7)
+            {
+                SPRC[BEFANA_INDEX] = PINK;
+            }
+            else
+            {
+                SPRC[BEFANA_INDEX] = LIGHT_GREEN;
+            }
+            --santa_bonus;
             points+=SANTA_POINTS;
             display_score();
-            increase_energy(GIFT_ENERGY*2);
+            increase_energy(SANTA_ENERGY);
             display_energy();
         }
     }
@@ -2276,7 +2281,7 @@ int main()
         {
             // printd(shocked_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
-                // printd(cool_down,3,40,WHITE);
+                // printd(shock_cool_down,3,40,WHITE);
                 handle_stars();
             
                 handle_befana();
