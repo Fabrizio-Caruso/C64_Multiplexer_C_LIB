@@ -11,5 +11,11 @@ You control Befana. The goal of the game is to avoid the balloons and take as ma
 Each gift box restores some of your energy.
 You die when your energy is depleted. Your energy decreases slowly over time. It decrease more when a balloon hits you.
 You can protect yourself by catching the armor item.
+You can also use the shock ability to knock out some balloons. This ability has a long cool-down period which is made longer if you are hit by balloons.
 
 The game has 20 level and it ends after completing the 20th level.
+
+
+Disclaimer:
+
+Most of the sprites have been taken from several obvious sources (Cauldron for Befana, the C64 manual for the balloons).

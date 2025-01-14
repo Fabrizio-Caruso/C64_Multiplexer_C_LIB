@@ -153,13 +153,16 @@ uint8_t forward_thrust;
 uint8_t shock;
 uint8_t cool_down;
 
+uint8_t shocked_balloons;
+uint8_t santa;
+
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
 #define MAX_COOL_DOWN 254
 #define GIFT_COOL_DOWN_BONUS 50
 
-#define SHOCK_DURATION 11
+#define SHOCK_DURATION 20
 #define SHOCK_THRESHOLD 9
 
 #define BULLET ('9'+1)
@@ -187,8 +190,11 @@ static uint8_t active_balloon[NUMBER_OF_BALLOONS];
 
 static uint8_t freeze;
 
+#define DEAD_COOL_DOWN 15
+
 static uint8_t y_balloon[NUMBER_OF_BALLOONS];
 static uint8_t falling_balloon[NUMBER_OF_BALLOONS];
+static uint8_t dead_balloon[NUMBER_OF_BALLOONS];
 
 // Pre-calculated sinus values
 const uint8_t sinValues1[] = SINUS(1);
@@ -931,20 +937,12 @@ void handle_befana(void)
             // display_smoke();
 
 			--shock;
-			++SPRX[BEFANA_INDEX];
+			// ++SPRX[BEFANA_INDEX];
 			if(shock>SHOCK_THRESHOLD)
 			{
 				++SPRX[BEFANA_INDEX];
 			}
-			else
-			{
-                // hide_smoke();
-			}
-			// if(!shock)
-			// {
-				// SPRC[BEFANA_INDEX]=PINK;
-			// }
-			// handle_stars();
+
 		}
 		else
 		{
@@ -1281,7 +1279,7 @@ void _handle_balloons(void)
 		{
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
-				harmful_balloon[i]=1;
+				// harmful_balloon[i]=1;
 				if(i<8)
 				{
 					y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
@@ -1384,6 +1382,7 @@ void _handle_balloons(void)
         else if(SPRX[i]<BALLON_THRESHOLD_X)
 		{
 			SPRX[i]=184;
+            harmful_balloon[i] = 1;
             activate_balloon(i);
             falling_balloon[i]=0;
 		}
@@ -1806,6 +1805,30 @@ void decrease_cool_down(void)
 }
 
 
+void handle_dead_balloons(void)
+{
+    uint8_t i;
+    
+    for(i=0;i<NUMBER_OF_BALLOONS; ++i)
+    {
+        if(dead_balloon[i]>2)
+        {
+            --dead_balloon[i];
+        }
+        else if(dead_balloon[i]==2)
+        {
+            y_balloon[i] = 255;
+            --dead_balloon[i];
+        }
+        else if(dead_balloon[i])
+        {
+            dead_balloon[i] = 0;
+            SPRF[i]=GFX_START_INDEX + BALLOON;
+        }
+    }
+}
+
+
 void handle_balloon_collision(void)
 {
     uint8_t balloon;
@@ -1813,18 +1836,35 @@ void handle_balloon_collision(void)
     balloon = balloon_collision();
 	if(balloon<255)
 	{
+        // SPRC[i]=WHITE;
+        // while(1){};
         if(shock)
         {
+
+            SPRF[balloon]=GFX_START_INDEX + BALLOON + 1;
+            
             // y_balloon[balloon] = 255;
-            falling_balloon[balloon] = 1;
             points+=BALLOON_POINTS;
             _XL_EXPLOSION_SOUND();
             display_score();
+            if(!santa)
+            {
+                ++shocked_balloons;
+            }
             
-            // TODO: Implement some effect
+            // MULTIPLEX_DONE = 0;
+            // SPRUPDATEFLAG = 1;
+            // while(!MULTIPLEX_DONE)
+            // {
+            // }
+            dead_balloon[balloon] = DEAD_COOL_DOWN;
+            // y_balloon[balloon]= 255;
+
         }
         else
         {
+            falling_balloon[balloon] = 1;
+
             // ++SPRC[BEFANA_INDEX];
             SPRC[BEFANA_INDEX]=RED;
             if(armor_level)
@@ -2044,6 +2084,49 @@ void title_screen(void)
 }
 
 
+#define SANTA_THRESHOLD 1
+uint8_t santa_x;
+
+void handle_santa_trigger(void)
+{
+    if(!santa && (shocked_balloons>=SANTA_THRESHOLD))
+    {
+        shocked_balloons = 0;
+        santa = 1;
+        santa_x = 0;
+    }
+}
+
+
+void handle_santa(void)
+{
+    if(santa)
+    {
+        SPRF[17] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
+        SPRY[17] = 224;
+        SPRX[17] = santa_x;
+        SPRM[17] = 1;
+        SPRC[17] = RED;
+        
+        SPRF[18] = GFX_START_INDEX+BEFANA+7+((counter/4)%3);
+        SPRY[18] = 224;
+        SPRX[18] = santa_x+12;
+        SPRM[18] = 1;
+        
+        if(!(counter&3))
+        {
+            ++santa_x;
+        }
+        // while(1){};
+        
+        if(santa_x==184)
+        {
+            santa = 0;
+        }
+    }
+}
+
+
 /******************/
 int main()
 {       
@@ -2164,8 +2247,10 @@ int main()
 		
         music_switch(0);
         display_new_level();
+        shocked_balloons = 0;
         while(energy && (level<=MAX_LEVEL)) 
         {
+            // printd(shocked_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
                 // printd(cool_down,3,40,WHITE);
                 handle_stars();
@@ -2173,7 +2258,11 @@ int main()
                 handle_befana();
                 
                 handle_balloons();
+                handle_dead_balloons();
                                 
+                handle_santa_trigger();
+                handle_santa();
+                
                 handle_grass();
 	
                 handle_items();
