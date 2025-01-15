@@ -159,11 +159,11 @@ uint8_t santa;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-#define MAX_COOL_DOWN 254
-#define GIFT_COOL_DOWN_BONUS 50
+#define MAX_COOL_DOWN 250
+#define GIFT_COOL_DOWN_BONUS 60
 
-#define SHOCK_DURATION 20
-#define SHOCK_THRESHOLD 9
+#define SHOCK_DURATION 40
+#define SHOCK_THRESHOLD 30
 
 #define BULLET ('9'+1)
 
@@ -2081,7 +2081,7 @@ void title_screen(void)
 }
 
 
-#define SANTA_THRESHOLD 3
+#define SANTA_THRESHOLD 6
 #define SANTA_CHARGE 40
 
 uint8_t santa_x;
@@ -2092,7 +2092,7 @@ void handle_santa_trigger(void)
 {
     if(!santa && (shocked_balloons>=SANTA_THRESHOLD))
     {
-        shocked_balloons = 0 + level/8;
+        shocked_balloons = 0 + level/4;
         santa = 1;
         santa_x = 0;
         santa_bonus = SANTA_CHARGE;
@@ -2123,9 +2123,13 @@ void handle_santa(void)
         
         
         ++santa_x;
+        if(!santa_bonus)
+        {
+            ++santa_x;
+        }
         
         
-        if(santa_x==184)
+        if(santa_x>=184)
         {
             santa = 0;
         }
@@ -2142,7 +2146,7 @@ void handle_santa(void)
             }
             else
             {
-                SPRC[BEFANA_INDEX] = LIGHT_GREEN;
+                SPRC[BEFANA_INDEX] = ORANGE;
             }
             --santa_bonus;
             points+=SANTA_POINTS;
