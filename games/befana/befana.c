@@ -159,7 +159,7 @@ uint8_t santa;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-#define MAX_COOL_DOWN 250
+#define SHOCK_COOL_DOWN 250
 #define GIFT_COOL_DOWN_BONUS 60
 
 #define SHOCK_DURATION 40
@@ -692,12 +692,17 @@ void draw_the_moon(void)
 
 void display_shock(void)
 {
-        print("SHOCK",5,SHOCK_OFFSET,YELLOW);
+        print("SHOCK",5,SHOCK_OFFSET,GREEN);
 }
+
+// void display_yellow_shock(void)
+// {
+        // print("SHOCK",5,SHOCK_OFFSET,YELLOW);
+// }
 
 void erase_shock(void)
 {
-        print("     ",5,SHOCK_OFFSET,YELLOW);
+        print("SHOCK",5,SHOCK_OFFSET,RED);
 }
 
 void set_background_colors(void)
@@ -980,6 +985,10 @@ void handle_befana(void)
 		if(shock_cool_down>1)
         {
             --shock_cool_down;
+            // if(shock_cool_down<SHOCK_COOL_DOWN/4)
+            // {
+                // display_yellow_shock();
+            // }
         }
         if(shock_cool_down==1)
         {
@@ -993,7 +1002,7 @@ void handle_befana(void)
 				if(!shock)
 				{
 					shock=SHOCK_DURATION;
-                    shock_cool_down=MAX_COOL_DOWN;
+                    shock_cool_down=SHOCK_COOL_DOWN;
                     SPRC[BEFANA_INDEX]=PURPLE;
                     erase_shock();
 				}
@@ -1876,7 +1885,7 @@ void handle_balloon_collision(void)
                 display_energy();
                 if(shock_cool_down>1)
                 {
-                    shock_cool_down=MAX_COOL_DOWN;
+                    shock_cool_down=SHOCK_COOL_DOWN;
                 }
             }
         }
