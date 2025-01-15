@@ -192,6 +192,7 @@ static uint8_t armor_level;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
+static uint8_t balloon_to_rest[NUMBER_OF_BALLOONS];
 
 static uint8_t freeze;
 
@@ -1092,6 +1093,7 @@ void init_sprite_balloons(void)
 		
 		SPRX[i]=255-i*28;
 		
+        balloon_to_rest[i] = 0;
 		do
 		{
 			y_balloon[i]=rand()&0xFF;
@@ -1257,7 +1259,9 @@ void check_level_trigger()
     
     if((distance>=level_threshold))
     {
+
         ++level;
+        
         if(level<=MAX_LEVEL)
         {
             display_level();
@@ -1265,9 +1269,26 @@ void check_level_trigger()
             display_new_level();
         }
     }
-    else if(distance==level_threshold-LEVEL_DISTANCE+15)
+    else if(distance==level_threshold-LEVEL_DISTANCE+10)
     {
+        uint8_t i;
+        
         erase_new_level();
+
+        for(i=0;i<NUMBER_OF_BALLOONS;++i)
+        {
+            balloon_to_rest[i]=0;
+        }
+    }
+    
+    if(distance==level_threshold-5)
+    {
+        uint8_t i;
+        
+        for(i=0;i<NUMBER_OF_BALLOONS;++i)
+        {
+            balloon_to_rest[i] = 1;
+        }
     }
     // else if(level==10)
     // {
@@ -1295,98 +1316,111 @@ void _handle_balloons(void)
 		{
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
-				// harmful_balloon[i]=1;
-				if(i<8)
-				{
-					y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
-
-					SPRC[i]=BALLOON_COLORS[rand()&7];
-
-				}
-				else
-				{
-                    if(i==8)
+                if(balloon_to_rest[i])
+                {
+                    y_balloon[i] = 255;
+                }
+                else
+                {
+                    if(i<8)
                     {
-                        if(SPRY[BEFANA_INDEX]>170)
-                        {
-                            y_balloon[8]=SPRY[BEFANA_INDEX]-16;
-                        }
-                        else if(SPRY[BEFANA_INDEX]<85)     
-                        {
-                            y_balloon[8]=SPRY[BEFANA_INDEX];                        
-                        }
-                        else if(SPRY[BEFANA_INDEX]>135)
-                        {
-                            y_balloon[8]=170;
-                        }
-                        else
-                        {
-                            y_balloon[8]=90;
-                        }
-                    
+                        y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
+
+                        SPRC[i]=BALLOON_COLORS[rand()&7];
+
                     }
-                    else 
+                    else
                     {
-                        y_balloon[i]=80+(counter&7)*8;
+                        if(i==8)
+                        {
+                            if(SPRY[BEFANA_INDEX]>170)
+                            {
+                                y_balloon[8]=SPRY[BEFANA_INDEX]-16;
+                            }
+                            else if(SPRY[BEFANA_INDEX]<85)     
+                            {
+                                y_balloon[8]=SPRY[BEFANA_INDEX];                        
+                            }
+                            else if(SPRY[BEFANA_INDEX]>135)
+                            {
+                                y_balloon[8]=170;
+                            }
+                            else
+                            {
+                                y_balloon[8]=90;
+                            }
+                        
+                        }
+                        else 
+                        {
+                            y_balloon[i]=80+(counter&7)*8;
+                        }
                     }
-				}
+                }
 				SPRX[i]=184;
 			}
-            if(i==9)
+            if(y_balloon[i]<255)
             {
-                SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
+                if(i==9)
+                {
+                    SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
+                }
+                else if(i==8)
+                {
+                    SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
+                }
+                else if(!(i&7))
+                {
+                    SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
+                }
+                else if((i&7)==1)
+                {
+                    if((level&1))
+                    {
+                        SPRY[i]=y_balloon[i]+shifted_sinValues2[counter]; // OK
+                    }
+                    else
+                    {
+                        SPRY[i]=y_balloon[i]+shifted_sinValues3[counter]; // OK
+                    }
+                }
+                else if((i&7)==2)
+                {
+                    
+                    if((level&1))
+                    {
+                        SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
+                    }
+                    else
+                    {
+                        SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
+                    }
+                }   
+                else if((i&7)==3)
+                {
+                    SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter]; // OK
+                }
+                else if((i&7)==4)
+                {
+                    SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter]; // OK
+                }
+                else if((i&7)==5)
+                {
+                    SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
+                }
+                else if((i&7)==6)
+                {
+                    SPRY[i]=y_balloon[i] +shifted3_sinValues1[counter]; // OK
+                }
+                else
+                {
+                    SPRY[i]=y_balloon[i] +shifted2_sinValues3[counter]; // OK
+                }
             }
-            else if(i==8)
+            else
             {
-                SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
+                SPRY[i] = 255;
             }
-			else if(!(i&7))
-			{
-				SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
-			}
-			else if((i&7)==1)
-			{
-				if((level&1))
-				{
-					SPRY[i]=y_balloon[i]+shifted_sinValues2[counter]; // OK
-				}
-				else
-				{
-					SPRY[i]=y_balloon[i]+shifted_sinValues3[counter]; // OK
-				}
-			}
-			else if((i&7)==2)
-			{
-				
-				if((level&1))
-				{
-					SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
-				}
-				else
-				{
-					SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
-				}
-			}   
-			else if((i&7)==3)
-			{
-				SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter]; // OK
-			}
-			else if((i&7)==4)
-			{
-				SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter]; // OK
-			}
-			else if((i&7)==5)
-			{
-				SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
-			}
-			else if((i&7)==6)
-			{
-				SPRY[i]=y_balloon[i] +shifted3_sinValues1[counter]; // OK
-			}
-			else
-			{
-				SPRY[i]=y_balloon[i] +shifted2_sinValues3[counter]; // OK
-			}
 			if(level&1)
 			{
 				if((i>=8)&&(counter&1))
