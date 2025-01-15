@@ -2324,6 +2324,9 @@ int main()
         music_switch(0);
         display_new_level();
         shocked_balloons = 0;
+        #if INITIAL_LEVEL>1
+        shocked_balloons = 0 + level/4;
+        #endif
         while(energy && (level<=MAX_LEVEL)) 
         {
             // printd(shocked_balloons,3,40,WHITE);

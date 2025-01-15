@@ -1,0 +1,13 @@
+TODO:
+
+- Music ON when Santa appears
+- Improve current "sound effects"
+- Fix initial shock at start-up
+- Fix "LEVEL 20" not disappearing
+- Fix level 20 being easier than level 19
+- Santa is too predictable if always on the bottom
+- Fix initial level 1 with balloons already started
+- Fix colors for some balloons showing the same color 
+- Fix stars erased by "LEVEL XX"
+- Improve game ending
+- Improve game over
