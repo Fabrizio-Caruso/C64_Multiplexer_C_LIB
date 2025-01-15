@@ -41,6 +41,11 @@ extern uint8_t MUSIC_ON;
 #define GIFT_POINTS  150
 #define BALLOON_POINTS 100
 #define ARMOR_POINTS 50
+#define SANTA_POINTS 5
+
+#define SANTA_THRESHOLD 6
+#define SANTA_CHARGE 40
+#define SANTA_ENERGY 1
 
 #define ARMOR_RECHARGE 1
 #define BULLET_RECHARGE 99
@@ -2090,8 +2095,6 @@ void title_screen(void)
 }
 
 
-#define SANTA_THRESHOLD 6
-#define SANTA_CHARGE 40
 
 uint8_t santa_x;
 uint8_t santa_bonus;
@@ -2108,9 +2111,6 @@ void handle_santa_trigger(void)
     }
 }
 
-
-#define SANTA_POINTS 5
-#define SANTA_ENERGY 1
 
 void handle_santa(void)
 {
