@@ -1093,7 +1093,7 @@ void init_sprite_balloons(void)
 		
 		SPRX[i]=255-i*28;
 		
-        balloon_to_rest[i] = 0;
+        balloon_to_rest[i] = 1;
 		do
 		{
 			y_balloon[i]=rand()&0xFF;
@@ -1127,9 +1127,10 @@ void init_balloons(void)
     for(i=0;i<NUMBER_OF_BALLOONS;++i)
 	{
 		harmful_balloon[i]=1;
+        
         #if INITIAL_LEVEL>1
-			active_balloon[i]=1;
-			y_balloon[i]= compute_y_balloon(i);        
+			active_balloon[i]=0;
+			y_balloon[i]= 255; // compute_y_balloon(i);        
         #else
         if(i==9)
         {
@@ -1138,8 +1139,8 @@ void init_balloons(void)
         }
 		else if((i&1))
 		{
-			active_balloon[i]=1;
-			y_balloon[i]= compute_y_balloon(i);
+			active_balloon[i]=0;
+			y_balloon[i]= 255; // compute_y_balloon(i);
 		}
 		else
 		{		
@@ -1208,6 +1209,13 @@ void activate_balloon(uint8_t i)
 			y_balloon[8]=compute_y_balloon(8);
 		}
 	}
+    else
+    {   if((i&1)&&(i<8))
+        {
+            active_balloon[i]=1;
+            y_balloon[i] = compute_y_balloon(i);
+        }
+    }   
 }
 
 
@@ -1308,7 +1316,7 @@ void _handle_balloons(void)
 {
     uint8_t i;
     
-    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<NUMBER_OF_BALLOONS;++i)
     {
 		// TODO: This should be optimized because
 		--SPRX[i];
@@ -1322,11 +1330,12 @@ void _handle_balloons(void)
                 }
                 else
                 {
+                    SPRC[i]=BALLOON_COLORS[rand()&7];
+
                     if(i<8)
                     {
                         y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
 
-                        SPRC[i]=BALLOON_COLORS[rand()&7];
 
                     }
                     else

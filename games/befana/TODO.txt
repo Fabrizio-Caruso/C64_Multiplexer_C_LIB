@@ -11,3 +11,4 @@ TODO:
 - Fix stars erased by "LEVEL XX"
 - Improve game ending
 - Improve game over
+- Initial y position of some balloons
