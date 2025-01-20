@@ -156,10 +156,12 @@ extern uint8_t MUSIC_ON;
 uint8_t forward_thrust;
 
 uint8_t shock;
+uint8_t super_shock;
 uint8_t shock_cool_down;
 
 uint8_t shocked_balloons;
 uint8_t santa;
+uint8_t santa_y;
 
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
@@ -578,85 +580,105 @@ void _short_sound(void)
 
 void _XL_SHOOT_SOUND(void) 
 { 
-	uint16_t i; 
 	
-	SID.v3.freq  = 0x3000; 
-	SID.flt_freq = 0x9000; 
+    if(!MUSIC_ON)
+    {
+        uint16_t i; 
 
-	_set_noise();
-	
-	for(i=0;i<800;++i) {} 
-	SID.amp      = 0x00; 
-	SID.v3.ctrl  = 0x08; 
+        SID.v3.freq  = 0x3000; 
+        SID.flt_freq = 0x9000; 
+
+        _set_noise();
+        
+        for(i=0;i<800;++i) {} 
+        SID.amp      = 0x00; 
+        SID.v3.ctrl  = 0x08; 
+    }
 };	
 	
 
 void _XL_EXPLOSION_SOUND(void)
 { 
-	uint16_t i; 
-	uint16_t j; 
-	
-	SID.v3.freq  = 0x1200; 
-	SID.flt_freq = 0x2000; 
 
-	_set_noise();
+    if(!MUSIC_ON)
+    {
+        uint16_t i; 
+        uint16_t j; 
 	
-	for(i=0;i<300;++i) 
-		{ 
-		} 
-	for(j=0;j<15;++j) 
-	{ 
-		SID.amp      = 0x1F - j; 
-		for(i=0;i<100;++i) 
-		{ 
-		} 
-	} 
-	SID.amp      = 0x00; 
-	SID.v3.ctrl  = 0x08; 
+        SID.v3.freq  = 0x1200; 
+        SID.flt_freq = 0x2000; 
+
+        _set_noise();
+        
+        for(i=0;i<300;++i) 
+            { 
+            } 
+        for(j=0;j<15;++j) 
+        { 
+            SID.amp      = 0x1F - j; 
+            for(i=0;i<100;++i) 
+            { 
+            } 
+        } 
+        SID.amp      = 0x00; 
+        SID.v3.ctrl  = 0x08;
+    }
 };
 
 
 void _XL_PING_SOUND(void)
 { 
-	SID.flt_freq = 0x3500; 
-	_short_sound();
+    if(!MUSIC_ON)
+    {
+        SID.flt_freq = 0x3500; 
+        _short_sound();
+    }
 };
 
 
 void _XL_TICK_SOUND(void) 
 { 
-	SID.flt_freq = 0x2000; 
-	_short_sound();
+    if(!MUSIC_ON)
+    {
+        SID.flt_freq = 0x2000; 
+        _short_sound();
+    }
 };
 
 void _XL_TOCK_SOUND(void) 
 {
-	SID.flt_freq = 0x1000; 
-	_short_sound();
+    if(!MUSIC_ON)
+    {
+        SID.flt_freq = 0x1000; 
+        _short_sound();
+    }
 };
 
 
 void _XL_ZAP_SOUND(void) 
 { 
-	uint8_t i;
-	uint8_t j;
-	
-	SID.v3.freq  = 0x6800; 
-	SID.v3.ad    = 0x88; 
-	SID.v3.sr    = 0xC8; 
-	SID.flt_freq = 0x5000; 
-	SID.flt_ctrl = 0x44; 
-	SID.amp      = 0x1F; 
-	SID.v3.ctrl  = 0x21; 
-	
-	for(i=0;i<253;++i) 
-	{ 
-		SID.v3.freq+=8;
-		for(j=0;j<25;++j){};
-	}; 
+    if(!MUSIC_ON)
+    {
+        uint8_t i;
+        uint8_t j;
+        
+        SID.v3.freq  = 0x6800; 
+        SID.v3.ad    = 0x88; 
+        SID.v3.sr    = 0xC8; 
+        SID.flt_freq = 0x5000; 
+        SID.flt_ctrl = 0x44; 
+        SID.amp      = 0x1F; 
+        SID.v3.ctrl  = 0x21; 
+        
+        for(i=0;i<253;++i) 
+        { 
+            SID.v3.freq+=8;
+            for(j=0;j<25;++j){};
+        }; 
 
-	SID.amp      = 0x00; 
-	SID.v3.ctrl  = 0x08; 
+        SID.amp      = 0x00; 
+        SID.v3.ctrl  = 0x08; 
+    }
 };
 
 
@@ -696,15 +718,15 @@ void draw_the_moon(void)
 
 
 
-void display_shock(void)
+void display_super_shock(void)
 {
         print("SHOCK",5,SHOCK_OFFSET,GREEN);
 }
 
-// void display_yellow_shock(void)
-// {
-        // print("SHOCK",5,SHOCK_OFFSET,YELLOW);
-// }
+void display_shock(void)
+{
+        print("SHOCK",5,SHOCK_OFFSET,YELLOW);
+}
 
 void erase_shock(void)
 {
@@ -950,10 +972,10 @@ void handle_befana(void)
 
 			--shock;
 			// ++SPRX[BEFANA_INDEX];
-			if(shock>SHOCK_THRESHOLD)
-			{
-				++SPRX[BEFANA_INDEX];
-			}
+			// if(shock>SHOCK_THRESHOLD)
+			// {
+				// ++SPRX[BEFANA_INDEX];
+			// }
 
 		}
 		else
@@ -1007,8 +1029,17 @@ void handle_befana(void)
 			// {
 				if(!shock)
 				{
-					shock=SHOCK_DURATION;
+                    
+                    if(super_shock)
+                    {
+                        shock=SHOCK_DURATION*3;
+                    }
+                    else
+                    {
+                        shock=SHOCK_DURATION;
+                    }
                     shock_cool_down=SHOCK_COOL_DOWN;
+                    super_shock = 0;
                     SPRC[BEFANA_INDEX]=PURPLE;
                     erase_shock();
 				}
@@ -1931,9 +1962,9 @@ void handle_balloon_collision(void)
             {
                 decrease_energy(BALLOON_DAMAGE);
                 display_energy();
-                if(shock_cool_down>1)
+                if(shock_cool_down>2 && shock_cool_down<SHOCK_COOL_DOWN/2)
                 {
-                    shock_cool_down=SHOCK_COOL_DOWN;
+                    shock_cool_down+=SHOCK_COOL_DOWN/2;
                 }
             }
         }
@@ -1976,6 +2007,11 @@ uint8_t handle_item_collision(void)
 				points+=GIFT_POINTS;
 				// display_score();
                 decrease_shock_cool_down();
+                if(!shock_cool_down)
+                {
+                    super_shock = 1;
+                    display_super_shock();
+                }
 			}
 			else if(item_type[i]==SHIELD_ITEM)
 			{
@@ -2151,6 +2187,8 @@ void handle_santa_trigger(void)
         santa = 1;
         santa_x = 0;
         santa_bonus = SANTA_CHARGE;
+        santa_y = 24+40+(160*(rand()&1));
+        music_switch(1);
     }
 }
 
@@ -2162,14 +2200,16 @@ void handle_santa(void)
         uint8_t befana_x;
         uint8_t befana_y; 
         
+        
+        
         SPRF[17] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
-        SPRY[17] = 224;
+        SPRY[17] = santa_y;
         SPRX[17] = santa_x;
         SPRM[17] = 1;
         SPRC[17] = RED;
         
         SPRF[18] = GFX_START_INDEX+BEFANA+7+((counter/4)%3);
-        SPRY[18] = 224;
+        SPRY[18] = santa_y;
         SPRX[18] = santa_x+12;
         SPRM[18] = 1;
         
@@ -2184,12 +2224,13 @@ void handle_santa(void)
         if(santa_x>=184)
         {
             santa = 0;
+            music_switch(0);
         }
         
         befana_x = SPRX[BEFANA_INDEX];
         befana_y = SPRY[BEFANA_INDEX];
         
-        if(befana_x>=santa_x-12 && befana_x<=santa_x+12 && befana_y>=BEFANA_MAX_Y-12 && santa_bonus)
+        if(santa_bonus && befana_x>=santa_x-12 && befana_x<=santa_x+12 && befana_y<=santa_y+12 && befana_y>=santa_y-12)
         {
             _XL_PING_SOUND();
             if(counter&7)
@@ -2277,6 +2318,8 @@ int main()
         SPRX[18]=166;
 		
 		armor_level = 0;
+        super_shock = 0;
+
 
         title_screen();
         
@@ -2329,6 +2372,10 @@ int main()
 		init_items();
         init_player(BEFANA_INDEX);
 
+        santa = 0;
+        santa_bonus = 0;
+        SPRY[17] = 255;
+        SPRY[18] = 255;
 		
         music_switch(0);
         display_new_level();
