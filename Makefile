@@ -149,7 +149,7 @@ xmas2025:
 # 	--asm-define MUSIC_SWITCH=1
 befana: 
 	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
-	--asm-define MAXSPR=19 -D_NUMBER_OF_SPRITES_=19 \
+	--asm-define MAXSPR=21 -D_NUMBER_OF_SPRITES_=21 \
 	--asm-define MUSIC_CODE=1 --asm-define MUSIC_SWITCH=1 \
 	--asm-define MULTICOLOR=1 \
 	-DSPRITES_AT_2800 \

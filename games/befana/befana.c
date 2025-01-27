@@ -166,7 +166,7 @@ uint8_t santa_y;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-#define SHOCK_COOL_DOWN 250
+#define SHOCK_COOL_DOWN 230
 #define GIFT_COOL_DOWN_BONUS 60
 
 #define SHOCK_DURATION 40
@@ -247,8 +247,8 @@ static uint8_t no_item;
 static uint8_t item;
 
 
-static uint16_t distance;
-static uint16_t level_threshold;
+static uint8_t distance;
+// static uint16_t level_threshold;
 static uint16_t record;
 
 static uint8_t volume;
@@ -422,7 +422,7 @@ static uint8_t j;
 static uint8_t slow_star_mask = 1;
 static uint8_t fast_star_mask = 1;
 
-static uint16_t k;
+// static uint16_t k;
 
 static uint8_t input;
 
@@ -703,6 +703,17 @@ void print(const char *str, uint8_t len, unsigned short offset, uint8_t col)
 }
 
 
+void color(uint8_t len, unsigned short offset, uint8_t col)
+{
+    uint8_t k;
+    
+    for(k=0;k<len;++k)
+    {
+        POKE(COLOR+offset+k,col);        
+    }
+}
+
+
 void draw_the_moon(void)
 {
     for(i=1;i<4;++i)
@@ -720,15 +731,20 @@ void draw_the_moon(void)
 
 void display_super_shock(void)
 {
-        print("SHOCK",5,SHOCK_OFFSET,GREEN);
+        color(5,SHOCK_OFFSET,GREEN);
 }
 
 void display_shock(void)
 {
-        print("SHOCK",5,SHOCK_OFFSET,YELLOW);
+        color(5,SHOCK_OFFSET,YELLOW);
 }
 
 void erase_shock(void)
+{
+        color(5,SHOCK_OFFSET,RED);
+}
+
+void display_initial_shock(void)
 {
         print("SHOCK",5,SHOCK_OFFSET,RED);
 }
@@ -742,6 +758,9 @@ void set_background_colors(void)
 
 void clear_screen(void)
 {
+    
+    uint16_t k;
+    
     for(k=0;k<1000;++k)
     {
         POKE(SCREEN+k,32);
@@ -1119,7 +1138,7 @@ void init_sprite_balloons(void)
     {
 		
         SPRF[i]=GFX_START_INDEX + BALLOON;
-        SPRC[i]=CYAN;
+        SPRC[i]=BALLOON_COLORS[i&7];
         SPRM[i]=0;
 		
 		SPRX[i]=255-i*28;
@@ -1296,7 +1315,7 @@ void check_level_trigger()
     // printd(((uint16_t) level),5,200,WHITE);
 
     
-    if((distance>=level_threshold))
+    if((distance>=LEVEL_DISTANCE))
     {
 
         ++level;
@@ -1304,11 +1323,12 @@ void check_level_trigger()
         if(level<=MAX_LEVEL)
         {
             display_level();
-            level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+            // level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+            distance = 0;
             display_new_level();
         }
     }
-    else if(distance==level_threshold-LEVEL_DISTANCE+10)
+    else if(distance==15)
     {
         uint8_t i;
         
@@ -1320,7 +1340,7 @@ void check_level_trigger()
         }
     }
     
-    if(distance==level_threshold-5)
+    if(distance==LEVEL_DISTANCE-5)
     {
         uint8_t i;
         
@@ -1365,9 +1385,7 @@ void _handle_balloons(void)
 
                     if(i<8)
                     {
-                        y_balloon[i]=48+(i&3)*32+(rand()&0x1F);
-
-
+                        y_balloon[i]=48+i*16+(rand()&0xF);
                     }
                     else
                     {
@@ -1401,60 +1419,83 @@ void _handle_balloons(void)
 			}
             if(y_balloon[i]<255)
             {
-                if(i==9)
+                if(level<6)
                 {
-                    SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
-                }
-                else if(i==8)
-                {
-                    SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
-                }
-                else if(!(i&7))
-                {
-                    SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
-                }
-                else if((i&7)==1)
-                {
-                    if((level&1))
+                    if((i==1))
+                    {
+                        SPRY[i]=y_balloon[i]+sinValues2[counter]; // OK
+                    }
+                    else if(i==3)
                     {
                         SPRY[i]=y_balloon[i]+shifted_sinValues2[counter]; // OK
                     }
-                    else
-                    {
-                        SPRY[i]=y_balloon[i]+shifted_sinValues3[counter]; // OK
-                    }
-                }
-                else if((i&7)==2)
-                {
-                    
-                    if((level&1))
+                    else if(i==5)
                     {
                         SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
                     }
                     else
                     {
-                        SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
+                        SPRY[i]=y_balloon[i]+shifted3_sinValues2[counter]; // OK
                     }
-                }   
-                else if((i&7)==3)
-                {
-                    SPRY[i]=y_balloon[i]+shifted3_sinValues3[counter]; // OK
-                }
-                else if((i&7)==4)
-                {
-                    SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter]; // OK
-                }
-                else if((i&7)==5)
-                {
-                    SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
-                }
-                else if((i&7)==6)
-                {
-                    SPRY[i]=y_balloon[i] +shifted3_sinValues1[counter]; // OK
                 }
                 else
                 {
-                    SPRY[i]=y_balloon[i] +shifted2_sinValues3[counter]; // OK
+                    
+                    if(i==9)
+                    {
+                        SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
+                    }
+                    else if(i==8)
+                    {
+                        SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
+                    }
+                    else if(!(i&7))
+                    {
+                        SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
+                    }
+                    else if((i&7)==1)
+                    {
+                        if((level&1))
+                        {
+                            SPRY[i]=y_balloon[i]+shifted_sinValues3[counter]; // OK
+                        }
+                        else
+                        {
+                            SPRY[i]=y_balloon[i]+shifted_sinValues4[counter]; // OK
+                        }
+                    }
+                    else if((i&7)==2)
+                    {
+                        
+                        if((level&1))
+                        {
+                            SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
+                        }
+                        else
+                        {
+                            SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
+                        }
+                    }   
+                    else if((i&7)==3)
+                    {
+                        SPRY[i]=y_balloon[i]+shifted3_sinValues4[counter]; // OK
+                    }
+                    else if((i&7)==4)
+                    {
+                        SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
+                    }
+                    else if((i&7)==5)
+                    {
+                        SPRY[i]=y_balloon[i] +shifted3_sinValues3[counter]; // OK
+                    }
+                    else if((i&7)==6)
+                    {
+                        SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
+                    }
+                    else
+                    {
+                        SPRY[i]=y_balloon[i] +shifted2_sinValues4[counter]; // OK
+                    }
                 }
             }
             else
@@ -1861,7 +1902,7 @@ void decrease_energy(uint8_t amount)
     
 }
 
-#define FREEZE_DAMAGE 1
+#define FREEZE_DAMAGE 2
 #define BALLOON_ARMOR_DAMAGE 1
 
 void decrease_armor(uint8_t amount)
@@ -2294,8 +2335,8 @@ int main()
 		}
 		clear_stars();
 
-		distance=(INITIAL_LEVEL-1)*LEVEL_DISTANCE;
-        level_threshold = (INITIAL_LEVEL)*LEVEL_DISTANCE;
+		distance=0;
+        // level_threshold = (INITIAL_LEVEL)*LEVEL_DISTANCE;
         slow_loop=0;
         fast_loop=0;
         
@@ -2357,7 +2398,7 @@ int main()
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
 
-        display_shock();
+        display_initial_shock();
         
         print("ARMOR",5,ARMOR_OFFSET-5,LIGHT_GREY);
         display_armor();
