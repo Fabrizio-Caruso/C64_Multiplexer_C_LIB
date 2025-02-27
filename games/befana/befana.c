@@ -344,6 +344,12 @@ static uint16_t points = 0;
 
 #define SHIELD ('0' - 1)
 
+#define SHIELD_ON 0
+
+#define DEAD_BALLOON_1 (BALLOON + 1)
+#define DEAD_BALLOON_2 (BALLOON + 10)
+
+
 // #define FIRE ('0' - 1 - 5)
 
 #define SANTA (- 'A' + 1 + 'Z' + 5)
@@ -930,7 +936,7 @@ void display_shield(void)
     {
         SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]+6+2*(counter&1);
         SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+0;
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
     }
     else
     {
@@ -1373,6 +1379,17 @@ void _handle_balloons(void)
 		--SPRX[i];
 		if(active_balloon[i] && !falling_balloon[i])
 		{
+            if(dead_balloon[i])
+            {
+                if(counter&1)
+                {
+                    SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_1;
+                }
+                else
+                {
+                    SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_2;
+                }
+            }
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
                 if(balloon_to_rest[i])
@@ -1966,7 +1983,7 @@ void handle_balloon_collision(void)
         if(shock)
         {
 
-            SPRF[balloon]=GFX_START_INDEX + BALLOON + 1;
+            // SPRF[balloon]=GFX_START_INDEX + DEAD_BALLOON;
             
             // y_balloon[balloon] = 255;
             points+=BALLOON_POINTS;
