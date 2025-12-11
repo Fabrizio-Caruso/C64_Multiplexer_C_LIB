@@ -878,7 +878,7 @@ void init_player(uint8_t sprite_index)
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
-    shock_cool_down = 0;
+    shock_cool_down = 10;
 }
 
 
@@ -972,11 +972,6 @@ void display_energy(void)
 }
 
 
-// void display_remaining_bullets(void)
-// {
-    // printd(remaining_bullets,2,HI_OFFSET-5,WHITE);
-// }
-
 void display_score(void)
 {
     printd(points,5,5,WHITE);
@@ -993,15 +988,7 @@ void handle_befana(void)
         display_shield();
 		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
 		{
-            // display_smoke();
-
 			--shock;
-			// ++SPRX[BEFANA_INDEX];
-			// if(shock>SHOCK_THRESHOLD)
-			// {
-				// ++SPRX[BEFANA_INDEX];
-			// }
-
 		}
 		else
 		{
@@ -1038,10 +1025,6 @@ void handle_befana(void)
 		if(shock_cool_down>1)
         {
             --shock_cool_down;
-            // if(shock_cool_down<SHOCK_COOL_DOWN/4)
-            // {
-                // display_yellow_shock();
-            // }
         }
         if(shock_cool_down==1)
         {
@@ -1050,8 +1033,6 @@ void handle_befana(void)
         }
 		if(JOY_FIRE(input) && !shock_cool_down)
 		{
-			// if(!remaining_bullets)
-			// {
 				if(!shock)
 				{
                     
@@ -1068,17 +1049,6 @@ void handle_befana(void)
                     SPRC[BEFANA_INDEX]=PURPLE;
                     erase_shock();
 				}
-			// }
-			// else if(remaining_bullets && (counter&1) && active_bullets<MAX_ACTIVE_BULLETS)
-			// {
-				// --remaining_bullets;
-				// ++active_bullets;
-                
-                // initialize_bullet(find_inactive_bullet());
-				
-				// display_remaining_bullets();
-				// _XL_SHOOT_SOUND();
-			// }
 		}
 		
 		if(armor_level)
@@ -2391,13 +2361,7 @@ int main()
         
         print("     ",5,INITIAL_HI_OFFSET,WHITE);
 
-        // SPRY[14]=255;
-        // SPRY[15]=255;
-        // SPRY[16]=255;
-        
-        // do{
-        // } while(!JOY_FIRE(joy_read(STANDARD_JOY))); 
-        
+
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
         SPRM[SMOKE_INDEX]=0;
         SPRC[SMOKE_INDEX]=YELLOW;
@@ -2407,8 +2371,7 @@ int main()
         display_energy();
 		print("SCORE",5,0,CYAN);
 		
-		// display_distance();
-		// print("M",1,DISTANCE_OFFSET+4,YELLOW);
+
         POKE(SCREEN+DISTANCE_OFFSET+5,0);
         POKE(SCREEN+DISTANCE_OFFSET+6,0);
 		
@@ -2417,12 +2380,11 @@ int main()
 
         display_initial_shock();
         
-        print("ARMOR",5,ARMOR_OFFSET-5,LIGHT_GREY);
+        print("ARMOR",5,ARMOR_OFFSET-5,GREY);
         display_armor();
         
 
         display_score();
-		// display_remaining_bullets();
 		
 		display_hi(HI_OFFSET);        
         
