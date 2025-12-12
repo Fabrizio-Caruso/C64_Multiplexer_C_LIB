@@ -38,9 +38,9 @@ extern uint8_t MUSIC_ON;
 #define INITIAL_ENERGY 99
 #define MAX_ENERGY 99
 
-#define GIFT_POINTS  150
-#define BALLOON_POINTS 100
-#define ARMOR_POINTS 50
+#define GIFT_POINTS  100
+#define BALLOON_POINTS 75
+#define ARMOR_POINTS 25
 #define SANTA_POINTS 5
 
 #define SANTA_THRESHOLD 6
@@ -162,6 +162,9 @@ uint8_t shock_cool_down;
 uint8_t shocked_balloons;
 uint8_t santa;
 uint8_t santa_y;
+
+uint8_t shield_x;
+uint8_t shield_y;
 
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
@@ -934,9 +937,19 @@ void display_shield(void)
 {
     if(counter&3)
     {
-        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]+6+2*(counter&1);
-        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+        // SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]+6+2*(counter&1);
+        // SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX];   
+        SPRX[SMOKE_INDEX]=shield_x;
+        SPRY[SMOKE_INDEX]=shield_y;  
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
+        if(shield_x<250)
+        {
+            shield_x+=3;
+        }
+        else
+        {
+            shield_y=255;
+        }
     }
     else
     {
@@ -993,6 +1006,7 @@ void handle_befana(void)
 		else
 		{
 			shock=0;
+            shield_y=255;
 		}
     }
     else if(!forward_thrust)
@@ -1035,7 +1049,8 @@ void handle_befana(void)
 		{
 				if(!shock)
 				{
-                    
+                    shield_x = SPRX[BEFANA_INDEX]+2;
+                    shield_y = SPRY[BEFANA_INDEX];
                     if(super_shock)
                     {
                         shock=SHOCK_DURATION*3;
@@ -1779,11 +1794,52 @@ uint8_t sprite_collision(uint8_t i)
 }
 
 
+uint8_t shield_collision(uint8_t i)
+{
+    uint8_t x;
+	uint8_t y;
+    
+    x = SPRX[i];
+    if(x>=shield_x)
+    {
+        if((x-shield_x)>COLLISION_BOX_X)
+        {
+            return 0;
+        }
+    }
+    else // x < shield_x
+    {
+        if((shield_x-x)>COLLISION_BOX_X)
+        {
+            return 0;
+        }
+    }
+    
+    y = SPRY[i];
+    if(y>=shield_y)
+    {
+        if((y-shield_y)>COLLISION_BOX_Y)
+        {
+            return 0;
+        }
+    }
+    else // y < shield_y
+    {
+        if((shield_y-y)>COLLISION_BOX_Y)
+        {
+            return 0;
+        }
+    }
+    return 1;    
+}
+
+
+
 uint8_t balloon_collision(void)
 {
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-		if(sprite_collision(i))
+		if(sprite_collision(i) || (shock && shield_collision(i)))
 		{
 			if(harmful_balloon[i])
 			{
