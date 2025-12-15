@@ -39,7 +39,7 @@ extern uint8_t MUSIC_ON;
 #define MAX_ENERGY 99
 
 #define GIFT_POINTS  100
-#define BALLOON_POINTS 75
+#define BALLOON_POINTS 50
 #define ARMOR_POINTS 25
 #define SANTA_POINTS 5
 
@@ -169,7 +169,9 @@ uint8_t shield_y;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-#define SHOCK_COOL_DOWN 230
+//#define SHOCK_COOL_DOWN 230
+#define SHOCK_COOL_DOWN 80
+
 #define GIFT_COOL_DOWN_BONUS 60
 
 #define SHOCK_DURATION 40
@@ -1053,7 +1055,7 @@ void handle_befana(void)
                     shield_y = SPRY[BEFANA_INDEX];
                     if(super_shock)
                     {
-                        shock=SHOCK_DURATION*3;
+                        shock=SHOCK_DURATION*6;
                     }
                     else
                     {
@@ -1837,9 +1839,26 @@ uint8_t shield_collision(uint8_t i)
 
 uint8_t balloon_collision(void)
 {
+    uint8_t shield_hit;
+    
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-		if(sprite_collision(i) || (shock && shield_collision(i)))
+        // shock should last as long as shield_x reaches the right end of the screen
+        if(shock)
+        {
+            shield_hit = shield_collision(i);
+            if(shield_hit)
+            {
+                shield_x+=2;
+                // shield_y = 255;
+                shock/=2;
+            }
+        }
+        else
+        {
+            shield_hit = 0;
+        }
+		if(sprite_collision(i) || shield_hit)
 		{
 			if(harmful_balloon[i])
 			{
@@ -1848,13 +1867,11 @@ uint8_t balloon_collision(void)
 				
 				color = SPRC[i];
 				harmful_balloon[i]=0;
-                if(!shock)
-                {
-				// for(j=0;j<8;++j)
-				// {
+                // if(!shock)
+                // {
+
 					SPRC[i]=WHITE;
 					
-					// MULTIPLEX_DONE=0;
 					while(MULTIPLEX_DONE)
 					{
 						MULTIPLEX_DONE=0;
@@ -1868,7 +1885,6 @@ uint8_t balloon_collision(void)
 					}
 					SPRC[i]=YELLOW;
 					
-					// MULTIPLEX_DONE=0;
 					while(MULTIPLEX_DONE)
 					{
 						MULTIPLEX_DONE=0;
@@ -1881,9 +1897,6 @@ uint8_t balloon_collision(void)
 					{
 					}
 					
-					// while(1)
-					// {
-					// }
 					SPRC[i]=color;
 					
 					MULTIPLEX_DONE=0;
@@ -1892,8 +1905,7 @@ uint8_t balloon_collision(void)
 						MULTIPLEX_DONE=0;
 						SPRUPDATEFLAG=1;
 					}
-				// }
-                }
+                // }
 				
 				return i;
 			}
