@@ -947,9 +947,11 @@ void display_shield(void)
         if(shield_x<250)
         {
             shield_x+=3;
+            // --shock;
         }
         else
         {
+            shock=0;
             shield_y=255;
         }
     }
@@ -1001,15 +1003,15 @@ void handle_befana(void)
 	if(shock)
     {
         display_shield();
-		if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
-		{
-			--shock;
-		}
-		else
-		{
-			shock=0;
-            shield_y=255;
-		}
+		// if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
+		// {
+			// --shock;
+		// }
+		// else
+		// {
+			// shock=0;
+            // shield_y=255;
+		// }
     }
     else if(!forward_thrust)
     {
@@ -1055,11 +1057,11 @@ void handle_befana(void)
                     shield_y = SPRY[BEFANA_INDEX];
                     if(super_shock)
                     {
-                        shock=SHOCK_DURATION*6;
+                        shock=2;
                     }
                     else
                     {
-                        shock=SHOCK_DURATION;
+                        shock=1;
                     }
                     shock_cool_down=SHOCK_COOL_DOWN;
                     super_shock = 0;
@@ -1751,7 +1753,7 @@ void handle_items(void)
 #define COLLISION_BOX_Y 12
 
 
-uint8_t sprite_collision(uint8_t i)
+uint8_t one_sprite_collision(uint8_t i)
 {
     uint8_t x;
 	uint8_t y;
@@ -1835,77 +1837,84 @@ uint8_t shield_collision(uint8_t i)
     return 1;    
 }
 
-
-
-uint8_t balloon_collision(void)
+void ballon_hit(uint8_t i)
 {
-    uint8_t shield_hit;
+    uint8_t color ;
+    uint8_t j;
+    
+    color = SPRC[i];
+    harmful_balloon[i]=0;
+    
+    SPRC[i]=WHITE;
+    
+    while(MULTIPLEX_DONE)
+    {
+        MULTIPLEX_DONE=0;
+        SPRUPDATEFLAG=1;
+    }
+
+    _XL_EXPLOSION_SOUND();
+
+    for(j=0;j<150;++j)
+    {
+    }
+    SPRC[i]=YELLOW;
+    
+    while(MULTIPLEX_DONE)
+    {
+        MULTIPLEX_DONE=0;
+        SPRUPDATEFLAG=1;
+    }
+
+    _XL_EXPLOSION_SOUND();
+
+    for(j=0;j<150;++j)
+    {
+    }
+    
+    SPRC[i]=color;
+    
+    MULTIPLEX_DONE=0;
+    while(MULTIPLEX_DONE)
+    {
+        MULTIPLEX_DONE=0;
+        SPRUPDATEFLAG=1;
+    }
+}
+
+#define MIN_SHOCK 4
+
+uint8_t befana_sprite_collision(void)
+{
+    // uint8_t shield_hit;
     
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-        // shock should last as long as shield_x reaches the right end of the screen
-        if(shock)
-        {
-            shield_hit = shield_collision(i);
-            if(shield_hit)
-            {
-                shield_x+=2;
-                // shield_y = 255;
-                shock/=2;
-            }
-        }
-        else
-        {
-            shield_hit = 0;
-        }
-		if(sprite_collision(i) || shield_hit)
+		if(one_sprite_collision(i))
 		{
 			if(harmful_balloon[i])
 			{
-				uint8_t color ;
-				uint8_t j;
+                ballon_hit(i);
 				
-				color = SPRC[i];
-				harmful_balloon[i]=0;
-                // if(!shock)
-                // {
+				return i;
+			}
+		}
+		
+	}
+	return 255;
+}
 
-					SPRC[i]=WHITE;
-					
-					while(MULTIPLEX_DONE)
-					{
-						MULTIPLEX_DONE=0;
-						SPRUPDATEFLAG=1;
-					}
-				
-					_XL_EXPLOSION_SOUND();
-
-					for(j=0;j<150;++j)
-					{
-					}
-					SPRC[i]=YELLOW;
-					
-					while(MULTIPLEX_DONE)
-					{
-						MULTIPLEX_DONE=0;
-						SPRUPDATEFLAG=1;
-					}
-				
-					_XL_EXPLOSION_SOUND();
-
-					for(j=0;j<150;++j)
-					{
-					}
-					
-					SPRC[i]=color;
-					
-					MULTIPLEX_DONE=0;
-					while(MULTIPLEX_DONE)
-					{
-						MULTIPLEX_DONE=0;
-						SPRUPDATEFLAG=1;
-					}
-                // }
+uint8_t shield_balloon_collision(void)
+{
+    // uint8_t shield_hit;
+    
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    {
+		if(shock && shield_collision(i))
+		{
+			if(harmful_balloon[i])
+			{
+                ballon_hit(i);
 				
 				return i;
 			}
@@ -1916,6 +1925,7 @@ uint8_t balloon_collision(void)
 }
 
 
+
 void handle_befana_color(void)
 {
 	if(freeze)
@@ -1923,10 +1933,10 @@ void handle_befana_color(void)
 		--freeze;
 		SPRC[BEFANA_INDEX]=YELLOW;
 	}
-    else if(shock)
-    {
-        SPRC[BEFANA_INDEX]=PURPLE;
-    }
+    // else if(shock)
+    // {
+        // SPRC[BEFANA_INDEX]=PURPLE;
+    // }
 	// else if(armor_level)
 	// {
 		// SPRC[BEFANA_INDEX]=GREY;
@@ -2011,60 +2021,52 @@ void handle_dead_balloons(void)
 
 void handle_balloon_collision(void)
 {
-    uint8_t balloon;
+    // uint8_t balloon;
+    uint8_t balloon_hit_by_befana;
+    uint8_t ballon_hit_by_shield = shield_balloon_collision();
     
-    balloon = balloon_collision();
-	if(balloon<255)
+	if(ballon_hit_by_shield<255)
 	{
-        // SPRC[i]=WHITE;
-        // while(1){};
-        if(shock)
+        if(shock<2)
         {
+            shock=0;
+            shield_y=255;
+        }
+        points+=BALLOON_POINTS;
+        _XL_EXPLOSION_SOUND();
+        display_score();
+        if(!santa)
+        {
+            ++shocked_balloons;
+        }
+        
 
-            // SPRF[balloon]=GFX_START_INDEX + DEAD_BALLOON;
-            
-            // y_balloon[balloon] = 255;
-            points+=BALLOON_POINTS;
-            _XL_EXPLOSION_SOUND();
-            display_score();
-            if(!santa)
-            {
-                ++shocked_balloons;
-            }
-            
-            // MULTIPLEX_DONE = 0;
-            // SPRUPDATEFLAG = 1;
-            // while(!MULTIPLEX_DONE)
-            // {
-            // }
-            dead_balloon[balloon] = DEAD_COOL_DOWN;
-            // y_balloon[balloon]= 255;
+        dead_balloon[ballon_hit_by_shield] = DEAD_COOL_DOWN;
 
+    }
+    balloon_hit_by_befana = befana_sprite_collision();
+    if(balloon_hit_by_befana<255)
+    {
+        freeze=FREEZE_DAMAGE;
+
+        falling_balloon[balloon_hit_by_befana] = 1;
+
+        SPRC[BEFANA_INDEX]=RED;
+        if(armor_level)
+        {
+            decrease_armor(BALLOON_ARMOR_DAMAGE);
+            display_armor();
         }
         else
         {
-            freeze=FREEZE_DAMAGE;
-
-            falling_balloon[balloon] = 1;
-
-            // ++SPRC[BEFANA_INDEX];
-            SPRC[BEFANA_INDEX]=RED;
-            if(armor_level)
+            decrease_energy(BALLOON_DAMAGE);
+            display_energy();
+            if(shock_cool_down>2 && shock_cool_down<SHOCK_COOL_DOWN/2)
             {
-                decrease_armor(BALLOON_ARMOR_DAMAGE);
-                display_armor();
-            }
-            else
-            {
-                decrease_energy(BALLOON_DAMAGE);
-                display_energy();
-                if(shock_cool_down>2 && shock_cool_down<SHOCK_COOL_DOWN/2)
-                {
-                    shock_cool_down+=SHOCK_COOL_DOWN/2;
-                }
+                shock_cool_down+=SHOCK_COOL_DOWN/2;
             }
         }
-	}
+    }
 }
 
 
@@ -2094,7 +2096,7 @@ uint8_t handle_item_collision(void)
     
     for(i=0;i<=NUMBER_OF_ITEMS-1;++i)
     {
-        if(sprite_collision(ITEM_INDEX+i))
+        if(one_sprite_collision(ITEM_INDEX+i))
         {
 			if(item_type[i]==GIFT_ITEM)
 			{
