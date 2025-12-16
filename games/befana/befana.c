@@ -170,7 +170,9 @@ uint8_t shield_y;
 // #define TITLE_SCREEN_TIME 100
 
 //#define SHOCK_COOL_DOWN 230
-#define SHOCK_COOL_DOWN 80
+#define SHOCK_COOL_DOWN 20
+#define HIT_SHOCK_COOL_DOWN 60
+#define MAX_SHOCK_COOL_DOWN 100
 
 #define GIFT_COOL_DOWN_BONUS 60
 
@@ -1048,6 +1050,12 @@ void handle_befana(void)
         {
             display_shock();
             --shock_cool_down;
+            SPRC[BEFANA_INDEX]=RED;
+            while(MULTIPLEX_DONE)
+            {
+            MULTIPLEX_DONE=0;
+            SPRUPDATEFLAG=1;
+            }
         }
 		if(JOY_FIRE(input) && !shock_cool_down)
 		{
@@ -1065,7 +1073,8 @@ void handle_befana(void)
                     }
                     shock_cool_down=SHOCK_COOL_DOWN;
                     super_shock = 0;
-                    SPRC[BEFANA_INDEX]=PURPLE;
+                    // display_shock();
+                    // SPRC[BEFANA_INDEX]=PURPLE;
                     erase_shock();
 				}
 		}
@@ -1933,10 +1942,15 @@ void handle_befana_color(void)
 		--freeze;
 		SPRC[BEFANA_INDEX]=YELLOW;
 	}
-    // else if(shock)
-    // {
-        // SPRC[BEFANA_INDEX]=PURPLE;
-    // }
+    else if(shock_cool_down)
+    {
+        SPRC[BEFANA_INDEX]=PURPLE;
+        while(MULTIPLEX_DONE)
+        {
+            MULTIPLEX_DONE=0;
+            SPRUPDATEFLAG=1;
+        }
+    }
 	// else if(armor_level)
 	// {
 		// SPRC[BEFANA_INDEX]=GREY;
@@ -2061,9 +2075,11 @@ void handle_balloon_collision(void)
         {
             decrease_energy(BALLOON_DAMAGE);
             display_energy();
-            if(shock_cool_down>2 && shock_cool_down<SHOCK_COOL_DOWN/2)
+            if(shock_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
             {
-                shock_cool_down+=SHOCK_COOL_DOWN/2;
+                shock_cool_down+=HIT_SHOCK_COOL_DOWN;
+                erase_shock();
+                // while(1){};
             }
         }
     }
@@ -2262,11 +2278,13 @@ void title_screen(void)
             
             #if defined(BETA_VERSION)
                 
-                print("BETA VERSION", 12, 1000-12-40,WHITE);
+             print("BETA VERSION", 12, 1000-12-40,WHITE);
+                // print("BETA     0.2", 12, 1000-12-40,WHITE);
+
             #endif
             
             MULTIPLEX_DONE = 0;
-            SPRUPDATEFLAG = 1;	
+            SPRUPDATEFLAG = 1;
         }                
     } while(!JOY_FIRE(joy_read(STANDARD_JOY)) || (distance<64)); 
 }
@@ -2283,7 +2301,7 @@ void handle_santa_trigger(void)
     {
         shocked_balloons = 0 + level/4;
         santa = 1;
-        santa_x = 0;
+        santa_x = 10;
         santa_bonus = SANTA_CHARGE;
         santa_y = 24+40+(160*(rand()&1));
         music_switch(1);
@@ -2313,13 +2331,13 @@ void handle_santa(void)
         
         
         ++santa_x;
-        if(!santa_bonus)
+        if(!santa_bonus || santa_x>=80 )
         {
             ++santa_x;
         }
         
         
-        if(santa_x>=184)
+        if(santa_x>=184-10)
         {
             santa = 0;
             music_switch(0);
@@ -2514,8 +2532,8 @@ int main()
 				}
                 if(!(counter&63))
                 {
-                    points+=5U;
-					display_score();
+                    // points+=5U;
+					// display_score();
                     decrease_energy(1);
                     display_energy();
 					distance+=5U;
@@ -2523,7 +2541,7 @@ int main()
                 check_level_trigger();
 		
                 MULTIPLEX_DONE = 0;
-                SPRUPDATEFLAG = 1;	
+                SPRUPDATEFLAG = 1;
             }
 
         }
