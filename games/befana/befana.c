@@ -43,7 +43,7 @@ extern uint8_t MUSIC_ON;
 #define ARMOR_POINTS 25
 #define SANTA_POINTS 5
 
-#define SANTA_THRESHOLD 6
+#define SANTA_THRESHOLD (6+2)
 #define SANTA_CHARGE 40
 #define SANTA_ENERGY 1
 
@@ -181,7 +181,7 @@ uint8_t shield_y;
 
 #define BULLET ('9'+1)
 
-#define MAX_LEVEL 20
+#define MAX_LEVEL 30
 static uint8_t level;
 
 #define MAX_ACTIVE_BULLETS 6
@@ -939,30 +939,33 @@ void _handle_stars(void)
 
 void display_shield(void)
 {
-    if(counter&3)
-    {
-        // SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]+6+2*(counter&1);
-        // SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX];   
+    // if(counter&3)
+    // {
         SPRX[SMOKE_INDEX]=shield_x;
         SPRY[SMOKE_INDEX]=shield_y;  
         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
-        if(shield_x<250)
+        if(shield_x<244)
         {
             shield_x+=3;
-            // --shock;
+            if(shock==2)
+            {
+                shield_x+=5;
+            }
+            
         }
         else
         {
             shock=0;
             shield_y=255;
+            SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
         }
-    }
-    else
-    {
-        SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14;
-        SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
-    }
+    // }
+    // else
+    // {
+        // SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14;
+        // SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX];  
+        // SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
+    // }
 
 }
 
@@ -1576,7 +1579,7 @@ void handle_balloons(void)
 	{
 		_handle_balloons();
 	}
-    else if(level>=MAX_LEVEL-2)
+    else if(level>=18)
     {
 		_handle_balloons();        
     }
@@ -1586,14 +1589,14 @@ void handle_balloons(void)
 void handle_stars(void)
 {
 	_handle_stars();
-    if(shock>SHOCK_THRESHOLD)
-    {
-        move_balloons();
-    }
-	else if(shock)
-	{
-		move_balloons();
-	}
+    // if(shock>SHOCK_THRESHOLD)
+    // {
+        // move_balloons();
+    // }
+	// else if(shock)
+	// {
+		// move_balloons();
+	// }
 	if(forward_thrust)
 	{
         if(!(counter&1))
@@ -1760,7 +1763,8 @@ void handle_items(void)
 
 #define COLLISION_BOX_X 8
 #define COLLISION_BOX_Y 12
-
+#define SHIELD_COLLISION_BOX_X 8
+#define SHIELD_COLLISION_BOX_Y 8
 
 uint8_t one_sprite_collision(uint8_t i)
 {
@@ -1815,14 +1819,14 @@ uint8_t shield_collision(uint8_t i)
     x = SPRX[i];
     if(x>=shield_x)
     {
-        if((x-shield_x)>COLLISION_BOX_X)
+        if((x-shield_x)>SHIELD_COLLISION_BOX_X)
         {
             return 0;
         }
     }
     else // x < shield_x
     {
-        if((shield_x-x)>COLLISION_BOX_X)
+        if((shield_x-x)>SHIELD_COLLISION_BOX_X)
         {
             return 0;
         }
@@ -1831,14 +1835,14 @@ uint8_t shield_collision(uint8_t i)
     y = SPRY[i];
     if(y>=shield_y)
     {
-        if((y-shield_y)>COLLISION_BOX_Y)
+        if((y-shield_y)>SHIELD_COLLISION_BOX_Y)
         {
             return 0;
         }
     }
     else // y < shield_y
     {
-        if((shield_y-y)>COLLISION_BOX_Y)
+        if((shield_y-y)>SHIELD_COLLISION_BOX_Y)
         {
             return 0;
         }
