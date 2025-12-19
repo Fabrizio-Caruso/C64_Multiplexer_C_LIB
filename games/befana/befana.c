@@ -356,6 +356,7 @@ static uint16_t points = 0;
 #define DEAD_BALLOON_1 (BALLOON + 1)
 #define DEAD_BALLOON_2 (BALLOON + 10)
 
+#define SMALL_SHIELD (BALLOON + 11)
 
 // #define FIRE ('0' - 1 - 5)
 
@@ -943,14 +944,22 @@ void display_shield(void)
     // {
         SPRX[SMOKE_INDEX]=shield_x;
         SPRY[SMOKE_INDEX]=shield_y;  
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
+        // SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
+        if(shock==2)
+        {
+            SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
+        }
+        else
+        {
+            SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
+        }
         if(shield_x<244)
         {
             shield_x+=3;
-            if(shock==2)
-            {
-                shield_x+=5;
-            }
+            // if(shock==2)
+            // {
+                // shield_x+=5;
+            // }
             
         }
         else
@@ -1811,7 +1820,7 @@ uint8_t one_sprite_collision(uint8_t i)
 }
 
 
-uint8_t shield_collision(uint8_t i)
+uint8_t shield_collision(uint8_t i, uint8_t size)
 {
     uint8_t x;
 	uint8_t y;
@@ -1819,14 +1828,14 @@ uint8_t shield_collision(uint8_t i)
     x = SPRX[i];
     if(x>=shield_x)
     {
-        if((x-shield_x)>SHIELD_COLLISION_BOX_X)
+        if((x-shield_x)>size)
         {
             return 0;
         }
     }
     else // x < shield_x
     {
-        if((shield_x-x)>SHIELD_COLLISION_BOX_X)
+        if((shield_x-x)>size)
         {
             return 0;
         }
@@ -1835,14 +1844,14 @@ uint8_t shield_collision(uint8_t i)
     y = SPRY[i];
     if(y>=shield_y)
     {
-        if((y-shield_y)>SHIELD_COLLISION_BOX_Y)
+        if((y-shield_y)>size+2)
         {
             return 0;
         }
     }
     else // y < shield_y
     {
-        if((shield_y-y)>SHIELD_COLLISION_BOX_Y)
+        if((shield_y-y)>size+2)
         {
             return 0;
         }
@@ -1923,7 +1932,7 @@ uint8_t shield_balloon_collision(void)
     
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-		if(shock && shield_collision(i))
+		if(shock && shield_collision(i,2+shock*3))
 		{
 			if(harmful_balloon[i])
 			{
