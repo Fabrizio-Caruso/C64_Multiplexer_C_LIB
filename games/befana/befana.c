@@ -39,12 +39,12 @@ extern uint8_t MUSIC_ON;
 #define MAX_ENERGY 99
 
 #define GIFT_POINTS  100
-#define BALLOON_POINTS 50
-#define ARMOR_POINTS 25
+#define BALLOON_POINTS 25
+#define ARMOR_POINTS 20
 #define SANTA_POINTS 5
 
-#define SANTA_THRESHOLD (6+2)
-#define SANTA_CHARGE 40
+#define SANTA_THRESHOLD (20)
+#define SANTA_CHARGE 50
 #define SANTA_ENERGY 1
 
 #define ARMOR_RECHARGE 1
@@ -159,7 +159,7 @@ uint8_t shield_status;
 uint8_t super_shield_status;
 uint8_t shield_cool_down;
 
-uint8_t shield_statused_balloons;
+uint8_t exploded_balloons;
 uint8_t santa;
 uint8_t santa_y;
 
@@ -749,20 +749,31 @@ void draw_the_moon(void)
 
 
 
-void display_super_shield_status(void)
-{
-        color(5,SHOCK_OFFSET,GREEN);
-}
+// void display_super_shield_status(void)
+// {
+        // color(5,SHOCK_OFFSET,GREEN);
+// }
 
 void display_shield_status(void)
 {
+    if(super_shield_status)
+    {
+        color(5,SHOCK_OFFSET,GREEN);
+    }
+    else if(shield_cool_down)
+    {
+        color(5,SHOCK_OFFSET,RED);
+    }
+    else
+    {
         color(5,SHOCK_OFFSET,YELLOW);
+    }
 }
 
-void erase_shield_status(void)
-{
-        color(5,SHOCK_OFFSET,RED);
-}
+// void erase_shield_status(void)
+// {
+        // color(5,SHOCK_OFFSET,RED);
+// }
 
 void display_initial_shield_status(void)
 {
@@ -1074,6 +1085,8 @@ void handle_befana(void)
                     {
                         shield_status=2;
                         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
+                        --super_shield_status;
+
                     }
                     else
                     {
@@ -1081,10 +1094,9 @@ void handle_befana(void)
                         SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
                     }
                     shield_cool_down=SHOCK_COOL_DOWN;
-                    super_shield_status = 0;
-                    // display_shield_status();
+                    display_shield_status();
                     // SPRC[BEFANA_INDEX]=PURPLE;
-                    erase_shield_status();
+                    // erase_shield_status();
 				}
 		}
 		
@@ -1654,7 +1666,7 @@ void clear_items(void)
 #define FEWER_GIFTS_THRESHOLD 7
 
 
-#define MAX_no_item_THRESHOLD 5
+#define MAX_NO_ITEM_THRESHOLD 5
 #define MAX_GIFT_THRESHOLD 3
 
 
@@ -1733,7 +1745,7 @@ void handle_items(void)
 
             if(level<=FEWEST_GIFTS_THRESHOLD)
             {
-                if((item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_no_item_THRESHOLD)))
+                if((item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1744,7 +1756,7 @@ void handle_items(void)
             }
             else if(level<=FEWER_GIFTS_THRESHOLD)
             {
-                if((item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_no_item_THRESHOLD)))
+                if((item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1756,7 +1768,7 @@ void handle_items(void)
             }
             else // Very high and difficult levels 8-20
             {
-                if((item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_no_item_THRESHOLD)))
+                if((item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1824,7 +1836,7 @@ uint8_t one_sprite_collision(uint8_t i)
 uint8_t shield_collision(uint8_t i, uint8_t size)
 {
     uint8_t x;
-	uint8_t y;
+    uint8_t y;
     
     x = SPRX[i];
     if(x>=SPRX[SMOKE_INDEX])
@@ -1935,20 +1947,24 @@ uint8_t befana_sprite_collision(void)
 uint8_t shield_balloon_collision(void)
 {
     // uint8_t shield_hit;
-    
-    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
-    {
-		if(shield_status && harmful_balloon[i])
-		{
-			if(shield_collision(i,shield_status<<3))
-			{
-                ballon_hit(i);
-				
-				return i;
-			}
-		}
-		
-	}
+    // if(shield_status)
+    // {
+        uint8_t size = shield_status<<3;
+
+        for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+        {
+            if(harmful_balloon[i])
+            {
+                if(shield_collision(i,size))
+                {
+                    ballon_hit(i);
+                    
+                    return i;
+                }
+            }
+            
+        }
+    // }
 	return 255;
 }
 
@@ -2056,26 +2072,30 @@ void handle_balloon_collision(void)
 {
     // uint8_t balloon;
     uint8_t balloon_hit_by_befana;
-    uint8_t ballon_hit_by_shield = shield_balloon_collision();
     
-	if(ballon_hit_by_shield<255)
-	{
-        if(shield_status<2)
-        {
-            shield_status=0;
-            SPRY[SMOKE_INDEX]=255;
-        }
-        points+=BALLOON_POINTS;
-        _XL_EXPLOSION_SOUND();
-        display_score();
-        if(!santa)
-        {
-            ++shield_statused_balloons;
-        }
+    if(shield_status)
+    {
+        uint8_t ballon_hit_by_shield = shield_balloon_collision();
         
+        if(ballon_hit_by_shield<255)
+        {
+            if(shield_status<2)
+            {
+                shield_status=0;
+                SPRY[SMOKE_INDEX]=255;
+            }
+            points+=BALLOON_POINTS;
+            _XL_EXPLOSION_SOUND();
+            display_score();
+            if(!santa)
+            {
+                ++exploded_balloons;
+            }
+            
 
-        dead_balloon[ballon_hit_by_shield] = DEAD_COOL_DOWN;
+            dead_balloon[ballon_hit_by_shield] = DEAD_COOL_DOWN;
 
+        }
     }
     balloon_hit_by_befana = befana_sprite_collision();
     if(balloon_hit_by_befana<255)
@@ -2097,7 +2117,9 @@ void handle_balloon_collision(void)
             if(shield_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
             {
                 shield_cool_down+=HIT_SHOCK_COOL_DOWN;
-                erase_shield_status();
+                
+                // RED
+                display_shield_status();
                 // while(1){};
             }
         }
@@ -2142,8 +2164,8 @@ uint8_t handle_item_collision(void)
                 decrease_shield_cool_down();
                 if(!shield_cool_down)
                 {
-                    super_shield_status = 1;
-                    display_super_shield_status();
+                    super_shield_status = 3;
+                    display_shield_status();
                 }
 			}
 			else if(item_type[i]==SHIELD_ITEM)
@@ -2316,9 +2338,9 @@ uint8_t santa_bonus;
 
 void handle_santa_trigger(void)
 {
-    if(!santa && (shield_statused_balloons>=SANTA_THRESHOLD))
+    if(!santa && (exploded_balloons>=SANTA_THRESHOLD))
     {
-        shield_statused_balloons = 0 + level/4;
+        exploded_balloons = 0;
         santa = 1;
         santa_x = 10;
         santa_bonus = SANTA_CHARGE;
@@ -2506,13 +2528,13 @@ int main()
 		
         music_switch(0);
         display_new_level();
-        shield_statused_balloons = 0;
+        exploded_balloons = 0;
         #if INITIAL_LEVEL>1
-        shield_statused_balloons = 0 + level/4;
+        exploded_balloons = 0 + level/4;
         #endif
         while(energy && (level<=MAX_LEVEL)) 
         {
-            // printd(shield_statused_balloons,3,40,WHITE);
+            // printd(exploded_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
                 // printd(shield_cool_down,3,40,WHITE);
                 handle_stars();
@@ -2529,10 +2551,12 @@ int main()
 	
                 handle_items();
 
+                if(counter&1)
+                {
                 handle_balloon_collision();
                 
                 handle_item_collision();
-
+                }
                 ++counter;
                 
 				// printd(no_item,3,120,WHITE);
