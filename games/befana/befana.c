@@ -165,6 +165,7 @@ uint8_t santa_y;
 
 uint16_t extra_life;
 
+uint8_t shock_level;
 
 #define EXTRA_LIFE_THRESHOLD 5000
 
@@ -208,7 +209,7 @@ static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
 static uint8_t balloon_to_rest[NUMBER_OF_BALLOONS];
 
-static uint8_t lost_life;
+static uint8_t lost_life_immortability;
 
 #define DEAD_COOL_DOWN 15
 
@@ -527,18 +528,24 @@ void increase_lives(void)
     {
         lives = MAX_LIVES;
     }
+    _XL_PING_SOUND();
+
     for(i=0;i<40;++i)
     {
-        _XL_PING_SOUND();
+        _XL_TOCK_SOUND();
 
         POKE(COLOR+NUMBER_OF_COLS-2,YELLOW);     
-        for(j=0;j<40;++j)
+        for(j=0;j<20;++j)
         {
         }
-        POKE(COLOR+NUMBER_OF_COLS-2,RED);     
+        _XL_TICK_SOUND();
 
+        POKE(COLOR+NUMBER_OF_COLS-2,RED);     
+        for(j=0;j<20;++j)
+        {
+        }
     }
-    _XL_TICK_SOUND();
+    _XL_PING_SOUND();
 }
 
 void display_lives(void)
@@ -735,6 +742,14 @@ void display_shield_status(void)
     else
     {
         color(5,SHOCK_OFFSET,YELLOW);
+        if((counter&15)&1)
+        {
+            color(shock_level,SHOCK_OFFSET,GREEN);
+        }
+        else
+        {
+            color(shock_level,SHOCK_OFFSET,YELLOW);
+        }
     }
 }
 
@@ -988,7 +1003,7 @@ void handle_befana(void)
     }
 	
 	forward_thrust = 0;
-	// if(!lost_life)
+	// if(!lost_life_immortability)
 	// {
     if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
     {
@@ -1046,7 +1061,7 @@ void handle_befana(void)
                     SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
                 }
                 shield_cool_down=SHOCK_COOL_DOWN;
-                display_shield_status();
+                // display_shield_status();
                 // SPRC[BEFANA_INDEX]=PURPLE;
                 // erase_shield_status();
             }
@@ -1685,10 +1700,10 @@ void handle_items(void)
 			{// TODO: To optimize
 				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD-((counter/4)&3);
 			}
-			else if(item_type[i]==FIRE_ITEM)
-			{// TODO: To optimize
-				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
-			}
+			// else if(item_type[i]==FIRE_ITEM)
+			// {
+				// SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
+			// }
         }
         
         // Re-position item
@@ -1748,7 +1763,6 @@ uint8_t one_sprite_collision(uint8_t i)
 {
     uint8_t x;
 	uint8_t y;
-
     
     x = SPRX[i];
     if(x>=befana_x)
@@ -1924,9 +1938,9 @@ uint8_t shield_balloon_collision(void)
 
 void handle_befana_color(void)
 {
-	if(lost_life)
+	if(lost_life_immortability)
 	{
-		--lost_life;
+		--lost_life_immortability;
 	}
     else if(shield_cool_down)
     {
@@ -2049,31 +2063,34 @@ void handle_balloon_collision(void)
 
         }
     }
-    balloon_hit_by_befana = befana_sprite_collision();
-    if(balloon_hit_by_befana<255)
+    if(!lost_life_immortability)
     {
-        lost_life=LOST_LIFE_IMMORTALITY;
-
-        falling_balloon[balloon_hit_by_befana] = 1;
-
-        if(armor_level)
+        balloon_hit_by_befana = befana_sprite_collision();
+        if(balloon_hit_by_befana<255)
         {
-            decrease_armor(BALLOON_ARMOR_DAMAGE);
-            display_armor();
-        }
-        else
-        {
-            // decrease_lives(BALLOON_DAMAGE);
-            --lives;
-            display_lives();
+            lost_life_immortability=LOST_LIFE_IMMORTALITY;
 
-            if(shield_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
+            falling_balloon[balloon_hit_by_befana] = 1;
+
+            if(armor_level)
             {
-                shield_cool_down+=HIT_SHOCK_COOL_DOWN;
-                
-                // RED
+                decrease_armor(BALLOON_ARMOR_DAMAGE);
+                display_armor();
+            }
+            else
+            {
+                // decrease_lives(BALLOON_DAMAGE);
+                --lives;
+                display_lives();
+
+                // if(shield_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
+                // {
+                shield_cool_down=HIT_SHOCK_COOL_DOWN;
+                    
+                    // RED
                 display_shield_status();
-                // while(1){};
+                    // while(1){};
+                // }
             }
         }
     }
@@ -2089,6 +2106,7 @@ void increase_armor(uint8_t amount)
     }
 }
 
+#define SHIELD_RECHARGE 5
 
 uint8_t handle_item_collision(void)
 {
@@ -2100,15 +2118,19 @@ uint8_t handle_item_collision(void)
         {
 			if(item_type[i]==GIFT_ITEM)
 			{
-				// increase_lives(GIFT_ENERGY);
 				display_lives();
 				increase_points(GIFT_POINTS);
 				// display_score();
                 decrease_shield_cool_down();
-                if(!shield_cool_down)
+                ++shock_level;
+                display_shield_status();
+
+                if(shock_level==5)
                 {
-                    super_shield_status = 3;
+                    super_shield_status = SHIELD_RECHARGE;
                     display_shield_status();
+                    shock_level=0;
+
                 }
 			}
 			else if(item_type[i]==SHIELD_ITEM)
@@ -2342,8 +2364,7 @@ void handle_santa(void)
             --santa_bonus;
             increase_points(SANTA_POINTS);
             display_score();
-            // increase_lives(SANTA_ENERGY);
-            // display_lives();
+
         }
     }
     
@@ -2397,7 +2418,7 @@ int main()
         slow_loop=0;
         fast_loop=0;
         
-		lost_life=0;
+		lost_life_immortability=0;
 		
         points = 0;
 		level = INITIAL_LEVEL;
@@ -2475,6 +2496,7 @@ int main()
         #endif
         
         extra_life = EXTRA_LIFE_THRESHOLD;
+        shock_level = 0;
 
         while(lives && (level<=MAX_LEVEL)) 
         {
@@ -2496,16 +2518,16 @@ int main()
                 handle_items();
 
                 
-                if(counter&1 && !lost_life)
+                if(counter&1)
                 {
                     handle_balloon_collision();
-                    // if(lost_life)
+                    // if(lost_life_immortability)
                     // {
                         // SPRC[BEFANA_INDEX]=YELLOW;
                     // }
                 }
                 ++counter;
-                if(lost_life)
+                if(lost_life_immortability)
                 {
                     if(counter&1)
                     {
@@ -2526,10 +2548,13 @@ int main()
                 
                 // TODO: Implement/fix this
                 // handle_bullets();
+                if(!(counter&3))
+                {
+                    handle_item_collision();
+                }
                 
 				if(!(counter&7))
 				{
-                    handle_item_collision();
 
                     display_shield_status();
 
