@@ -139,7 +139,7 @@ extern uint8_t MUSIC_ON;
 
 #define NUMBER_OF_BALLOONS 10
 
-#define NUMBER_OF_ITEMS 4
+#define NUMBER_OF_ITEMS 2
 
 
 #define BEFANA_MIN_X 14
@@ -156,8 +156,8 @@ extern uint8_t MUSIC_ON;
 uint8_t forward_thrust;
 
 uint8_t shield_status;
-uint8_t super_shield_status;
-uint8_t shield_cool_down;
+uint8_t super_weapon_status;
+uint8_t weapon_cool_down;
 
 uint8_t exploded_balloons;
 uint8_t santa;
@@ -304,13 +304,13 @@ void music_switch(uint8_t toggle)
 #define SMOKE_INDEX (ITEM_INDEX+NUMBER_OF_ITEMS)
 
 #define SMOKE 60
-#define SHIELD_INDEX ('A'-1)
+#define SHIELD_INDEX SMOKE_INDEX
+static uint8_t shield_index[] = {SHIELD_INDEX, SHIELD_INDEX+1}; 
 
 static uint8_t counter;
 static uint8_t grass_counter;
 static uint8_t lives;
 static uint16_t points = 0;
-
 
 
 #define X_OFFSET 46
@@ -716,15 +716,9 @@ void draw_the_moon(void)
 
 
 
-
-// void display_super_shield_status(void)
-// {
-        // color(5,SHOCK_OFFSET,GREEN);
-// }
-
-void display_shield_status(void)
+void display_weapon_status(void)
 {
-    if(super_shield_status)
+    if(super_weapon_status)
     {
         if((counter&15)&1)
         {
@@ -735,7 +729,7 @@ void display_shield_status(void)
             color(5,SHOCK_OFFSET,YELLOW);
         }
     }
-    else if(shield_cool_down)
+    else if(weapon_cool_down)
     {
         color(5,SHOCK_OFFSET,RED);
     }
@@ -753,12 +747,8 @@ void display_shield_status(void)
     }
 }
 
-// void erase_shield_status(void)
-// {
-        // color(5,SHOCK_OFFSET,RED);
-// }
 
-void display_initial_shield_status(void)
+void display_shock(void)
 {
         print("SHOCK",5,SHOCK_OFFSET,RED);
 }
@@ -886,7 +876,7 @@ void init_player(uint8_t sprite_index)
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
-    shield_cool_down = 10;
+    weapon_cool_down = 10;
 }
 
 
@@ -940,21 +930,8 @@ void _handle_stars(void)
 
 void display_shield(void)
 {
-    // if(counter&1)
-    // {
-        // if(shield_status==2)
-        // {
-            // SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
-        // }
-        // else
-        // {
-            // SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
-        // }
-    // }
-    if(shield_status) // && SPRX[SMOKE_INDEX]<240)
-    {
-        SPRX[SMOKE_INDEX]+=5;
-    }
+
+    SPRX[SMOKE_INDEX]+=5;
     if(SPRX[SMOKE_INDEX]>240)
     {
         shield_status=0;
@@ -987,15 +964,6 @@ void handle_befana(void)
 	if(shield_status)
     {
         display_shield();
-		// if (SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
-		// {
-			// --shield_status;
-		// }
-		// else
-		// {
-			// shield_status=0;
-            // SPRY[SMOKE_INDEX]=255;
-		// }
     }
     else if(!forward_thrust)
     {
@@ -1024,15 +992,15 @@ void handle_befana(void)
     {
         ++SPRY[BEFANA_INDEX];
     }
-    if(shield_cool_down)
+    if(weapon_cool_down)
     {
-        --shield_cool_down;
+        --weapon_cool_down;
     }
-    if(!shield_cool_down)
+    if(!weapon_cool_down)
     {
-        display_shield_status();
+        display_weapon_status();
         
-        // --shield_cool_down;
+        // --weapon_cool_down;
         
         // SPRC[BEFANA_INDEX]=RED;
         // while(MULTIPLEX_DONE)
@@ -1041,18 +1009,18 @@ void handle_befana(void)
         // SPRUPDATEFLAG=1;
         // }
     }
-    if(JOY_FIRE(input) && !shield_cool_down)
+    if(JOY_FIRE(input) && !weapon_cool_down)
     {
             if(!shield_status)
             {
                 _XL_SHOOT_SOUND();
                 SPRX[SMOKE_INDEX] = SPRX[BEFANA_INDEX]+8;
                 SPRY[SMOKE_INDEX] = SPRY[BEFANA_INDEX];
-                if(super_shield_status)
+                if(super_weapon_status)
                 {
                     shield_status=2;
                     SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
-                    --super_shield_status;
+                    --super_weapon_status;
 
                 }
                 else
@@ -1060,10 +1028,7 @@ void handle_befana(void)
                     shield_status=1;
                     SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
                 }
-                shield_cool_down=SHOCK_COOL_DOWN;
-                // display_shield_status();
-                // SPRC[BEFANA_INDEX]=PURPLE;
-                // erase_shield_status();
+                weapon_cool_down=SHOCK_COOL_DOWN;
             }
     }
     
@@ -1113,10 +1078,7 @@ void scroll_grass(void)
 void handle_grass(void)
 {
 	scroll_grass();
-	// if(shield_status)
-	// {
-		// scroll_grass();
-	// }
+
 }
 
 #define BALLOON_TOP_Y 45
@@ -1543,15 +1505,7 @@ void move_balloons(void)
 
 void handle_balloons(void)
 {
-	// uint8_t i;
-	
-    // for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
-    // {
-        // if(shield_status)
-        // {
-            // --SPRX[i];
-        // }
-	// }
+
 	_handle_balloons();
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
@@ -1574,14 +1528,7 @@ void handle_balloons(void)
 void handle_stars(void)
 {
 	_handle_stars();
-    // if(shield_status>SHOCK_THRESHOLD)
-    // {
-        // move_balloons();
-    // }
-	// else if(shield_status)
-	// {
-		// move_balloons();
-	// }
+
 	if(forward_thrust)
 	{
         if(!(counter&1))
@@ -1599,7 +1546,8 @@ void handle_stars(void)
 }
 
 
-const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, GREEN, CYAN};
+// const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, GREEN, CYAN};
+const uint8_t item_colors[NUMBER_OF_ITEMS] = {GREEN, CYAN};
 
 void init_items(void)
 {
@@ -1609,9 +1557,9 @@ void init_items(void)
     {
         SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
         SPRC[ITEM_INDEX+i]=item_colors[i];
-        SPRY[ITEM_INDEX+i]=80+40*i;
+        SPRY[ITEM_INDEX+i]=80+40+40*i;
         SPRM[ITEM_INDEX+i]=1;
-        SPRX[ITEM_INDEX+i]=i*64;
+        SPRX[ITEM_INDEX+i]=80+i*64;
     }
 }
 
@@ -1649,7 +1597,7 @@ void spawn_item(uint8_t i)
 	
 	rnd = rand()&3;
 	
-	SPRY[ITEM_INDEX+i]=100+i*40-(rand()&0x1F);
+	SPRY[ITEM_INDEX+i]=100+40+i*40-(rand()&0x1F);
 	
 	if(!rnd)
 	{
@@ -1657,11 +1605,6 @@ void spawn_item(uint8_t i)
 		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
 		// TODO: update counters?
 	}
-	// else if(rnd==1)
-	// {
-		// item_type[i]=FIRE_ITEM;
-		// SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
-	// }
 	else 
 	{
 		item_type[i]=GIFT_ITEM;
@@ -1700,10 +1643,6 @@ void handle_items(void)
 			{// TODO: To optimize
 				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD-((counter/4)&3);
 			}
-			// else if(item_type[i]==FIRE_ITEM)
-			// {
-				// SPRF[ITEM_INDEX+i]=GFX_START_INDEX+FIRE;
-			// }
         }
         
         // Re-position item
@@ -1889,8 +1828,6 @@ void ballon_hit(uint8_t i)
 
 uint8_t befana_sprite_collision(void)
 {
-    // uint8_t shield_hit;
-    
 	befana_x = SPRX[BEFANA_INDEX];
 	befana_y = SPRY[BEFANA_INDEX];
     
@@ -1912,26 +1849,22 @@ uint8_t befana_sprite_collision(void)
 
 uint8_t shield_balloon_collision(void)
 {
-    // uint8_t shield_hit;
-    // if(shield_status)
-    // {
-        uint8_t size = shield_status<<3;
+    uint8_t size = shield_status<<3;
 
-        for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
+    {
+        if(harmful_balloon[i])
         {
-            if(harmful_balloon[i])
+            if(shield_collision(i,size))
             {
-                if(shield_collision(i,size))
-                {
-                    ballon_hit(i);
-                    
-                    return i;
-                }
+                ballon_hit(i);
+                
+                return i;
             }
-            
         }
-    // }
-	return 255;
+        
+    }
+    return 255;
 }
 
 
@@ -1942,7 +1875,7 @@ void handle_befana_color(void)
 	{
 		--lost_life_immortability;
 	}
-    else if(shield_cool_down)
+    else if(weapon_cool_down)
     {
         SPRC[BEFANA_INDEX]=PURPLE;
         while(MULTIPLEX_DONE)
@@ -1999,11 +1932,11 @@ void decrease_armor(uint8_t amount)
 
 
 
-void decrease_shield_cool_down(void)
+void decrease_weapon_cool_down(void)
 {
-    if(shield_cool_down>GIFT_COOL_DOWN_BONUS+1)
+    if(weapon_cool_down>GIFT_COOL_DOWN_BONUS+1)
     {
-        shield_cool_down-=GIFT_COOL_DOWN_BONUS;
+        weapon_cool_down-=GIFT_COOL_DOWN_BONUS;
     }
 }
 
@@ -2035,7 +1968,6 @@ void handle_dead_balloons(void)
 
 void handle_balloon_collision(void)
 {
-    // uint8_t balloon;
     uint8_t balloon_hit_by_befana;
     
     if(shield_status)
@@ -2083,12 +2015,12 @@ void handle_balloon_collision(void)
                 --lives;
                 display_lives();
 
-                // if(shield_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
+                // if(weapon_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
                 // {
-                shield_cool_down=HIT_SHOCK_COOL_DOWN;
+                weapon_cool_down=HIT_SHOCK_COOL_DOWN;
                     
                     // RED
-                display_shield_status();
+                display_weapon_status();
                     // while(1){};
                 // }
             }
@@ -2120,17 +2052,15 @@ uint8_t handle_item_collision(void)
 			{
 				display_lives();
 				increase_points(GIFT_POINTS);
-				// display_score();
-                decrease_shield_cool_down();
+                decrease_weapon_cool_down();
                 ++shock_level;
-                display_shield_status();
+                display_weapon_status();
 
                 if(shock_level==5)
                 {
-                    super_shield_status = SHIELD_RECHARGE;
-                    display_shield_status();
+                    super_weapon_status = SHIELD_RECHARGE;
+                    display_weapon_status();
                     shock_level=0;
-
                 }
 			}
 			else if(item_type[i]==SHIELD_ITEM)
@@ -2138,16 +2068,9 @@ uint8_t handle_item_collision(void)
 				increase_points(ARMOR_POINTS);
 				increase_armor(ARMOR_RECHARGE);
                 display_armor();
-				// armor_level = ARMOR_RECHARGE;
 			}
             display_score();
-			// else if(item_type[i]==FIRE_ITEM)
-			// {
-				// remaining_bullets = BULLET_RECHARGE;
-				// display_remaining_bullets();
-			// }
-			// TODO: Implement fire activation here
-			
+
 			_XL_ZAP_SOUND();
 			SPRY[ITEM_INDEX+i]=255;
 			return i;
@@ -2156,15 +2079,12 @@ uint8_t handle_item_collision(void)
 }
 
 
-// static char MESSAGE[] = "BEFANAVSCOMMODORE";
 static char MESSAGE[] = "BEFANAVSBALLOONS";
-//                       1234567890123456
 
 void init_letters()
 {
     POKE(MULTICOLOR_1,PINK);
     POKE(MULTICOLOR_2,LIGHT_GREY);
-    // SPRC[BEFANA_INDEX]=PINK;
         
     for(i=1;i<=16;++i)
     {
@@ -2437,7 +2357,7 @@ int main()
         SPRX[18]=166;
 		
 		armor_level = 0;
-        super_shield_status = 0;
+        super_weapon_status = 0;
 
 
         title_screen();
@@ -2469,7 +2389,7 @@ int main()
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
 
-        display_initial_shield_status();
+        display_shock();
         
         print("ARMOR",5,ARMOR_OFFSET-5,GREY);
         display_armor();
@@ -2502,7 +2422,7 @@ int main()
         {
             // printd(exploded_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
-                // printd(shield_cool_down,3,40,WHITE);
+                // printd(weapon_cool_down,3,40,WHITE);
                 handle_stars();
             
                 handle_befana();
@@ -2556,7 +2476,7 @@ int main()
 				if(!(counter&7))
 				{
 
-                    display_shield_status();
+                    display_weapon_status();
 
 					handle_befana_color();
 
@@ -2637,9 +2557,6 @@ int main()
                         for(i=0;i<NUMBER_OF_ITEMS;++i)
                         {
                             SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
-                            // SPRC[ITEM_INDEX+i]=item_colors[i];
-                            // SPRY[ITEM_INDEX+i]=80+40*i;
-                            // SPRM[ITEM_INDEX+i]=1;
                             --SPRX[ITEM_INDEX+i];
                         }
                     }
