@@ -174,7 +174,8 @@ uint8_t shock_level;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-
+//#define BULLET_COOL_DOWN 230
+#define BULLET_COOL_DOWN 17
 #define HIT_BULLET_COOL_DOWN 30
 #define MAX_BULLET_COOL_DOWN 50
 
@@ -202,7 +203,6 @@ static uint8_t armor_level;
 
 
 #define bullet_active bullet_y
-#define BULLET_COOL_DOWN 10
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
@@ -305,8 +305,8 @@ void music_switch(uint8_t toggle)
 #define SMOKE 60
 #define SHIELD_INDEX SMOKE_INDEX
 
-#define NUMBER_OF_BULLETS 4
-static uint8_t bullet_sprite_index[] = {SHIELD_INDEX, SHIELD_INDEX+1, SHIELD_INDEX+2, SHIELD_INDEX+3}; 
+#define NUMBER_OF_BULLETS 2
+static uint8_t bullet_sprite_index[] = {SHIELD_INDEX, SHIELD_INDEX+1}; 
 static uint8_t bullet_status[NUMBER_OF_BULLETS];
 // static uint8_t bullet_status[NUMBER_OF_BULLETS];
 
@@ -873,19 +873,17 @@ void init_player(uint8_t sprite_index)
 	// SPRY[BEFANA_INDEX] = 20;
 	// SPRM[BEFANA_INDEX] = 1;
     // SPRC[BEFANA_INDEX] = PINK;
-    uint8_t i;
     
     SPRX[sprite_index] = 30;
     SPRY[sprite_index] = 100;
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
-    for(i=0;i<NUMBER_OF_BULLETS;++i)
-    {
-        SPRM[bullet_sprite_index[i]] = 0;
-        SPRC[bullet_sprite_index[i]] = YELLOW;
-    }
-
+    SPRM[bullet_sprite_index[0]] = 0;
+    SPRM[bullet_sprite_index[1]] = 0;
+    SPRC[bullet_sprite_index[0]] = YELLOW;
+    SPRC[bullet_sprite_index[1]] = YELLOW;
+    
     weapon_cool_down = 10;
 }
 
@@ -996,14 +994,11 @@ void handle_befana(void)
     {
         hide_smoke();
     }
-    for(b=1;b<NUMBER_OF_BULLETS;++b)
+    if(bullet_status[1])
     {
-        if(bullet_status[b])
-        {
-            handle_bullet(b);
-        }
+        handle_bullet(1);
     }
-    
+	
 	forward_thrust = 0;
 
     if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
@@ -2315,8 +2310,6 @@ int main()
     
     while(1)
     {
-        uint8_t i;
-        
         hide_sprites();
         
         clear_items();
@@ -2425,11 +2418,8 @@ int main()
         extra_life = EXTRA_LIFE_THRESHOLD;
         shock_level = 0;
 
-        for(i=0;i<NUMBER_OF_BULLETS;++i)
-        {
-            bullet_status[i]=0;
-        }
-        
+        bullet_status[0]=0;
+        bullet_status[1]=0;
 
         while(lives && (level<=MAX_LEVEL)) 
         {

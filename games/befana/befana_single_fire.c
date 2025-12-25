@@ -155,6 +155,7 @@ extern uint8_t MUSIC_ON;
 
 uint8_t forward_thrust;
 
+uint8_t shield_status;
 uint8_t super_weapon_status;
 uint8_t weapon_cool_down;
 
@@ -174,9 +175,10 @@ uint8_t shock_level;
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
 
-
-#define HIT_BULLET_COOL_DOWN 30
-#define MAX_BULLET_COOL_DOWN 50
+//#define SHOCK_COOL_DOWN 230
+#define SHOCK_COOL_DOWN 20
+#define HIT_SHOCK_COOL_DOWN 60
+#define MAX_SHOCK_COOL_DOWN 100
 
 #define GIFT_COOL_DOWN_BONUS 60
 
@@ -202,7 +204,6 @@ static uint8_t armor_level;
 
 
 #define bullet_active bullet_y
-#define BULLET_COOL_DOWN 10
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
@@ -304,11 +305,7 @@ void music_switch(uint8_t toggle)
 
 #define SMOKE 60
 #define SHIELD_INDEX SMOKE_INDEX
-
-#define NUMBER_OF_BULLETS 4
-static uint8_t bullet_sprite_index[] = {SHIELD_INDEX, SHIELD_INDEX+1, SHIELD_INDEX+2, SHIELD_INDEX+3}; 
-static uint8_t bullet_status[NUMBER_OF_BULLETS];
-// static uint8_t bullet_status[NUMBER_OF_BULLETS];
+static uint8_t shield_index[] = {SHIELD_INDEX, SHIELD_INDEX+1}; 
 
 static uint8_t counter;
 static uint8_t grass_counter;
@@ -873,19 +870,12 @@ void init_player(uint8_t sprite_index)
 	// SPRY[BEFANA_INDEX] = 20;
 	// SPRM[BEFANA_INDEX] = 1;
     // SPRC[BEFANA_INDEX] = PINK;
-    uint8_t i;
     
     SPRX[sprite_index] = 30;
     SPRY[sprite_index] = 100;
     SPRC[sprite_index] = RED;   
     SPRM[sprite_index] = 1;    
     
-    for(i=0;i<NUMBER_OF_BULLETS;++i)
-    {
-        SPRM[bullet_sprite_index[i]] = 0;
-        SPRC[bullet_sprite_index[i]] = YELLOW;
-    }
-
     weapon_cool_down = 10;
 }
 
@@ -938,16 +928,15 @@ void _handle_stars(void)
 }
 
 
-void handle_bullet(uint8_t b)
+void display_shield(void)
 {
 
-    uint8_t index = bullet_sprite_index[b];
-    SPRX[index]+=5;
-    if(SPRX[index]>240)
+    SPRX[SMOKE_INDEX]+=5;
+    if(SPRX[SMOKE_INDEX]>240)
     {
-        bullet_status[b]=0;
-        SPRY[index]=255;
-        SPRF[index]=GFX_START_INDEX+SMOKE;
+        shield_status=0;
+        SPRY[SMOKE_INDEX]=255;
+        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
     }
 
 }
@@ -967,45 +956,23 @@ void hide_smoke(void)
 }
 
 
-uint8_t get_available_bullet(void)
-{
-    uint8_t b;
-    for(b=0;b<NUMBER_OF_BULLETS;++b)
-    {
-        if(!(bullet_status[b]))
-        {
-            return b;
-        }
-    }
-    return NUMBER_OF_BULLETS;
-}
-
-
 void handle_befana(void)
 {
-    uint8_t b;
-    uint8_t a_bullet_index;
-    
+
 	input = joy_read(STANDARD_JOY);
 	
-	if(bullet_status[0])
+	if(shield_status)
     {
-        handle_bullet(0);
+        display_shield();
     }
     else if(!forward_thrust)
     {
         hide_smoke();
     }
-    for(b=1;b<NUMBER_OF_BULLETS;++b)
-    {
-        if(bullet_status[b])
-        {
-            handle_bullet(b);
-        }
-    }
-    
+	
 	forward_thrust = 0;
-
+	// if(!lost_life_immortability)
+	// {
     if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
     {
         --SPRX[BEFANA_INDEX];
@@ -1032,30 +999,36 @@ void handle_befana(void)
     if(!weapon_cool_down)
     {
         display_weapon_status();
+        
+        // --weapon_cool_down;
+        
+        // SPRC[BEFANA_INDEX]=RED;
+        // while(MULTIPLEX_DONE)
+        // {
+        // MULTIPLEX_DONE=0;
+        // SPRUPDATEFLAG=1;
+        // }
     }
     if(JOY_FIRE(input) && !weapon_cool_down)
     {
-            b = get_available_bullet();
-            
-            
-            if(b<NUMBER_OF_BULLETS)
+            if(!shield_status)
             {
-                bullet_status[b] = 1;
-                a_bullet_index = bullet_sprite_index[b];
                 _XL_SHOOT_SOUND();
-                SPRX[a_bullet_index] = SPRX[BEFANA_INDEX]+8;
-                SPRY[a_bullet_index] = SPRY[BEFANA_INDEX];
+                SPRX[SMOKE_INDEX] = SPRX[BEFANA_INDEX]+8;
+                SPRY[SMOKE_INDEX] = SPRY[BEFANA_INDEX];
                 if(super_weapon_status)
                 {
-                    SPRF[a_bullet_index]=GFX_START_INDEX+SHIELD_ON;
+                    shield_status=2;
+                    SPRF[SMOKE_INDEX]=GFX_START_INDEX+SHIELD_ON;
                     --super_weapon_status;
 
                 }
                 else
                 {
-                    SPRF[a_bullet_index]=GFX_START_INDEX+SMALL_SHIELD;
+                    shield_status=1;
+                    SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMALL_SHIELD;
                 }
-                weapon_cool_down=BULLET_COOL_DOWN;
+                weapon_cool_down=SHOCK_COOL_DOWN;
             }
     }
     
@@ -1067,6 +1040,13 @@ void handle_befana(void)
     {
         SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);			
     }
+        
+
+		// Armored befana
+		// 
+	// }
+	
+		
 }
 
 
@@ -1556,7 +1536,7 @@ void handle_stars(void)
             move_balloons();
             // handle_balloons();
         }
-        if(!bullet_status[0])
+        if(!shield_status)
         {
             display_smoke();
         }
@@ -1758,38 +1738,38 @@ uint8_t one_sprite_collision(uint8_t i)
 }
 
 
-uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t size)
+uint8_t shield_collision(uint8_t i, uint8_t size)
 {
     uint8_t x;
     uint8_t y;
     
-    x = SPRX[balloon_index];
-    if(x>=SPRX[a_bullet_index])
+    x = SPRX[i];
+    if(x>=SPRX[SMOKE_INDEX])
     {
-        if((x-SPRX[a_bullet_index])>size)
+        if((x-SPRX[SMOKE_INDEX])>size)
         {
             return 0;
         }
     }
     else // x < SPRX[SMOKE_INDEX]
     {
-        if((SPRX[a_bullet_index]-x)>size)
+        if((SPRX[SMOKE_INDEX]-x)>size)
         {
             return 0;
         }
     }
     
-    y = SPRY[balloon_index];
-    if(y>=SPRY[a_bullet_index])
+    y = SPRY[i];
+    if(y>=SPRY[SMOKE_INDEX])
     {
-        if((y-SPRY[a_bullet_index])>size+2)
+        if((y-SPRY[SMOKE_INDEX])>size+2)
         {
             return 0;
         }
     }
     else // y < SPRY[SMOKE_INDEX]
     {
-        if((SPRY[a_bullet_index]-y)>size+2)
+        if((SPRY[SMOKE_INDEX]-y)>size+2)
         {
             return 0;
         }
@@ -1815,7 +1795,7 @@ void ballon_hit(uint8_t i)
 
     _XL_EXPLOSION_SOUND();
 
-    for(j=0;j<120;++j)
+    for(j=0;j<150;++j)
     {
     }
     SPRC[i]=YELLOW;
@@ -1826,9 +1806,9 @@ void ballon_hit(uint8_t i)
         SPRUPDATEFLAG=1;
     }
 
-    // _XL_EXPLOSION_SOUND();
+    _XL_EXPLOSION_SOUND();
 
-    for(j=0;j<100;++j)
+    for(j=0;j<150;++j)
     {
     }
     
@@ -1857,7 +1837,7 @@ uint8_t befana_sprite_collision(void)
 		{
 			if(one_sprite_collision(i))
 			{
-                // ballon_hit(i);
+                ballon_hit(i);
 				
 				return i;
 			}
@@ -1867,35 +1847,26 @@ uint8_t befana_sprite_collision(void)
 	return 255;
 }
 
-
-uint8_t bullet_balloon_collision(uint8_t b)
+uint8_t shield_balloon_collision(void)
 {
-    uint8_t size;
-    uint8_t balloon_index;
+    uint8_t size = shield_status<<3;
 
-    if(super_weapon_status)
+    for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
-        size = 20;
-    }
-    else
-    {
-        size = 8;
-    }
-
-    for(balloon_index=0;balloon_index<=0+NUMBER_OF_BALLOONS-1;++balloon_index)
-    {
-        if(harmful_balloon[balloon_index])
+        if(harmful_balloon[i])
         {
-            if(bullet_collision(bullet_sprite_index[b], balloon_index, size))
+            if(shield_collision(i,size))
             {
-                // ballon_hit(balloon_index);
-                return balloon_index;
+                ballon_hit(i);
+                
+                return i;
             }
         }
         
     }
     return 255;
 }
+
 
 
 void handle_befana_color(void)
@@ -1913,6 +1884,14 @@ void handle_befana_color(void)
             SPRUPDATEFLAG=1;
         }
     }
+	// else if(armor_level)
+	// {
+		// SPRC[BEFANA_INDEX]=GREY;
+	// }	
+	// else if(remaining_bullets)
+    // {
+        // SPRC[BEFANA_INDEX]=BLUE;
+    // }
     else
     {
         SPRC[BEFANA_INDEX]=RED;
@@ -1920,9 +1899,23 @@ void handle_befana_color(void)
 }
 
 
+// void decrease_lives(uint8_t amount)
+// {
+    // #if !defined(TRAINER)
+    // if(lives>=amount)
+    // {
+        // lives-=amount;
+    // }
+    // else
+    // {
+        // lives=0;
+    // }
+    // #endif
+    
+// }
+
 #define LOST_LIFE_IMMORTALITY 15
 #define BALLOON_ARMOR_DAMAGE 1
-
 
 void decrease_armor(uint8_t amount)
 {
@@ -1976,35 +1969,30 @@ void handle_dead_balloons(void)
 void handle_balloon_collision(void)
 {
     uint8_t balloon_hit_by_befana;
-    uint8_t b;
     
-    for(b=0;b<NUMBER_OF_BULLETS;++b)
+    if(shield_status)
     {
-        if(bullet_status[b])
+        uint8_t ballon_hit_by_shield = shield_balloon_collision();
+        
+        if(ballon_hit_by_shield<255)
         {
-            uint8_t ballon_hit_by_bullet = bullet_balloon_collision(b);
-            
-            if(ballon_hit_by_bullet<255)
+            if(shield_status<2)
             {
-                bullet_status[b] = 0;
-                SPRY[bullet_sprite_index[b]]=255;
-                
-                ballon_hit(ballon_hit_by_bullet);
-                if(!super_weapon_status)
-                {
-                    SPRY[SMOKE_INDEX]=255;
-                }
-                increase_points(BALLOON_POINTS);
-                _XL_EXPLOSION_SOUND();
-                display_score();
-                if(!santa)
-                {
-                    ++exploded_balloons;
-                }
-                
-
-                dead_balloon[ballon_hit_by_bullet] = DEAD_COOL_DOWN;
+                shield_status=0;
+                SPRY[SMOKE_INDEX]=255;
             }
+            increase_points(BALLOON_POINTS);
+            // points+=BALLOON_POINTS;
+            _XL_EXPLOSION_SOUND();
+            display_score();
+            if(!santa)
+            {
+                ++exploded_balloons;
+            }
+            
+
+            dead_balloon[ballon_hit_by_shield] = DEAD_COOL_DOWN;
+
         }
     }
     if(!lost_life_immortability)
@@ -2012,7 +2000,6 @@ void handle_balloon_collision(void)
         balloon_hit_by_befana = befana_sprite_collision();
         if(balloon_hit_by_befana<255)
         {
-            ballon_hit(balloon_hit_by_befana);
             lost_life_immortability=LOST_LIFE_IMMORTALITY;
 
             falling_balloon[balloon_hit_by_befana] = 1;
@@ -2024,13 +2011,18 @@ void handle_balloon_collision(void)
             }
             else
             {
+                // decrease_lives(BALLOON_DAMAGE);
                 --lives;
                 display_lives();
 
-                weapon_cool_down=HIT_BULLET_COOL_DOWN;
-
+                // if(weapon_cool_down<MAX_SHOCK_COOL_DOWN-HIT_SHOCK_COOL_DOWN)
+                // {
+                weapon_cool_down=HIT_SHOCK_COOL_DOWN;
+                    
+                    // RED
                 display_weapon_status();
-
+                    // while(1){};
+                // }
             }
         }
     }
@@ -2315,8 +2307,6 @@ int main()
     
     while(1)
     {
-        uint8_t i;
-        
         hide_sprites();
         
         clear_items();
@@ -2328,9 +2318,11 @@ int main()
         
         init_letters();
         init_player(0);
+        // init_bullets();
         
         SPRY[17]=120;
         SPRF[17]=GFX_START_INDEX+BALLOON;
+        // SPRY[0]=255;    
         SPRF[0]=GFX_START_INDEX+BEFANA;
 		while(MULTIPLEX_DONE)
 		{
@@ -2356,6 +2348,7 @@ int main()
         grass_counter = 0;
 		no_item = 0;
 		item = 0;
+        // active_bullets = 0;
 		
         music_switch(1);
         
@@ -2425,12 +2418,6 @@ int main()
         extra_life = EXTRA_LIFE_THRESHOLD;
         shock_level = 0;
 
-        for(i=0;i<NUMBER_OF_BULLETS;++i)
-        {
-            bullet_status[i]=0;
-        }
-        
-
         while(lives && (level<=MAX_LEVEL)) 
         {
             // printd(exploded_balloons,3,40,WHITE);
@@ -2472,7 +2459,15 @@ int main()
                     }
                     
                 }
+                
+				// printd(no_item,3,120,WHITE);
+				// printd(item,3,200,WHITE);
 
+                // printd(SPRY[BEFANA_INDEX],3,120,WHITE);
+                // printd(armor_level,3,120,WHITE);
+                
+                // TODO: Implement/fix this
+                // handle_bullets();
                 if(!(counter&3))
                 {
                     handle_item_collision();
