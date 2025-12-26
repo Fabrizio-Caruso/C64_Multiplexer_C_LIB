@@ -50,7 +50,7 @@ extern uint8_t MUSIC_ON;
 #define ARMOR_RECHARGE 1
 #define BULLET_RECHARGE 99
 
-#define MAX_ARMOR 9
+#define MAX_ARMOR 3
 
 #pragma zpsym ("NUMSPRITES")
 #pragma zpsym ("SPRUPDATEFLAG")
@@ -443,11 +443,19 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 
 #define DISTANCE_OFFSET 11
 #define LEVEL_OFFSET (DISTANCE_OFFSET+2)
-#define ARMOR_OFFSET ((LEVEL_OFFSET)+14)
+#define ARMOR_OFFSET ((LEVEL_OFFSET)+14-5)
 
 #define SHOCK_OFFSET (LEVEL_OFFSET+4)
 #define HI_OFFSET (NUMBER_OF_COLS-9)
 #define INITIAL_HI_OFFSET (NUMBER_OF_COLS/2-2)
+
+
+#define MIN_SHOCK 4
+
+#define MAX_SHOCK_LEVEL 4
+#define SUPER_SHOCK_CHARGE 10
+
+
 
 static uint8_t slow_loop = 0;
 static uint8_t fast_loop = 20;
@@ -623,7 +631,7 @@ void _XL_SHOOT_SOUND(void)
 
         _set_noise();
         
-        for(i=0;i<50;++i) {} 
+        for(i=0;i<10;++i) {} 
         SID.amp      = 0x00; 
         SID.v3.ctrl  = 0x08; 
     }
@@ -748,7 +756,7 @@ void display_weapon_status(void)
 {
     if(super_weapon_status)
     {
-        if((counter&15)&1)
+        if((counter&31)&1)
         {
             color(4,SHOCK_OFFSET,RED);
         }
@@ -757,13 +765,14 @@ void display_weapon_status(void)
             color(4,SHOCK_OFFSET,YELLOW);
         }
     }
-    else if(weapon_cool_down)
-    {
-        color(4,SHOCK_OFFSET,BLACK);
-    }
+    // else if(weapon_cool_down)
+    // {
+        // color(4,SHOCK_OFFSET,BLACK);
+    // }
     else
     {
         color(shock_level,SHOCK_OFFSET,YELLOW);
+        color(4-shock_level, SHOCK_OFFSET+1+shock_level-1,BLACK);
         // if((counter&15)&1)
         // {
             // color(shock_level,SHOCK_OFFSET,GREEN);
@@ -1005,13 +1014,10 @@ uint8_t get_available_bullet(void)
 }
 
 
-void handle_befana(void)
+void handle_bullets(void)
 {
     uint8_t b;
-    uint8_t a_bullet_index;
     
-	input = joy_read(STANDARD_JOY);
-	
 	if(bullet_status[0])
     {
         handle_bullet(0);
@@ -1027,6 +1033,15 @@ void handle_befana(void)
             handle_bullet(b);
         }
     }
+}
+
+void handle_befana(void)
+{
+    uint8_t b;
+    uint8_t a_bullet_index;
+    
+	input = joy_read(STANDARD_JOY);
+	
     
 	forward_thrust = 0;
 
@@ -1053,10 +1068,10 @@ void handle_befana(void)
     {
         --weapon_cool_down;
     }
-    if(!weapon_cool_down)
-    {
-        display_weapon_status();
-    }
+    // if(!weapon_cool_down)
+    // {
+        // display_weapon_status();
+    // }
     if(JOY_FIRE(input) && !weapon_cool_down)
     {
             b = get_available_bullet();
@@ -1079,8 +1094,9 @@ void handle_befana(void)
                 {
                     SPRF[a_bullet_index]=GFX_START_INDEX+SMALL_SHIELD;
                 }
-                weapon_cool_down=bullet_cool_down;
             }
+            weapon_cool_down=bullet_cool_down;
+
     }
     
     if(armor_level)
@@ -1281,7 +1297,26 @@ void display_level(void)
 
 void display_armor(void)
 {
-    printd(armor_level,1,ARMOR_OFFSET,WHITE);
+    uint8_t armor_color;
+    // printd(armor_level,1,ARMOR_OFFSET,WHITE);
+    if(!armor_level)
+    {
+        armor_color = BLACK;
+    }
+    else if(armor_level==1)
+    {
+        armor_color = DARK_GREY;
+    }
+    else if(armor_level==2)
+    {
+        armor_color = GREY;
+    }
+    else
+    {
+        armor_color = LIGHT_GREY;
+    }
+    
+    color(5,ARMOR_OFFSET,armor_color);
 }
 
 
@@ -1318,6 +1353,8 @@ void check_level_trigger()
 
         ++level;
         exploded_balloons = 0;
+        shock_level = 1;
+        display_weapon_status();
         if(level<=MAX_LEVEL)
         {
             display_level();
@@ -1671,6 +1708,7 @@ void handle_items(void)
 {
     uint8_t i;
     
+    // printd(distance,3,40,WHITE);//(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
     for(i=0;i<NUMBER_OF_ITEMS;++i)
     {
         --SPRX[ITEM_INDEX+i];
@@ -1695,7 +1733,7 @@ void handle_items(void)
 
             if(level<=FEWEST_GIFTS_THRESHOLD)
             {
-                if((item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
+                if(distance>LEVEL_DISTANCE/2 && (item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1706,7 +1744,7 @@ void handle_items(void)
             }
             else if(level<=FEWER_GIFTS_THRESHOLD)
             {
-                if((item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
+                if(distance>LEVEL_DISTANCE/3 && (item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1718,7 +1756,7 @@ void handle_items(void)
             }
             else // Very high and difficult levels 8-20
             {
-                if((item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
+                if(distance>LEVEL_DISTANCE/4 && (item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
 					spawn_item(i);
                 }
@@ -1739,8 +1777,9 @@ void handle_items(void)
 
 uint8_t befana_x;
 uint8_t befana_y;
-	
 
+
+#define X_COLLISION_RANGE 13
 
 uint8_t one_sprite_collision(uint8_t i)
 {
@@ -1750,14 +1789,14 @@ uint8_t one_sprite_collision(uint8_t i)
     x = SPRX[i];
     if(x>=befana_x)
     {
-        if((x-befana_x)>20)
+        if((x-befana_x)>X_COLLISION_RANGE)
         {
             return 0;
         }
     }
     else // x < befana_x
     {
-        if((befana_x-x)>20)
+        if((befana_x-x)>X_COLLISION_RANGE)
         {
             return 0;
         }
@@ -1806,7 +1845,7 @@ uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t 
     y = SPRY[balloon_index];
     if(y>=SPRY[a_bullet_index])
     {
-        if((y-SPRY[a_bullet_index])>size+2)
+        if((y-SPRY[a_bullet_index])>size+2) // TODO: avoid +2
         {
             return 0;
         }
@@ -1866,9 +1905,6 @@ void ballon_hit(uint8_t i)
     }
 }
 
-#define MIN_SHOCK 4
-
-
 
 uint8_t befana_sprite_collision(void)
 {
@@ -1922,25 +1958,25 @@ uint8_t bullet_balloon_collision(uint8_t b)
 }
 
 
-void handle_befana_color(void)
+void handle_immortality(void)
 {
 	if(lost_life_immortability)
 	{
 		--lost_life_immortability;
 	}
-    else if(weapon_cool_down)
-    {
-        SPRC[BEFANA_INDEX]=PURPLE;
-        while(MULTIPLEX_DONE)
-        {
-            MULTIPLEX_DONE=0;
-            SPRUPDATEFLAG=1;
-        }
-    }
-    else
-    {
-        SPRC[BEFANA_INDEX]=RED;
-    }
+    // else if(weapon_cool_down)
+    // {
+        // SPRC[BEFANA_INDEX]=PURPLE;
+        // while(MULTIPLEX_DONE)
+        // {
+            // MULTIPLEX_DONE=0;
+            // SPRUPDATEFLAG=1;
+        // }
+    // }
+    // else
+    // {
+        // SPRC[BEFANA_INDEX]=RED;
+    // }
 }
 
 
@@ -1948,15 +1984,14 @@ void handle_befana_color(void)
 #define BALLOON_ARMOR_DAMAGE 1
 
 
-void decrease_armor(uint8_t amount)
+void decrease_armor(void)
 {
-	if(armor_level>amount)
+	if(armor_level)
 	{
-		armor_level-=amount;
+		--armor_level;
 	}
-	else
+	if(!armor_level)
 	{
-		armor_level=0;
 		SPRC[BEFANA_INDEX]=BROWN;
 	}
 }
@@ -2022,10 +2057,10 @@ void handle_balloon_collision(void)
                 SPRY[bullet_sprite_index[b]]=255;
                 
                 ballon_hit(ballon_hit_by_bullet);
-                if(!super_weapon_status)
-                {
+                // if(!super_weapon_status)
+                // {
                     SPRY[SMOKE_INDEX]=255;
-                }
+                // }
                 increase_points(BALLOON_POINTS);
                 // _XL_EXPLOSION_SOUND();
                 display_score();
@@ -2050,15 +2085,19 @@ void handle_balloon_collision(void)
 
             if(armor_level)
             {
-                decrease_armor(BALLOON_ARMOR_DAMAGE);
+                decrease_armor();
                 display_armor();
+                
+                shock_level = 1;
+                set_fire_speed(1);
+                display_weapon_status();
             }
             else
             {
                 --lives;
                 display_lives();
 
-                weapon_cool_down=HIT_bullet_cool_down;
+                // weapon_cool_down=HIT_bullet_cool_down;
                 shock_level = 1;
                 set_fire_speed(1);
                 display_weapon_status();
@@ -2070,18 +2109,13 @@ void handle_balloon_collision(void)
 }
 
 
-void increase_armor(uint8_t amount)
+void increase_armor(void)
 {
-    armor_level+=amount;
-    if(armor_level>MAX_ARMOR)
+    if(armor_level<MAX_ARMOR)
     {
-        armor_level = MAX_ARMOR;
+        ++armor_level;
     }
 }
-
-
-#define MAX_SHOCK_LEVEL 4
-#define SUPER_SHOCK_CHARGE 10
 
 
 uint8_t handle_item_collision(void)
@@ -2114,7 +2148,7 @@ uint8_t handle_item_collision(void)
 			else if(item_type[i]==SHIELD_ITEM)
 			{
 				increase_points(ARMOR_POINTS);
-				increase_armor(ARMOR_RECHARGE);
+				increase_armor();
                 display_armor();
 			}
             display_score();
@@ -2438,7 +2472,7 @@ int main()
 
         display_shock();
         
-        print("ARMOR",5,ARMOR_OFFSET-5,GREY);
+        print("ARMOR",5,ARMOR_OFFSET,GREY);
         display_armor();
         
 
@@ -2481,6 +2515,7 @@ int main()
                 handle_stars();
             
                 handle_befana();
+                handle_bullets();
                 
                 handle_balloons();
                 handle_dead_balloons();
@@ -2489,7 +2524,7 @@ int main()
                 handle_santa();
                 
                 handle_grass();
-	
+
                 handle_items();
 
                 
@@ -2517,16 +2552,17 @@ int main()
                     
                 }
 
-                // if(!(counter&3))
-                // {
-                // }
+                if(!(counter&3))
+                {
+                    handle_item_collision();
+                }
                 
 				if(!(counter&7))
 				{
 
-                    display_weapon_status();
+                    // display_weapon_status();
 
-					handle_befana_color();
+					handle_immortality();
 
 				}
                 if(!(counter&63))
