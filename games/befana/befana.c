@@ -168,8 +168,8 @@ uint8_t shock_level;
 
 #define EXTRA_LIFE_THRESHOLD 5000
 
-// uint8_t SPRX[SMOKE_INDEX];
-// uint8_t SPRY[SMOKE_INDEX];
+// uint8_t SPRX[BULLET_INDEX];
+// uint8_t SPRY[BULLET_INDEX];
 
 #define GAME_OVER_TIME 150
 // #define TITLE_SCREEN_TIME 100
@@ -220,7 +220,7 @@ static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
 static uint8_t balloon_to_rest[NUMBER_OF_BALLOONS];
 
-static uint8_t lost_life_immortability;
+static uint8_t immortality;
 
 #define DEAD_COOL_DOWN 9
 
@@ -315,14 +315,20 @@ void music_switch(uint8_t toggle)
 // Item         11
 // Bullets      12,13,14,15
 // Santa        16,17
+
+
+
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
 #define ITEM_INDEX   ((BEFANA_INDEX)+1)
-#define SMOKE_INDEX  ((ITEM_INDEX)+1)
-#define SANTA_INDEX  ((SMOKE_INDEX)+NUMBER_OF_BULLETS)
+#define BULLET_INDEX ((ITEM_INDEX)+1)
+#define SANTA_INDEX  ((BULLET_INDEX)+NUMBER_OF_BULLETS)
 
 #define SMOKE 60
-#define SHIELD_INDEX (SMOKE_INDEX)
 
+
+#define TOTAL_SPRITE_COUNT ((NUMBER_OF_BALLOONS)+1+1+(NUMBER_OF_BULLETS)+2)
+
+#define TOTAL_SPRITE_NUMBER 1
 
 /*
 0	$00	black
@@ -360,8 +366,8 @@ void music_switch(uint8_t toggle)
 #define LIGHT_BLUE  0x0E
 #define LIGHT_GREY  0x0F
 
-#define NUMBER_OF_BULLETS 4
-static uint8_t bullet_sprite_index[] = {SHIELD_INDEX, SHIELD_INDEX+1, SHIELD_INDEX+2, SHIELD_INDEX+3}; 
+#define NUMBER_OF_BULLETS 3
+static uint8_t bullet_sprite_index[] = {BULLET_INDEX, BULLET_INDEX+1, BULLET_INDEX+2}; 
 static uint8_t bullet_status[NUMBER_OF_BULLETS];
 // static uint8_t bullet_status[NUMBER_OF_BULLETS];
 
@@ -455,14 +461,14 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 #define LEVEL_OFFSET (DISTANCE_OFFSET+2)
 #define ARMOR_OFFSET ((LEVEL_OFFSET)+14-5)
 
-#define SHOCK_OFFSET (LEVEL_OFFSET+4)
+#define SHOCK_OFFSET (LEVEL_OFFSET+5)
 #define HI_OFFSET (NUMBER_OF_COLS-9)
 #define INITIAL_HI_OFFSET (NUMBER_OF_COLS/2-2)
 
 
 #define MIN_SHOCK 4
 
-#define MAX_SHOCK_LEVEL 4
+#define MAX_SHOCK_LEVEL NUMBER_OF_BULLETS
 #define SUPER_SHOCK_CHARGE 10
 
 
@@ -480,6 +486,9 @@ static uint8_t input;
 
 static uint8_t prev_slow_loop;
 static uint8_t prev_fast_loop;
+
+
+static uint8_t alive;
 
 void _short_sound(void)
 {
@@ -772,14 +781,14 @@ void display_weapon_status(void)
 {
     if(super_weapon_status)
     {
-        if((counter&31)&1)
-        {
-            color(4,SHOCK_OFFSET,RED);
-        }
-        else
-        {
-            color(4,SHOCK_OFFSET,YELLOW);
-        }
+        // if((counter&7)&1)
+        // {
+            color(3,SHOCK_OFFSET,RED);
+        // }
+        // else
+        // {
+            // color(3,SHOCK_OFFSET,YELLOW);
+        // }
     }
     // else if(weapon_cool_down)
     // {
@@ -788,7 +797,7 @@ void display_weapon_status(void)
     else
     {
         color(shock_level,SHOCK_OFFSET,YELLOW);
-        color(4-shock_level, SHOCK_OFFSET+1+shock_level-1,BLACK);
+        color(NUMBER_OF_BULLETS-shock_level, SHOCK_OFFSET+shock_level,BLACK);
         // if((counter&15)&1)
         // {
             // color(shock_level,SHOCK_OFFSET,GREEN);
@@ -804,10 +813,15 @@ void display_weapon_status(void)
 void display_shock(void)
 {
         // print("SHOCK",5,SHOCK_OFFSET,RED);
-        POKE(SCREEN+SHOCK_OFFSET+0,SHOCK_TILE);
-        POKE(SCREEN+SHOCK_OFFSET+1,SHOCK_TILE);
-        POKE(SCREEN+SHOCK_OFFSET+2,SHOCK_TILE);
-        POKE(SCREEN+SHOCK_OFFSET+3,SHOCK_TILE);
+        uint8_t i;
+        
+        for(i=0;i<NUMBER_OF_BULLETS;++i)
+        {
+            POKE(SCREEN+SHOCK_OFFSET+i,SHOCK_TILE);
+        }
+        // POKE(SCREEN+SHOCK_OFFSET+1,SHOCK_TILE);
+        // POKE(SCREEN+SHOCK_OFFSET+2,SHOCK_TILE);
+        // POKE(SCREEN+SHOCK_OFFSET+3,SHOCK_TILE);
 
 }
 
@@ -1005,15 +1019,15 @@ void handle_bullet(uint8_t b)
 
 void display_smoke(void)
 {
-    SPRX[SMOKE_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
-    SPRY[SMOKE_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
-    SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
+    SPRX[BULLET_INDEX]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
+    SPRY[BULLET_INDEX]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+    SPRF[BULLET_INDEX]=GFX_START_INDEX+SMOKE+(counter&1);
 }
 
 
 void hide_smoke(void)
 {
-    SPRY[SMOKE_INDEX]=255;  
+    SPRY[BULLET_INDEX]=255;  
 }
 
 
@@ -1105,6 +1119,10 @@ void handle_befana(void)
                 {
                     SPRF[a_bullet_index]=GFX_START_INDEX+SHIELD_ON;
                     --super_weapon_status;
+                    if(!super_weapon_status)
+                    {
+                        display_weapon_status();
+                    }
 
                 }
                 else
@@ -1114,7 +1132,11 @@ void handle_befana(void)
             }
             weapon_cool_down=bullet_cool_down;
     }
-    
+
+}
+
+void handle_befana_shape(void)
+{
     if(armor_level)
     {
         SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA_ARMOR+((counter/4)&3);
@@ -1124,7 +1146,6 @@ void handle_befana(void)
         SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);			
     }
 }
-
 
 static const uint8_t GRASS_SHAPE[8][7]=
 {
@@ -1368,7 +1389,9 @@ void check_level_trigger()
         // display_weapon_status();
         // armor_level = 0;
         // display_armor();
-        SPRC[BEFANA_INDEX]=RED;
+        // SPRC[BEFANA_INDEX]=RED;
+        SPRC[BEFANA_INDEX]=GREY_LEVEL[armor_level];
+
 
         
         if(level<=MAX_LEVEL)
@@ -1697,7 +1720,7 @@ void spawn_item(void)
 	
 	rnd = rand()&3;
 	
-	SPRY[ITEM_INDEX]=100+40+20-(rand()&0x1F);
+	SPRY[ITEM_INDEX]=100+40-(rand()&0x3F);
     SPRC[ITEM_INDEX]=GIFT_COLORS[rnd];
 	
 	if(!rnd)
@@ -1854,7 +1877,7 @@ uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t 
             return 0;
         }
     }
-    else // x < SPRX[SMOKE_INDEX]
+    else // x < SPRX[BULLET_INDEX]
     {
         if((SPRX[a_bullet_index]-x)>12)
         {
@@ -1870,7 +1893,7 @@ uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t 
             return 0;
         }
     }
-    else // y < SPRY[SMOKE_INDEX]
+    else // y < SPRY[BULLET_INDEX]
     {
         if((SPRY[a_bullet_index]-y)>size)
         {
@@ -1980,9 +2003,9 @@ uint8_t bullet_balloon_collision(uint8_t b)
 
 void handle_immortality(void)
 {
-	if(lost_life_immortability)
+	if(immortality)
 	{
-		--lost_life_immortability;
+		--immortality;
 	}
     // else if(weapon_cool_down)
     // {
@@ -2001,6 +2024,7 @@ void handle_immortality(void)
 
 
 #define LOST_LIFE_IMMORTALITY 15
+#define EXTRA_ARMOR_IMMORTALITY 25
 #define BALLOON_ARMOR_DAMAGE 1
 
 
@@ -2010,10 +2034,11 @@ void decrease_armor(void)
 	{
 		--armor_level;
 	}
-	if(!armor_level)
-	{
-		SPRC[BEFANA_INDEX]=RED;
-	}
+    SPRC[BEFANA_INDEX]=GREY_LEVEL[armor_level];
+	// if(!armor_level)
+	// {
+		// SPRC[BEFANA_INDEX]=RED;
+	// }
 }
 
 
@@ -2073,7 +2098,7 @@ void handle_balloon_collision(void)
                 ballon_hit(ballon_hit_by_bullet);
                 // if(!super_weapon_status)
                 // {
-                    SPRY[SMOKE_INDEX]=255;
+                    SPRY[BULLET_INDEX]=255;
                 // }
                 increase_points(BALLOON_POINTS);
                 // _XL_EXPLOSION_SOUND();
@@ -2087,13 +2112,13 @@ void handle_balloon_collision(void)
             }
         }
     }
-    if(!lost_life_immortability)
+    if(!immortality)
     {
         balloon_hit_by_befana = befana_sprite_collision();
         if(balloon_hit_by_befana<255)
         {
             ballon_hit(balloon_hit_by_befana);
-            lost_life_immortability=LOST_LIFE_IMMORTALITY;
+            immortality=LOST_LIFE_IMMORTALITY;
 
             falling_balloon[balloon_hit_by_befana] = 1;
 
@@ -2105,11 +2130,9 @@ void handle_balloon_collision(void)
             }
             else
             {
-                --lives;
-                display_lives();
-
+                alive = 0;
+                _XL_EXPLOSION_SOUND();
                 // weapon_cool_down=HIT_bullet_cool_down;
-
 
             }
             shock_level = 1;
@@ -2129,6 +2152,10 @@ void increase_armor(void)
         ++armor_level;
         SPRC[BEFANA_INDEX]=GREY_LEVEL[armor_level];
 
+    }
+    else
+    {
+        immortality = EXTRA_ARMOR_IMMORTALITY;
     }
 }
 
@@ -2437,7 +2464,7 @@ int main()
         slow_loop=0;
         fast_loop=0;
         
-		lost_life_immortability=0;
+		immortality=0;
 		
         points = 0;
 		level = INITIAL_LEVEL;
@@ -2471,9 +2498,9 @@ int main()
         print("     ",5,INITIAL_HI_OFFSET,WHITE);
 
 
-        SPRF[SMOKE_INDEX]=GFX_START_INDEX+SMOKE;
-        SPRM[SMOKE_INDEX]=0;
-        SPRC[SMOKE_INDEX]=YELLOW;
+        SPRF[BULLET_INDEX]=GFX_START_INDEX+SMOKE;
+        SPRM[BULLET_INDEX]=0;
+        SPRC[BULLET_INDEX]=YELLOW;
         
 		POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON);
 		POKE(COLOR+NUMBER_OF_COLS-2,RED);        
@@ -2529,10 +2556,10 @@ int main()
         //  1 Befana
         //  2 Santa
         //  1 gift
-        //  4 bullets (including smoke)
-        NUMSPRITES = 18;
+        //  3 bullets (including smoke)
+        NUMSPRITES = TOTAL_SPRITE_COUNT;
 
-
+        alive = 1;
         while(lives && (level<=MAX_LEVEL)) 
         {
             // printd(exploded_balloons,3,40,WHITE);
@@ -2540,7 +2567,11 @@ int main()
                 // printd(weapon_cool_down,3,40,WHITE);
                 handle_stars();
             
-                handle_befana();
+                if(alive)
+                {
+                    handle_befana();
+                }
+                handle_befana_shape();
                 handle_bullets();
                 
                 handle_balloons();
@@ -2559,13 +2590,13 @@ int main()
                     handle_balloon_collision();
                     handle_item_collision();
 
-                    // if(lost_life_immortability)
+                    // if(immortality)
                     // {
                         // SPRC[BEFANA_INDEX]=YELLOW;
                     // }
                 }
                 ++counter;
-                if(lost_life_immortability)
+                if(immortality)
                 {
                     if(counter&1)
                     {
@@ -2598,6 +2629,20 @@ int main()
                     // decrease_lives(1);
                     // display_lives();
 					++distance;
+                }
+                if(!alive)
+                {
+                    ++SPRY[BEFANA_INDEX];
+                    if(SPRY[BEFANA_INDEX]>230)
+                    {
+                        --lives;
+                        display_lives();
+                        _silence();
+                        immortality = LOST_LIFE_IMMORTALITY;
+                        alive = 1;
+                        SPRX[BEFANA_INDEX] = 30;
+                        SPRY[BEFANA_INDEX] = 130;
+                    }
                 }
                 check_level_trigger();
 		
