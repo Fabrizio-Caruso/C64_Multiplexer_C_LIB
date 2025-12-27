@@ -310,17 +310,62 @@ void music_switch(uint8_t toggle)
 
 #define GFX_START_INDEX (GFX_START/0x40U)
 
+// Balloons      0,..,9
+// Befana       10
+// Item         11
+// Bullets      12,13,14,15
+// Santa        16,17
 #define BEFANA_INDEX (NUMBER_OF_BALLOONS)
-#define ITEM_INDEX (BEFANA_INDEX+1)
-#define SMOKE_INDEX (ITEM_INDEX+NUMBER_OF_ITEMS)
+#define ITEM_INDEX   ((BEFANA_INDEX)+1)
+#define SMOKE_INDEX  ((ITEM_INDEX)+1)
+#define SANTA_INDEX  ((SMOKE_INDEX)+NUMBER_OF_BULLETS)
 
 #define SMOKE 60
-#define SHIELD_INDEX SMOKE_INDEX
+#define SHIELD_INDEX (SMOKE_INDEX)
+
+
+/*
+0	$00	black
+1	$01	white
+2	$02	red
+3	$03	cyan
+4	$04	purple
+5	$05	green
+6	$06	blue
+7	$07	yellow
+8	$08	orange
+9	$09	brown
+10	$0A	pink
+11	$0B	dark grey
+12	$0C	grey
+13	$0D	light green
+14	$0E	light blue
+15	$0F	light grey 
+
+*/
+#define BLACK       0x00
+#define WHITE       0x01
+#define RED         0x02
+#define CYAN        0x03
+#define PURPLE      0x04
+#define GREEN       0x05
+#define BLUE        0x06
+#define YELLOW      0x07
+#define ORANGE      0x08
+#define BROWN       0x09
+#define PINK        0x0A
+#define DARK_GREY   0x0B
+#define GREY        0x0C
+#define LIGHT_GREEN 0x0D
+#define LIGHT_BLUE  0x0E
+#define LIGHT_GREY  0x0F
 
 #define NUMBER_OF_BULLETS 4
 static uint8_t bullet_sprite_index[] = {SHIELD_INDEX, SHIELD_INDEX+1, SHIELD_INDEX+2, SHIELD_INDEX+3}; 
 static uint8_t bullet_status[NUMBER_OF_BULLETS];
 // static uint8_t bullet_status[NUMBER_OF_BULLETS];
+
+static uint8_t GREY_LEVEL[] = {RED, DARK_GREY, GREY, LIGHT_GREY};
 
 static uint8_t counter;
 static uint8_t grass_counter;
@@ -395,41 +440,6 @@ static uint16_t points = 0;
 // #define BIG_FIXED_STAR 29
 // #define COMET 33
 
-/*
-0	$00	black
-1	$01	white
-2	$02	red
-3	$03	cyan
-4	$04	purple
-5	$05	green
-6	$06	blue
-7	$07	yellow
-8	$08	orange
-9	$09	brown
-10	$0A	pink
-11	$0B	dark grey
-12	$0C	grey
-13	$0D	light green
-14	$0E	light blue
-15	$0F	light grey 
-
-*/
-#define BLACK       0x00
-#define WHITE       0x01
-#define RED         0x02
-#define CYAN        0x03
-#define PURPLE      0x04
-#define GREEN       0x05
-#define BLUE        0x06
-#define YELLOW      0x07
-#define ORANGE      0x08
-#define BROWN       0x09
-#define PINK        0x0A
-#define DARK_GREY   0x0B
-#define GREY        0x0C
-#define LIGHT_GREEN 0x0D
-#define LIGHT_BLUE  0x0E
-#define LIGHT_GREY  0x0F
 
 // {CYAN, PURPLE, GREEN, LIGHT_BLUE, YELLOW, RED, LIGHT_GREY, CYAN};
 const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_GREEN, RED, LIGHT_GREY, CYAN};
@@ -752,6 +762,12 @@ void draw_the_moon(void)
 
 
 
+
+void set_fire_speed(uint8_t shock_level)
+{
+    bullet_cool_down = bullet_cool_down_value[shock_level-1];
+}
+
 void display_weapon_status(void)
 {
     if(super_weapon_status)
@@ -919,7 +935,8 @@ void init_player(uint8_t sprite_index)
         SPRC[bullet_sprite_index[i]] = YELLOW;
     }
 
-    weapon_cool_down = 10;
+    shock_level = 1;
+    set_fire_speed(1);
 }
 
 
@@ -1096,7 +1113,6 @@ void handle_befana(void)
                 }
             }
             weapon_cool_down=bullet_cool_down;
-
     }
     
     if(armor_level)
@@ -1283,12 +1299,6 @@ void activate_balloon(uint8_t i)
 }
 
 
-// void display_distance(void)
-// {
-    // printd(distance,4,DISTANCE_OFFSET,WHITE);
-// }
-
-
 void display_level(void)
 {
     printd(level,2,LEVEL_OFFSET,WHITE);
@@ -1353,8 +1363,14 @@ void check_level_trigger()
 
         ++level;
         exploded_balloons = 0;
-        shock_level = 1;
-        display_weapon_status();
+        // shock_level = 1;
+        // set_fire_speed(1);
+        // display_weapon_status();
+        // armor_level = 0;
+        // display_armor();
+        SPRC[BEFANA_INDEX]=RED;
+
+        
         if(level<=MAX_LEVEL)
         {
             display_level();
@@ -1363,7 +1379,7 @@ void check_level_trigger()
             display_new_level();
         }
     }
-    else if(distance==3)
+    else if(distance==4)
     {
         uint8_t i;
         
@@ -1375,7 +1391,7 @@ void check_level_trigger()
         }
     }
     
-    if(distance==LEVEL_DISTANCE-2)
+    if(distance==LEVEL_DISTANCE-3)
     {
         uint8_t i;
         
@@ -1584,9 +1600,9 @@ void move_balloons(void)
     }
 }
 
+
 void handle_balloons(void)
 {
-
 	_handle_balloons();
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
@@ -1595,11 +1611,12 @@ void handle_balloons(void)
 			_handle_balloons();
 		}
 	}
-	else if((level>=12) && (!(level&1)) && (counter&3))
+	// if((level>=12) && (!(level&1)) && (counter&3))
+    if(level>=12)
 	{
 		_handle_balloons();
 	}
-    else if(level>=18)
+    if(level>=18)
     {
 		_handle_balloons();        
     }
@@ -1628,77 +1645,80 @@ void handle_stars(void)
 
 
 // const uint8_t item_colors[NUMBER_OF_ITEMS] = {PURPLE, BLUE, GREEN, CYAN};
-const uint8_t item_colors[NUMBER_OF_ITEMS] = {GREEN, CYAN};
+const uint8_t GIFT_COLORS[] = {PURPLE, GREEN, CYAN, BLUE};
 
 void init_items(void)
 {
-    uint8_t i;
+    // uint8_t i;
     
-    for(i=0;i<NUMBER_OF_ITEMS;++i)
-    {
-        SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
-        SPRC[ITEM_INDEX+i]=item_colors[i];
-        SPRY[ITEM_INDEX+i]=80+40+40*i;
-        SPRM[ITEM_INDEX+i]=1;
-        SPRX[ITEM_INDEX+i]=80+i*64;
-    }
+    // for(i=0;i<NUMBER_OF_ITEMS;++i)
+    // {
+        // SPRF[ITEM_INDEX]=GFX_START_INDEX+GIFT;
+        // SPRC[ITEM_INDEX]=CYAN; // TODO: should be random
+        SPRY[ITEM_INDEX]=255;
+        SPRM[ITEM_INDEX]=1;
+        // SPRX[ITEM_INDEX]=80+i*64;
+        SPRX[ITEM_INDEX]=255;
+
+    // }
 }
 
 void clear_items(void)
 {
-    uint8_t i;
+    // uint8_t i;
     
-    for(i=0;i<NUMBER_OF_ITEMS;++i)
-    {
+    // for(i=0;i<NUMBER_OF_ITEMS;++i)
+    // {
         // SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
         // SPRC[ITEM_INDEX+i]=BALLOON_COLORS[i];
-        SPRY[ITEM_INDEX+i]=255;
+        SPRY[ITEM_INDEX]=255;
         // SPRM[ITEM_INDEX+i]=1;
         // SPRX[ITEM_INDEX+i]=i*64;
-    }
+    // }
 }
 
 #define FEWEST_GIFTS_THRESHOLD 3
 #define FEWER_GIFTS_THRESHOLD 7
 
 
-#define MAX_NO_ITEM_THRESHOLD 5
-#define MAX_GIFT_THRESHOLD 3
+#define MAX_NO_ITEM_THRESHOLD 2
+#define MAX_GIFT_THRESHOLD 4
 
 
-static uint8_t item_type[NUMBER_OF_ITEMS];
+static uint8_t item_type;
 
 #define GIFT_ITEM 0
 #define SHIELD_ITEM 1
 #define FIRE_ITEM 2
 
-void spawn_item(uint8_t i)
+void spawn_item(void)
 {
 	uint8_t rnd; 
 	
 	rnd = rand()&3;
 	
-	SPRY[ITEM_INDEX+i]=100+40+i*40-(rand()&0x1F);
+	SPRY[ITEM_INDEX]=100+40+20-(rand()&0x1F);
+    SPRC[ITEM_INDEX]=GIFT_COLORS[rnd];
 	
 	if(!rnd)
 	{
-		item_type[i]=SHIELD_ITEM;
-		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD;
+		item_type=SHIELD_ITEM;
+		SPRF[ITEM_INDEX]=GFX_START_INDEX+SHIELD;
 		// TODO: update counters?
 	}
 	else 
 	{
-		item_type[i]=GIFT_ITEM;
-		SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT;
+		item_type=GIFT_ITEM;
+		SPRF[ITEM_INDEX]=GFX_START_INDEX+GIFT;
 		no_item=0;
 		++item;
 	}		
 }
 
 
-void unspawn_item(uint8_t i)
+void unspawn_item(void)
 {
-	SPRY[ITEM_INDEX+i]=255;
+	SPRY[ITEM_INDEX]=255;
 	++no_item;
 	item=0;	
 }
@@ -1706,51 +1726,51 @@ void unspawn_item(uint8_t i)
 
 void handle_items(void)
 {
-    uint8_t i;
+    // uint8_t i;
     
     // printd(distance,3,40,WHITE);//(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
-    for(i=0;i<NUMBER_OF_ITEMS;++i)
-    {
-        --SPRX[ITEM_INDEX+i];
+    // for(i=0;i<NUMBER_OF_ITEMS;++i)
+    // {
+        --SPRX[ITEM_INDEX];
 		
 		
         if(!(counter&3))
         {
-			if(item_type[i]==GIFT_ITEM)
+			if(item_type==GIFT_ITEM)
 			{
 				// TODO: Fix non-rotating items
-				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
+				SPRF[ITEM_INDEX]=GFX_START_INDEX+GIFT+((counter/4)%3);
 			}
-			else if(item_type[i]==SHIELD_ITEM)
+			else if(item_type==SHIELD_ITEM)
 			{// TODO: To optimize
-				SPRF[ITEM_INDEX+i]=GFX_START_INDEX+SHIELD-((counter/4)&3);
+				SPRF[ITEM_INDEX]=GFX_START_INDEX+SHIELD-((counter/4)&3);
 			}
         }
         
         // Re-position item
-        if(!SPRX[ITEM_INDEX+i])
+        if(!SPRX[ITEM_INDEX])
         {
 
             if(level<=FEWEST_GIFTS_THRESHOLD)
             {
                 if(distance>LEVEL_DISTANCE/2 && (item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
-					spawn_item(i);
+					spawn_item();
                 }
                 else
                 {
-					unspawn_item(i);
+					unspawn_item();
                 }
             }
             else if(level<=FEWER_GIFTS_THRESHOLD)
             {
                 if(distance>LEVEL_DISTANCE/3 && (item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
-					spawn_item(i);
+					spawn_item();
                 }
                 else
                 {
-					unspawn_item(i);
+					unspawn_item();
                 }
                 
             }
@@ -1758,16 +1778,16 @@ void handle_items(void)
             {
                 if(distance>LEVEL_DISTANCE/4 && (item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
                 {
-					spawn_item(i);
+					spawn_item();
                 }
                 else
                 {
-					unspawn_item(i);
+					unspawn_item();
                 }
             }
             
         }
-    }
+    
 }
 
 #define COLLISION_BOX_X 8
@@ -1992,7 +2012,7 @@ void decrease_armor(void)
 	}
 	if(!armor_level)
 	{
-		SPRC[BEFANA_INDEX]=BROWN;
+		SPRC[BEFANA_INDEX]=RED;
 	}
 }
 
@@ -2031,12 +2051,6 @@ void handle_dead_balloons(void)
             SPRF[i]=GFX_START_INDEX + BALLOON;
         }
     }
-}
-
-
-void set_fire_speed(uint8_t shock_level)
-{
-    bullet_cool_down = bullet_cool_down_value[shock_level-1];
 }
 
 
@@ -2088,9 +2102,6 @@ void handle_balloon_collision(void)
                 decrease_armor();
                 display_armor();
                 
-                shock_level = 1;
-                set_fire_speed(1);
-                display_weapon_status();
             }
             else
             {
@@ -2098,12 +2109,13 @@ void handle_balloon_collision(void)
                 display_lives();
 
                 // weapon_cool_down=HIT_bullet_cool_down;
-                shock_level = 1;
-                set_fire_speed(1);
-                display_weapon_status();
-                _silence();
+
 
             }
+            shock_level = 1;
+            set_fire_speed(1);
+            display_weapon_status();
+            _silence();
         }
     }
 }
@@ -2113,20 +2125,23 @@ void increase_armor(void)
 {
     if(armor_level<MAX_ARMOR)
     {
+
         ++armor_level;
+        SPRC[BEFANA_INDEX]=GREY_LEVEL[armor_level];
+
     }
 }
 
 
 uint8_t handle_item_collision(void)
 {
-    uint8_t i;
+    // uint8_t i;
     
-    for(i=0;i<=NUMBER_OF_ITEMS-1;++i)
-    {
-        if(one_sprite_collision(ITEM_INDEX+i))
+    // for(i=0;i<=NUMBER_OF_ITEMS-1;++i)
+    // {
+        if(one_sprite_collision(ITEM_INDEX))
         {
-			if(item_type[i]==GIFT_ITEM)
+			if(item_type==GIFT_ITEM)
 			{
 				display_lives();
 				increase_points(GIFT_POINTS);
@@ -2135,7 +2150,6 @@ uint8_t handle_item_collision(void)
                 if(shock_level==MAX_SHOCK_LEVEL)
                 {
                     super_weapon_status = SUPER_SHOCK_CHARGE;
-                    // shock_level=0;
                 }
                 else
                 {
@@ -2145,7 +2159,7 @@ uint8_t handle_item_collision(void)
                 display_weapon_status();
 
 			}
-			else if(item_type[i]==SHIELD_ITEM)
+			else if(item_type==SHIELD_ITEM)
 			{
 				increase_points(ARMOR_POINTS);
 				increase_armor();
@@ -2154,10 +2168,11 @@ uint8_t handle_item_collision(void)
             display_score();
 
 			_XL_ZAP_SOUND();
-			SPRY[ITEM_INDEX+i]=255;
-			return i;
+			SPRY[ITEM_INDEX]=255;
+			return 1;
         }
-	}
+        return 0;
+	// }
 }
 
 
@@ -2324,16 +2339,16 @@ void handle_santa(void)
         uint8_t befana_x;
         uint8_t befana_y; 
         
-        SPRF[17] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
-        SPRY[17] = santa_y;
-        SPRX[17] = santa_x;
-        SPRM[17] = 1;
-        SPRC[17] = RED;
+        SPRF[SANTA_INDEX] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
+        SPRY[SANTA_INDEX] = santa_y;
+        SPRX[SANTA_INDEX] = santa_x;
+        SPRM[SANTA_INDEX] = 1;
+        SPRC[SANTA_INDEX] = RED;
         
-        SPRF[18] = GFX_START_INDEX+BEFANA+7+((counter/4)%3);
-        SPRY[18] = santa_y;
-        SPRX[18] = santa_x+12;
-        SPRM[18] = 1;
+        SPRF[SANTA_INDEX+1] = GFX_START_INDEX+BEFANA+7+((counter/4)%3);
+        SPRY[SANTA_INDEX+1] = santa_y;
+        SPRX[SANTA_INDEX+1] = santa_x+12;
+        SPRM[SANTA_INDEX+1] = 1;
         
         
         ++santa_x;
@@ -2347,7 +2362,7 @@ void handle_santa(void)
         {
             santa = 0;
             music_switch(0);
-            SPRC[BEFANA_INDEX] = RED;
+            SPRC[BEFANA_INDEX]=GREY_LEVEL[armor_level];
         }
         
         befana_x = SPRX[BEFANA_INDEX];
@@ -2397,7 +2412,9 @@ int main()
 		clear_stars();
 
         init_background();
-        
+
+        NUMSPRITES = _NUMBER_OF_SPRITES_;
+
         MULTIPLEX_DONE=1;
         
         init_letters();
@@ -2506,7 +2523,16 @@ int main()
         
         shock_level = 1;
         set_fire_speed(1);
+        display_weapon_status();
         
+        // 10 balloons
+        //  1 Befana
+        //  2 Santa
+        //  1 gift
+        //  4 bullets (including smoke)
+        NUMSPRITES = 18;
+
+
         while(lives && (level<=MAX_LEVEL)) 
         {
             // printd(exploded_balloons,3,40,WHITE);
@@ -2543,7 +2569,7 @@ int main()
                 {
                     if(counter&1)
                     {
-                        SPRC[BEFANA_INDEX] = BLACK;
+                        SPRC[BEFANA_INDEX] = PURPLE;
                     }
                     else
                     {
@@ -2640,8 +2666,8 @@ int main()
                         SPRF[BEFANA_INDEX] = GFX_START_INDEX+BEFANA+((counter/4)&3);
                         for(i=0;i<NUMBER_OF_ITEMS;++i)
                         {
-                            SPRF[ITEM_INDEX+i]=GFX_START_INDEX+GIFT+((counter/4)%3);
-                            --SPRX[ITEM_INDEX+i];
+                            SPRF[ITEM_INDEX]=GFX_START_INDEX+GIFT+((counter/4)%3);
+                            --SPRX[ITEM_INDEX];
                         }
                     }
                     SPRUPDATEFLAG=1;
