@@ -1829,14 +1829,14 @@ uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t 
     x = SPRX[balloon_index];
     if(x>=SPRX[a_bullet_index])
     {
-        if((x-SPRX[a_bullet_index])>size)
+        if((x-SPRX[a_bullet_index])>12)
         {
             return 0;
         }
     }
     else // x < SPRX[SMOKE_INDEX]
     {
-        if((SPRX[a_bullet_index]-x)>size)
+        if((SPRX[a_bullet_index]-x)>12)
         {
             return 0;
         }
@@ -1845,14 +1845,14 @@ uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t 
     y = SPRY[balloon_index];
     if(y>=SPRY[a_bullet_index])
     {
-        if((y-SPRY[a_bullet_index])>size+2) // TODO: avoid +2
+        if((y-SPRY[a_bullet_index])>size) // TODO: avoid +2
         {
             return 0;
         }
     }
     else // y < SPRY[SMOKE_INDEX]
     {
-        if((SPRY[a_bullet_index]-y)>size+2)
+        if((SPRY[a_bullet_index]-y)>size)
         {
             return 0;
         }
@@ -2347,6 +2347,7 @@ void handle_santa(void)
         {
             santa = 0;
             music_switch(0);
+            SPRC[BEFANA_INDEX] = RED;
         }
         
         befana_x = SPRX[BEFANA_INDEX];
@@ -2366,7 +2367,6 @@ void handle_santa(void)
             --santa_bonus;
             increase_points(SANTA_POINTS);
             display_score();
-
         }
     }
     
