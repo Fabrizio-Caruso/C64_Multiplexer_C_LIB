@@ -273,6 +273,18 @@ static uint8_t item;
 
 static uint8_t distance;
 // static uint16_t level_threshold;
+
+
+static uint8_t bullet_y_size;
+
+static uint8_t balloon_x;
+static uint8_t balloon_y;
+static uint8_t bullet_x;
+static uint8_t bullet_y;
+
+
+
+
 static uint16_t record;
 
 static uint8_t volume;
@@ -318,10 +330,11 @@ void music_switch(uint8_t toggle)
 
 
 
-#define BEFANA_INDEX (NUMBER_OF_BALLOONS)
-#define ITEM_INDEX   ((BEFANA_INDEX)+1)
-#define BULLET_INDEX ((ITEM_INDEX)+1)
-#define SANTA_INDEX  ((BULLET_INDEX)+NUMBER_OF_BULLETS)
+#define BALLOON_INDEX 0
+#define BEFANA_INDEX  (BALLOON_INDEX+(NUMBER_OF_BALLOONS))
+#define ITEM_INDEX    ((BEFANA_INDEX)+1)
+#define BULLET_INDEX  ((ITEM_INDEX)+1)
+#define SANTA_INDEX   ((BULLET_INDEX)+NUMBER_OF_BULLETS)
 
 #define SMOKE 60
 
@@ -367,7 +380,7 @@ void music_switch(uint8_t toggle)
 #define LIGHT_GREY  0x0F
 
 #define NUMBER_OF_BULLETS 3
-static uint8_t bullet_sprite_index[] = {BULLET_INDEX, BULLET_INDEX+1, BULLET_INDEX+2}; 
+// static uint8_t bullet_sprite_index[] = {BULLET_INDEX, BULLET_INDEX+1, BULLET_INDEX+2}; 
 static uint8_t bullet_status[NUMBER_OF_BULLETS];
 // static uint8_t bullet_status[NUMBER_OF_BULLETS];
 
@@ -1803,7 +1816,7 @@ void handle_items(void)
     
 }
 
-#define COLLISION_BOX_X 8
+#define COLLISION_BOX_X 13
 #define COLLISION_BOX_Y 12
 #define SHIELD_COLLISION_BOX_X 8
 #define SHIELD_COLLISION_BOX_Y 8
@@ -1811,8 +1824,6 @@ void handle_items(void)
 uint8_t befana_x;
 uint8_t befana_y;
 
-
-#define X_COLLISION_RANGE 13
 
 uint8_t one_sprite_collision(uint8_t i)
 {
@@ -1822,14 +1833,14 @@ uint8_t one_sprite_collision(uint8_t i)
     x = SPRX[i];
     if(x>=befana_x)
     {
-        if((x-befana_x)>X_COLLISION_RANGE)
+        if((x-befana_x)>COLLISION_BOX_X)
         {
             return 0;
         }
     }
     else // x < befana_x
     {
-        if((befana_x-x)>X_COLLISION_RANGE)
+        if((befana_x-x)>COLLISION_BOX_X)
         {
             return 0;
         }
@@ -1853,44 +1864,79 @@ uint8_t one_sprite_collision(uint8_t i)
     return 1;    
 }
 
+#define BULLET_X_SIZE 12
 
-uint8_t bullet_collision(uint8_t a_bullet_index, uint8_t balloon_index, uint8_t size)
+
+uint8_t bullet_collision(void)
 {
-    uint8_t x;
-    uint8_t y;
+    // uint8_t x;
+    // uint8_t y;
     
-    x = SPRX[balloon_index];
-    if(x>=SPRX[a_bullet_index])
+    // x = SPRX[balloon_index];
+    // if(x>=SPRX[a_bullet_index])
+    // {
+        // if((x-SPRX[a_bullet_index])>BULLET_X_SIZE)
+        // {
+            // return 0;
+        // }
+    // }
+    // else // x < SPRX[BULLET_INDEX]
+    // {
+        // if((SPRX[a_bullet_index]-x)>BULLET_X_SIZE)
+        // {
+            // return 0;
+        // }
+    // }
+    
+    // y = SPRY[balloon_index];
+    // if(y>=SPRY[a_bullet_index])
+    // {
+        // if((y-SPRY[a_bullet_index])>bullet_y_size) // TODO: avoid +2
+        // {
+            // return 0;
+        // }
+    // }
+    // else // y < SPRY[BULLET_INDEX]
+    // {
+        // if((SPRY[a_bullet_index]-y)>bullet_y_size)
+        // {
+            // return 0;
+        // }
+    // }
+    // return 1;    
+
+    
+    if(balloon_x>=bullet_x)
     {
-        if((x-SPRX[a_bullet_index])>12)
+        if((balloon_x-bullet_x)>BULLET_X_SIZE)
         {
             return 0;
         }
     }
     else // x < SPRX[BULLET_INDEX]
     {
-        if((SPRX[a_bullet_index]-x)>12)
+        if((bullet_x-balloon_x)>BULLET_X_SIZE)
         {
             return 0;
         }
     }
     
-    y = SPRY[balloon_index];
-    if(y>=SPRY[a_bullet_index])
+    // y = SPRY[balloon_index];
+    if(balloon_y>=bullet_y)
     {
-        if((y-SPRY[a_bullet_index])>size) // TODO: avoid +2
+        if((balloon_y-bullet_y)>bullet_y_size) // TODO: avoid +2
         {
             return 0;
         }
     }
     else // y < SPRY[BULLET_INDEX]
     {
-        if((SPRY[a_bullet_index]-y)>size)
+        if((bullet_y-balloon_y)>bullet_y_size)
         {
             return 0;
         }
     }
-    return 1;    
+    return 1;   
 }
 
 void ballon_hit(uint8_t i)
@@ -1953,25 +1999,33 @@ uint8_t befana_sprite_collision(void)
 #define BIG_SHOCK_SIZE 20
 #define SMALL_SHOCK_SIZE 8
 
+
+
 uint8_t bullet_balloon_collision(uint8_t b)
 {
-    uint8_t size;
+    // uint8_t size;
     uint8_t balloon_index;
 
     if(super_weapon_status)
     {
-        size = BIG_SHOCK_SIZE;
+        bullet_y_size = BIG_SHOCK_SIZE;
     }
     else
     {
-        size = SMALL_SHOCK_SIZE;
+        bullet_y_size = SMALL_SHOCK_SIZE;
     }
 
-    for(balloon_index=0;balloon_index<=0+NUMBER_OF_BALLOONS-1;++balloon_index)
+    for(balloon_index=0;balloon_index<=NUMBER_OF_BALLOONS-1;++balloon_index)
     {
+        balloon_x = SPRX[BALLOON_INDEX+balloon_index];
+        balloon_y = SPRY[BALLOON_INDEX+balloon_index];
+
         if(harmful_balloon[balloon_index])
         {
-            if(bullet_collision(BULLET_INDEX+b, balloon_index, size))
+            bullet_x = SPRX[BULLET_INDEX+b];
+            bullet_y = SPRY[BULLET_INDEX+b];
+
+            if(bullet_collision())
             {
                 // ballon_hit(balloon_index);
                 return balloon_index;
