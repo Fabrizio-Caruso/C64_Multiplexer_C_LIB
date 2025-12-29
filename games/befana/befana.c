@@ -218,7 +218,7 @@ uint8_t bullet_cool_down;
 
 static uint8_t harmful_balloon[NUMBER_OF_BALLOONS];
 static uint8_t active_balloon[NUMBER_OF_BALLOONS];
-static uint8_t balloon_to_rest[NUMBER_OF_BALLOONS];
+static uint8_t balloons_to_rest;
 
 static uint8_t immortality;
 
@@ -1197,7 +1197,7 @@ void init_sprite_balloons(void)
 		
 		SPRX[i]=255-i*28;
 		
-        balloon_to_rest[i] = 1;
+        balloons_to_rest = 1;
 		do
 		{
 			y_balloon[i]=rand()&0xFF;
@@ -1415,7 +1415,7 @@ void check_level_trigger()
 
         for(i=0;i<NUMBER_OF_BALLOONS;++i)
         {
-            balloon_to_rest[i]=0;
+            balloons_to_rest=0;
         }
     }
     
@@ -1425,7 +1425,7 @@ void check_level_trigger()
         
         for(i=0;i<NUMBER_OF_BALLOONS;++i)
         {
-            balloon_to_rest[i] = 1;
+            balloons_to_rest = 1;
         }
     }
     // else if(level==10)
@@ -1465,7 +1465,7 @@ void _handle_balloons(void)
             }
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
-                if(balloon_to_rest[i])
+                if(balloons_to_rest)
                 {
                     y_balloon[i] = 255;
                 }
