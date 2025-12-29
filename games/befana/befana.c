@@ -225,7 +225,7 @@ static uint8_t immortality;
 #define DEAD_COOL_DOWN 9
 
 static uint8_t y_balloon[NUMBER_OF_BALLOONS];
-static uint8_t falling_balloon[NUMBER_OF_BALLOONS];
+// static uint8_t falling_balloon[NUMBER_OF_BALLOONS];
 static uint8_t dead_balloon[NUMBER_OF_BALLOONS];
 
 // Pre-calculated sinus values
@@ -384,7 +384,7 @@ void music_switch(uint8_t toggle)
 static uint8_t bullet_status[NUMBER_OF_BULLETS];
 // static uint8_t bullet_status[NUMBER_OF_BULLETS];
 
-static uint8_t ARMOR_COLOR[] = {RED, DARK_GREY, GREY, YELLOW};
+static uint8_t ARMOR_COLOR[] = {RED, DARK_GREY, GREY, CYAN};
 
 static uint8_t counter;
 static uint8_t grass_counter;
@@ -1450,7 +1450,7 @@ void _handle_balloons(void)
     {
 		// TODO: This should be optimized because
 		--SPRX[i];
-		if(active_balloon[i] && !falling_balloon[i])
+		if(active_balloon[i])
 		{
             if(dead_balloon[i])
             {
@@ -1605,16 +1605,15 @@ void _handle_balloons(void)
 			SPRX[i]=184;
             harmful_balloon[i] = 1;
             activate_balloon(i);
-            falling_balloon[i]=0;
 		}
-        else if(falling_balloon[i])
-        {
-            --SPRX[i];
-            if(SPRY[i]<250)
-            {
-                SPRY[i]+=3;
-            }
-        }
+        // else if(falling_balloon[i])
+        // {
+            // --SPRX[i];
+            // if(SPRY[i]<250)
+            // {
+                // SPRY[i]+=3;
+            // }
+        // }
     }
 }
 
@@ -2140,13 +2139,13 @@ void handle_balloon_collision(void)
             ballon_hit(balloon_hit_by_befana);
             // immortality=LOST_LIFE_IMMORTALITY;
 
-            falling_balloon[balloon_hit_by_befana] = 1;
+            // falling_balloon[balloon_hit_by_befana] = 1;
+            dead_balloon[balloon_hit_by_befana] = DEAD_COOL_DOWN;
 
             if(armor_level)
             {
                 decrease_armor();
                 display_armor();
-                
             }
             else
             {
