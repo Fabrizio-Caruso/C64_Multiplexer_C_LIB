@@ -1263,9 +1263,11 @@ void init_balloons(void)
 
 void activate_balloon(uint8_t i)
 {
-
-    
-	if(level>=13)
+    if(level>13)
+    {
+        return;
+    }
+	if(level==13)
 	{
 		if(i==4)
 		{
@@ -1273,7 +1275,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[4]=compute_y_balloon(4);		
 		}
 	}	
-	else if(level>=11)
+	else if(level==11)
 	{
 		if(i==2)
 		{
@@ -1281,7 +1283,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[2]=compute_y_balloon(2);
 		}
 	}
-	else if(level>=9)
+	else if(level==9)
 	{
 		if(i==6)
 		{
@@ -1289,7 +1291,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[6]=compute_y_balloon(6);
 		}			
 	}
-	else if(level>=7)
+	else if(level==7)
 	{
 		if(!i)
 		{
@@ -1297,7 +1299,7 @@ void activate_balloon(uint8_t i)
 			y_balloon[0]=compute_y_balloon(0);
 		}
 	}
-    else if(level>=5)
+    else if(level==5)
         {
         if(i==9)
         {
@@ -1305,7 +1307,7 @@ void activate_balloon(uint8_t i)
             y_balloon[9]=compute_y_balloon(9);
         }
     }
-	else if(level>=3)
+	else if(level==3)
 	{
 		if(i==8)
 		{
@@ -1493,11 +1495,6 @@ void _handle_balloons(void)
                             {
                                 y_balloon[8]=130;
                             }
-                            // else
-                            // {
-                                // y_balloon[8]=90;
-                            // }
-                        
                         }
                         else 
                         {
@@ -2655,14 +2652,11 @@ int main()
                     // display_weapon_status();
 
 					handle_immortality();
-
+                    
+                    
 				}
                 if(!(counter&63))
                 {
-                    // points+=5U;
-					// display_score();
-                    // decrease_lives(1);
-                    // display_lives();
 					++distance;
                 }
                 if(!alive)
