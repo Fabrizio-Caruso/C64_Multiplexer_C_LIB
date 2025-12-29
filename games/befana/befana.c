@@ -151,7 +151,7 @@ extern uint8_t MUSIC_ON;
 
 #define GIFT_ENERGY 20
 
-#define LEVEL_DISTANCE 20U
+#define LEVEL_DISTANCE 160U
 
 uint8_t forward_thrust;
 
@@ -663,7 +663,7 @@ void _XL_SHOOT_SOUND(void)
 
         _set_noise();
         
-        for(i=0;i<10;++i) {} 
+        for(i=0;i<5;++i) {} 
         SID.amp      = 0x00; 
         SID.v3.ctrl  = 0x08; 
     }
@@ -1188,6 +1188,8 @@ void init_sprite_balloons(void)
 {
     uint8_t i;
     
+    balloons_to_rest = 1;
+
     for(i=0;i<=0+NUMBER_OF_BALLOONS-1;++i)
     {
 		
@@ -1197,7 +1199,6 @@ void init_sprite_balloons(void)
 		
 		SPRX[i]=255-i*28;
 		
-        balloons_to_rest = 1;
 		do
 		{
 			y_balloon[i]=rand()&0xFF;
@@ -1409,26 +1410,18 @@ void check_level_trigger()
             display_new_level();
         }
     }
-    else if(distance==4)
-    {
-        uint8_t i;
-        
+    else if(distance==30)
+    {    
         erase_new_level();
-
-        for(i=0;i<NUMBER_OF_BALLOONS;++i)
-        {
-            balloons_to_rest=0;
-        }
+        balloons_to_rest=0;
+       
     }
     
-    if(distance==LEVEL_DISTANCE-3)
+    if(distance==LEVEL_DISTANCE-24)
     {
-        uint8_t i;
-        
-        for(i=0;i<NUMBER_OF_BALLOONS;++i)
-        {
-            balloons_to_rest = 1;
-        }
+
+        balloons_to_rest = 1;
+    
     }
     // else if(level==10)
     // {
@@ -2365,7 +2358,7 @@ uint8_t santa_bonus;
 
 void handle_santa_trigger(void)
 {
-    if(!santa && (exploded_balloons>=SANTA_THRESHOLD))
+    if(exploded_balloons>=SANTA_THRESHOLD)
     {
         exploded_balloons = 0;
         santa = 1;
@@ -2373,6 +2366,8 @@ void handle_santa_trigger(void)
         santa_bonus = SANTA_CHARGE;
         santa_y = 24+40+(160*(rand()&1));
         music_switch(1);
+        SPRY[SANTA_INDEX] = santa_y; 
+        SPRY[SANTA_INDEX+1] = santa_y;
     }
 }
 
@@ -2386,19 +2381,18 @@ void handle_santa(void)
         uint8_t befana_y; 
         
         SPRF[SANTA_INDEX] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
-        SPRY[SANTA_INDEX] = santa_y;
+        // SPRY[SANTA_INDEX] = santa_y; // TODO
         SPRX[SANTA_INDEX] = santa_x;
-        SPRM[SANTA_INDEX] = 1;
-        SPRC[SANTA_INDEX] = RED;
+
         
         SPRF[SANTA_INDEX+1] = GFX_START_INDEX+BEFANA+7+((counter/4)%3);
-        SPRY[SANTA_INDEX+1] = santa_y;
+        // SPRY[SANTA_INDEX+1] = santa_y;
         SPRX[SANTA_INDEX+1] = santa_x+12;
-        SPRM[SANTA_INDEX+1] = 1;
         
+
         
         ++santa_x;
-        if(!santa_bonus || santa_x>=80 )
+        if(santa_x>=80 )
         {
             ++santa_x;
         }
@@ -2434,6 +2428,14 @@ void handle_santa(void)
 
 }
 
+
+void init_santa(void)
+{
+    SPRM[SANTA_INDEX] = 1; // TODO
+    SPRC[SANTA_INDEX] = RED;
+    SPRM[SANTA_INDEX+1] = 1; // TODO
+    SPRC[SANTA_INDEX+1] = WHITE;
+}
 
 /******************/
 int main()
@@ -2579,6 +2581,9 @@ int main()
         NUMSPRITES = TOTAL_SPRITE_COUNT;
 
         alive = 1;
+        
+        init_santa();
+        
         while(lives && (level<=MAX_LEVEL)) 
         {
 
@@ -2652,13 +2657,12 @@ int main()
                     // display_weapon_status();
 
 					handle_immortality();
-                    
+                    ++distance;
                     
 				}
-                if(!(counter&63))
-                {
-					++distance;
-                }
+                // if(!(counter&63))
+                // {
+                // }
                 if(!alive)
                 {
                     ++SPRY[BEFANA_INDEX];
