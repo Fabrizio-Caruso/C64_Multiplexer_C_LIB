@@ -1433,6 +1433,38 @@ void check_level_trigger()
 	
 }
 
+#define handle_dead_balloon_shape(i) \
+    do \
+    { \
+        if(counter&1) \
+        { \
+            SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_1; \
+        } \
+        else \
+        { \
+            SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_2; \
+        } \
+    } while(0)
+
+
+#define compute_y_balloon(i) \
+    do \
+        if(i<8) \
+        { \
+            y_balloon[i]=48+i*16+(rand()&0xF); \
+        } \
+        else \
+        { \
+            if(i==8) \
+            { \
+                y_balloon[8]=SPRY[BEFANA_INDEX]; \
+            } \
+            else \
+            { \
+                y_balloon[9]=80+(counter&7)*8; \
+            } \
+        } \
+    while(0)
 
 
 #define BALLON_THRESHOLD_X 8
@@ -1449,14 +1481,7 @@ void _handle_balloons(void)
 		{
             if(dead_balloon[i])
             {
-                if(counter&1)
-                {
-                    SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_1;
-                }
-                else
-                {
-                    SPRF[i] = GFX_START_INDEX + DEAD_BALLOON_2;
-                }
+                handle_dead_balloon_shape(i);
             }
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
@@ -1468,33 +1493,7 @@ void _handle_balloons(void)
                 {
                     SPRC[i]=BALLOON_COLORS[rand()&7];
 
-                    if(i<8)
-                    {
-                        y_balloon[i]=48+i*16+(rand()&0xF);
-                    }
-                    else
-                    {
-                        if(i==8)
-                        {
-                            // if(SPRY[BEFANA_INDEX]>170)
-                            // {
-                                // y_balloon[8]=SPRY[BEFANA_INDEX]-16;
-                            // }
-                            // else if(SPRY[BEFANA_INDEX]<85)     
-                            // {
-                                // y_balloon[8]=SPRY[BEFANA_INDEX];                        
-                            // }
-                            // else if(SPRY[BEFANA_INDEX]>135)
-                            // {
-                                // y_balloon[8]=130;
-                            // }
-                            y_balloon[8]=SPRY[BEFANA_INDEX]-8;
-                        }
-                        else 
-                        {
-                            y_balloon[9]=80+(counter&7)*8;
-                        }
-                    }
+                    compute_y_balloon(i);
                 }
 				SPRX[i]=184;
 			}
