@@ -1498,30 +1498,23 @@ void _handle_balloons(void)
             }
 			if(SPRX[i]<BALLON_THRESHOLD_X)
 			{
+                SPRX[i]=184;
+
                 if(balloons_to_rest)
                 {
                     y_balloon[i] = 255;
+                    SPRY[i] = 255;
+                    return;
                 }
                 else
                 {
                     SPRC[i]=BALLOON_COLORS[rand()&7];
 
                     compute_y_balloon(i);
-                    // if(i<8)
-                    // {
-                        // y_balloon[i] = PRECOMPUTED_Y_BALLOON[i];
-
-                    // }
-                    // else if (i==8)
-                    // {
-                        // y_balloon[8] = SPRY[BEFANA_INDEX]-10;
-                    // }
-                    // else
-                    // {
-                        // y_balloon[9] = 80 + rand()&31;
-                    // }
+                    
                 }
-				SPRX[i]=184;
+              
+
 			}
             if(y_balloon[i]<255)
             {
