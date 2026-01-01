@@ -142,7 +142,7 @@ static uint8_t item_type;
 #define STANDARD_JOY 2
 
 
-#define NUMBER_OF_BALLOONS 10
+#define NUMBER_OF_BALLOONS 9
 
 #define NUMBER_OF_ITEMS 2
 
@@ -1058,8 +1058,8 @@ void handle_bullet(uint8_t b)
 
 void display_smoke(void)
 {
-    SPRX[BULLET_INDEX+NUMBER_OF_BULLETS-1]=SPRX[BEFANA_INDEX]-14-8*(counter&1);
-    SPRY[BULLET_INDEX+NUMBER_OF_BULLETS-1]=SPRY[BEFANA_INDEX]; // TODO: this could be done in the sprite shape     
+    SPRX[BULLET_INDEX+NUMBER_OF_BULLETS-1]=befana_x-14-8*(counter&1);
+    SPRY[BULLET_INDEX+NUMBER_OF_BULLETS-1]=befana_y; // TODO: this could be done in the sprite shape     
     SPRF[BULLET_INDEX+NUMBER_OF_BULLETS-1]=GFX_START_INDEX+SMOKE+(counter&1);
 }
 
@@ -1115,24 +1115,24 @@ void handle_befana(void)
     
 	forward_thrust = 0;
 
-    if(JOY_LEFT(input) && SPRX[BEFANA_INDEX]>BEFANA_MIN_X)
+    if(JOY_LEFT(input) && befana_x>BEFANA_MIN_X)
     {
-        --SPRX[BEFANA_INDEX];
+        --befana_x;
         
     }
-    else if(JOY_RIGHT(input) && SPRX[BEFANA_INDEX]<BEFANA_MAX_X)
+    else if(JOY_RIGHT(input) && befana_x<BEFANA_MAX_X)
     {
-        ++SPRX[BEFANA_INDEX];
+        ++befana_x;
         forward_thrust = 1;
     }
     
-    if(JOY_UP(input) && SPRY[BEFANA_INDEX]>BEFANA_MIN_Y)
+    if(JOY_UP(input) && befana_y>BEFANA_MIN_Y)
     {
-        --SPRY[BEFANA_INDEX];
+        --befana_y;
     }
-    else if(JOY_DOWN(input) && SPRY[BEFANA_INDEX]<BEFANA_MAX_Y)
+    else if(JOY_DOWN(input) && befana_y<BEFANA_MAX_Y)
     {
-        ++SPRY[BEFANA_INDEX];
+        ++befana_y;
     }
     if(weapon_cool_down)
     {
@@ -1152,8 +1152,8 @@ void handle_befana(void)
                 bullet_status[b] = 1;
                 a_bullet_index = BULLET_INDEX+b;
                 _XL_SHOOT_SOUND();
-                SPRX[a_bullet_index] = SPRX[BEFANA_INDEX]+8;
-                SPRY[a_bullet_index] = SPRY[BEFANA_INDEX];
+                SPRX[a_bullet_index] = befana_x+8;
+                SPRY[a_bullet_index] = befana_y;
                 if(super_weapon_status)
                 {
                     SPRF[a_bullet_index]=GFX_START_INDEX+SHIELD_ON;
@@ -1200,22 +1200,29 @@ static const uint8_t GRASS_SHAPE[8][7]=
 
 void scroll_grass(void)
 {
-    uint8_t i;
+    // uint8_t i;
     
-    for(i=0;i<7;++i)
-    {
+    // for(i=0;i<7;++i)
+    // {
         
-        POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(grass_counter)&7][i]);
-    }
+        // POKE(SHAPE+1+(GRASS_TILE*8)+i,GRASS_SHAPE[(grass_counter)&7][i]);
+    // }
+    // uint8_t i;
+    uint16_t GRASS_BASE = SHAPE+1+(GRASS_TILE*8);
+ 
+    POKE(GRASS_BASE+0,GRASS_SHAPE[(grass_counter)&7][0]);
+    POKE(GRASS_BASE+1,GRASS_SHAPE[(grass_counter)&7][1]);
+    POKE(GRASS_BASE+2,GRASS_SHAPE[(grass_counter)&7][2]);
+    POKE(GRASS_BASE+3,GRASS_SHAPE[(grass_counter)&7][3]);
+    POKE(GRASS_BASE+4,GRASS_SHAPE[(grass_counter)&7][4]);
+    POKE(GRASS_BASE+5,GRASS_SHAPE[(grass_counter)&7][5]);
+    POKE(GRASS_BASE+6,GRASS_SHAPE[(grass_counter)&7][6]);
+
     ++grass_counter;
 }
 
 
-void handle_grass(void)
-{
-	scroll_grass();
-
-}
+#define handle_grass() scroll_grass()
 
 #define BALLOON_TOP_Y 45
 #define BALLOON_BOTTOM_Y 180
@@ -1253,18 +1260,6 @@ static uint8_t PRECOMPUTED_Y_BALLOON[] = { \
     BASE_Y_BALLOON+DISTANCE_Y_BALLOON*8, \
     110 \
     };
-
-// uint8_t compute_y_balloon(uint8_t i)
-// {
-    // if(i<=8)
-    // {
-        // return 40+i*22;
-    // }
-    // else
-    // {
-        // return 110;
-    // }
-// }
 
 
 void init_balloons(void)
@@ -1346,14 +1341,14 @@ void activate_balloon(uint8_t i)
 			y_balloon[0]=PRECOMPUTED_Y_BALLOON[0];
 		}
 	}
-    else if(level==5)
-        {
-        if(i==9)
-        {
-            active_balloon[9]=1;
-            y_balloon[9]=PRECOMPUTED_Y_BALLOON[9];
-        }
-    }
+    // else if(level==5)
+        // {
+        // if(i==9)
+        // {
+            // active_balloon[9]=1;
+            // y_balloon[9]=PRECOMPUTED_Y_BALLOON[9];
+        // }
+    // }
 	else if(level==3)
 	{
 		if(i==8)
@@ -1560,14 +1555,7 @@ void check_level_trigger()
         } \
         else \
         { \
-            if(i==8) \
-            { \
-                y_balloon[8]=SPRY[BEFANA_INDEX]; \
-            } \
-            else \
-            { \
-                y_balloon[9]=80+(counter&7)*8; \
-            } \
+            y_balloon[8]=befana_y; \
         } \
     while(0)
 
@@ -1701,11 +1689,12 @@ void _handle_balloons(void)
                 else
                 {
                     
-                    if(i==9)
-                    {
-                        SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
-                    }
-                    else if(i==8)
+                    // if(i==9)
+                    // {
+                        // SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
+                    // }
+                    // else 
+                    if(i==8)
                     {
                         SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
                     }
@@ -2037,10 +2026,7 @@ void ballon_hit(uint8_t i)
 
 
 uint8_t befana_sprite_collision(void)
-{
-	befana_x = SPRX[BEFANA_INDEX];
-	befana_y = SPRY[BEFANA_INDEX];
-    
+{    
     for(i=0;i<=NUMBER_OF_BALLOONS-1;++i)
     {
 		if(harmful_balloon[i])
@@ -2570,6 +2556,9 @@ int main()
         
         init_santa();
         
+        
+        befana_x = SPRX[BEFANA_INDEX];
+        befana_y = SPRY[BEFANA_INDEX];
         while(lives && (level<=MAX_LEVEL)) 
         {
 
@@ -2579,14 +2568,24 @@ int main()
                 #if defined(BENCHMARK)
                 POKE(0xd020, WHITE);
                 #endif
-                
+
                 // printd(weapon_cool_down,3,40,WHITE);
                 handle_stars();
-            
+                
+                // void printd(uint16_t val, uint8_t length, unsigned short offset, uint8_t color)
+
+                // printd(befana_x, 3, 80, WHITE);
+                // printd(befana_y, 3, 80+5, WHITE);
+
+                // printd(SPRX[BEFANA_INDEX], 3, 120, WHITE);
+                // printd(SPRY[BEFANA_INDEX], 3, 120+5, WHITE);   
+                
                 if(alive)
                 {
                     handle_befana();
                 }
+                // befana_x = SPRX[BEFANA_INDEX];
+                // befana_y = SPRY[BEFANA_INDEX];
                 handle_befana_shape();
                 handle_bullets();
                 
@@ -2643,16 +2642,16 @@ int main()
 
                 if(!alive)
                 {
-                    ++SPRY[BEFANA_INDEX];
-                    if(SPRY[BEFANA_INDEX]>110)
+                    ++befana_y;
+                    if(befana_y>110)
                     {
-                        ++SPRY[BEFANA_INDEX];
+                        ++befana_y;
                     }
-                    if(SPRY[BEFANA_INDEX]>180)
+                    if(befana_y>180)
                     {
-                        ++SPRY[BEFANA_INDEX];
+                        ++befana_y;
                     }
-                    if(SPRY[BEFANA_INDEX]>230)
+                    if(befana_y>230)
                     {
                         --lives;
                         display_lives();
@@ -2660,11 +2659,14 @@ int main()
                         immortality = LOST_LIFE_IMMORTALITY;
                         alive = 1;
                         // display_weapon_status();
-                        SPRX[BEFANA_INDEX] = 30;
-                        SPRY[BEFANA_INDEX] = 130;
+                        befana_x = 30;
+                        befana_y = 130;
                     }
                 }
-		
+                
+		        SPRX[BEFANA_INDEX] = befana_x;
+                SPRY[BEFANA_INDEX] = befana_y;
+                
                 MULTIPLEX_DONE = 0;
                 SPRUPDATEFLAG = 1;
                 
