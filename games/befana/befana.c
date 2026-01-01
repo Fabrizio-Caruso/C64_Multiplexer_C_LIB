@@ -836,7 +836,7 @@ void display_weapon_status(void)
     // else
     // {
         color(shock_level,SHOCK_OFFSET,YELLOW);
-        color(NUMBER_OF_BULLETS-shock_level, SHOCK_OFFSET+shock_level,BLACK);
+        color(NUMBER_OF_BULLETS-shock_level, SHOCK_OFFSET+shock_level,DARK_GREY);
         // if((counter&15)&1)
         // {
             // color(shock_level,SHOCK_OFFSET,GREEN);
@@ -1376,11 +1376,12 @@ void display_level(void)
 
 void display_armor(void)
 {
-    // uint8_t armor_color;
+    // uint8_t armor_color; 
     // printd(armor_level,1,ARMOR_OFFSET,WHITE);
     if(!armor_level)
     {
-        color(5,ARMOR_OFFSET,BLACK);
+        // print("ARMOR",5,ARMOR_OFFSET,ARMOR_COLOR[armor_level]);
+        print("     ",5,ARMOR_OFFSET,BLACK);
     }
     // else if(armor_level==1)
     // {
@@ -1396,7 +1397,8 @@ void display_armor(void)
     // }
     else
     {
-        color(5,ARMOR_OFFSET,ARMOR_COLOR[armor_level]);
+        print("ARMOR",5,ARMOR_OFFSET,ARMOR_COLOR[armor_level]);
+        // color(5,ARMOR_OFFSET,ARMOR_COLOR[armor_level]);
     }
 }
 
@@ -1424,9 +1426,10 @@ void erase_new_level(void)
 
 
 
-
+#define LOST_ARMOR_IMMORTALITY 10
 #define LOST_LIFE_IMMORTALITY 20
 #define EXTRA_ARMOR_IMMORTALITY 30
+
 #define BALLOON_ARMOR_DAMAGE 1
 
 
@@ -1686,23 +1689,17 @@ void _handle_balloons(void)
                         SPRY[i]=y_balloon[i]+shifted3_sinValues2[counter]; // OK
                     }
                 }
-                else
+                else 
                 {
-                    
-                    // if(i==9)
-                    // {
-                        // SPRY[i]=y_balloon[i]+sinValues1[counter]; // OK
-                    // }
-                    // else 
                     if(i==8)
                     {
                         SPRY[i]=y_balloon[i]+sinValues4[counter]; // OK
                     }
-                    else if(!(i&7))
+                    else if(!i)
                     {
                         SPRY[i]=y_balloon[i]+sinValues3[counter]; // OK
                     }
-                    else if((i&7)==1)
+                    else if(i==1)
                     {
                         if((level&1))
                         {
@@ -1713,7 +1710,7 @@ void _handle_balloons(void)
                             SPRY[i]=y_balloon[i]+shifted_sinValues4[counter]; // OK
                         }
                     }
-                    else if((i&7)==2)
+                    else if(i==2)
                     {
                         
                         if((level&1))
@@ -1725,19 +1722,19 @@ void _handle_balloons(void)
                             SPRY[i]=y_balloon[i]+shifted2_sinValues3[counter]; // OK
                         }
                     }   
-                    else if((i&7)==3)
+                    else if(i==3)
                     {
                         SPRY[i]=y_balloon[i]+shifted3_sinValues4[counter]; // OK
                     }
-                    else if((i&7)==4)
+                    else if(i==4)
                     {
                         SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
                     }
-                    else if((i&7)==5)
+                    else if(i==5)
                     {
                         SPRY[i]=y_balloon[i] +shifted3_sinValues3[counter]; // OK
                     }
-                    else if((i&7)==6)
+                    else if(i==6)
                     {
                         SPRY[i]=y_balloon[i] +shifted3_sinValues2[counter]; // OK
                     }
@@ -2166,6 +2163,7 @@ void handle_balloon_collision(void)
             {
                 decrease_armor();
                 display_armor();
+                immortality = LOST_ARMOR_IMMORTALITY;
             }
             else
             {
@@ -2173,7 +2171,6 @@ void handle_balloon_collision(void)
                 SPRC[BEFANA_INDEX]=PURPLE;
 
                 _XL_EXPLOSION_SOUND();
-                // weapon_cool_down=HIT_bullet_cool_down;
 
             }
             super_weapon_status = 0;
@@ -2509,7 +2506,7 @@ int main()
 
         display_shock();
         
-        print("ARMOR",5,ARMOR_OFFSET,GREY);
+        // print("ARMOR",5,ARMOR_OFFSET,GREY);
         display_armor();
         
 
@@ -2613,7 +2610,7 @@ int main()
                         }
                         else
                         {
-                            SPRC[BEFANA_INDEX] = RED;
+                            SPRC[BEFANA_INDEX] = ARMOR_COLOR[armor_level];
                         }
                     }
                 }
