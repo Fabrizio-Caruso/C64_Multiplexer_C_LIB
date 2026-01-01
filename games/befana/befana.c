@@ -1724,11 +1724,25 @@ void _handle_balloons(void)
                     }   
                     else if(i==3)
                     {
-                        SPRY[i]=y_balloon[i]+shifted3_sinValues4[counter]; // OK
+                        if(level<15)
+                        {
+                            SPRY[i]=y_balloon[i]+shifted3_sinValues4[counter]; // OK
+                        }
+                        else
+                        {
+                            SPRY[i]=y_balloon[i]+shifted3_sinValues1[counter]; // OK
+                        }
                     }
                     else if(i==4)
                     {
-                        SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
+                        if(level<9)
+                        {
+                            SPRY[i]=y_balloon[i]+shifted2_sinValues2[counter]; // OK
+                        }
+                        else
+                        {
+                            SPRY[i]=y_balloon[i]+shifted2_sinValues1[counter]; // OK
+                        }
                     }
                     else if(i==5)
                     {
@@ -1772,6 +1786,8 @@ void move_balloons(void)
 void handle_balloons(void)
 {
 	_handle_balloons();
+      
+    
 	if((level==2)||(level==4)||(level==6)||(level==8)||(level==10))
 	{
 		if(counter&1)
@@ -1779,14 +1795,33 @@ void handle_balloons(void)
 			_handle_balloons();
 		}
 	}
-	// if((level>=12) && (!(level&1)) && (counter&3))
     if(level>=12)
 	{
-		_handle_balloons();
+		if(!(counter&1))
+		{
+            _handle_balloons();
+        }
 	}
     if(level>=18)
     {
-		_handle_balloons();        
+		if(counter&1)
+		{
+            _handle_balloons();
+        }            
+    }
+    if(level>=24)
+    {
+		if(!(counter&1))
+		{
+            _handle_balloons();
+        }   
+    }
+    if(level>=30)
+    {
+		if(counter&1)
+		{
+            _handle_balloons();
+        }   
     }
 }
 
