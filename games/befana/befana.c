@@ -1653,7 +1653,7 @@ void _handle_balloons(void)
                 {
                     y_balloon[i] = 255;
                     SPRY[i] = 255;
-                    return;
+                    continue;
                 }
                 else
                 {
