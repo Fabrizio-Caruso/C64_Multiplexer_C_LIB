@@ -2240,9 +2240,9 @@ void print_press_fire(void)
 
 void title_screen(void)
 {
+    uint8_t music_counter = 0;
     distance = 0;
-    
-    
+
     do
     {
         SPRY[0]=128;
@@ -2292,7 +2292,14 @@ void title_screen(void)
             {
                 print("PRESS FIRE TO USE SHOCK",23,1000-40+8,YELLOW);
             }
-            
+            if(!counter)
+            {
+                ++music_counter;
+                if(music_counter==7)
+                {
+                    music_switch(0);
+                }
+            }
             #if defined(BETA_VERSION)
                 
              print("BETA VERSION", 12, 1000-12-40,WHITE);
