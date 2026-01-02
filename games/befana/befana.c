@@ -508,7 +508,7 @@ const static uint8_t BALLOON_COLORS[] = {CYAN, PURPLE, GREEN, LIGHT_BLUE, LIGHT_
 
 #define DISTANCE_OFFSET 11
 #define LEVEL_OFFSET (DISTANCE_OFFSET+2)
-#define ARMOR_OFFSET ((LEVEL_OFFSET)+14-5)
+#define ARMOR_OFFSET ((LEVEL_OFFSET)+14-5+1)
 
 #define SHOCK_OFFSET (LEVEL_OFFSET+5)
 #define HI_OFFSET (NUMBER_OF_COLS-9)
@@ -1351,7 +1351,9 @@ void display_armor(void)
 
 void display_hi(uint8_t position)
 {
-    print("HI",2,position-2,GREEN);
+    // print("HI",2,position-2,GREEN);
+    POKE(SCREEN+position-1,'9'+5); 
+    POKE(COLOR+position-1,GREEN); 
 	printd(record,5,position,WHITE);
 }
 
