@@ -2656,9 +2656,17 @@ int main()
                     }
                     if(befana_y>230)
                     {
+                        uint16_t i;
                         --lives;
                         display_lives();
+                        music_switch(0);
+                        for(i=0;i<4;++i)
+                        {
+                            _XL_EXPLOSION_SOUND();
+                        }
+                        for(i=0;i<3000;++i) {};
                         _silence();
+
                         immortality = LOST_LIFE_IMMORTALITY;
                         alive = 1;
                         // display_weapon_status();
