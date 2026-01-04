@@ -147,16 +147,16 @@ static uint8_t item_type;
 #define NUMBER_OF_ITEMS 2
 
 
-#define BEFANA_MIN_X 24
+#define BEFANA_MIN_X 22
 #define BEFANA_MAX_X 120
 
 #define BEFANA_MIN_Y 65
-#define BEFANA_MAX_Y 209
+#define BEFANA_MAX_Y 211
 
 
 #define GIFT_ENERGY 20
 
-#define LEVEL_DISTANCE 160U
+#define LEVEL_DISTANCE 224U
 
 
 
@@ -165,7 +165,7 @@ static uint8_t item_type;
 
 
 #define MAX_NO_ITEM_THRESHOLD 2
-#define MAX_GIFT_THRESHOLD 4
+#define MAX_GIFT_THRESHOLD 6
 
 
 #define GIFT_ITEM 0
@@ -231,7 +231,7 @@ static uint8_t level;
 
 #define SHOCK_TILE 40
 
-#define BENCHMARK   
+// #define BENCHMARK   
 
 static uint8_t armor_level;
 
@@ -873,8 +873,8 @@ void display_shock(void)
 
 void set_background_colors(void)
 {
-    POKE(0xd020, BLACK);
-    POKE(0xd021, BLACK); 
+    POKE(0xD020, BLACK);
+    POKE(0xD021, BLACK); 
 }
 
 
@@ -1374,9 +1374,15 @@ void display_new_level(void)
 }
 
 
+void display_no_energy(void)
+{
+    print("NO ENERGY",9, NEW_LEVEL_OFFSET,WHITE);
+}
+
+
 void erase_new_level(void)
 {
-    print("         ",8,NEW_LEVEL_OFFSET,WHITE);
+    print("         ",9,NEW_LEVEL_OFFSET,WHITE);
 }
 
 
@@ -1442,6 +1448,7 @@ uint8_t one_sprite_collision(uint8_t i)
 
 void display_energy_item(void)
 {
+    
     POKE(SCREEN+NUMBER_OF_COLS-2,energy_icon[energy]);
 }
 
@@ -1932,6 +1939,8 @@ void handle_items(void)
     {
         if(item_type==GIFT_ITEM && SPRY[ITEM_INDEX]<255)
         {
+            POKE(0xD020, RED);
+            _XL_TOCK_SOUND();
             // POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON_2);
             --energy;
             display_energy_item();
@@ -1940,6 +1949,12 @@ void handle_items(void)
                 alive = 0;
                 // TODO: DISPLAY "NO ENERGY"
             }
+            {
+                uint16_t i;
+                for(i=0;i<850;++i){};
+            }
+            _XL_TOCK_SOUND();
+            POKE(0xD020, BLACK);
         }
         if(level<=FEWEST_GIFTS_THRESHOLD)
         {
@@ -2612,7 +2627,7 @@ int main()
             // printd(exploded_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
                 #if defined(BENCHMARK)
-                POKE(0xd020, WHITE);
+                POKE(0xD020, WHITE);
                 #endif
 
                 // printd(weapon_cool_down,3,40,WHITE);
@@ -2715,7 +2730,23 @@ int main()
                         // display_weapon_status();
                         befana_x = 30;
                         befana_y = 130;
+                        
+                        if(!energy)
+                        {
+                            display_no_energy();
+                        }
+                        for(i=0;i<12000;++i) {};
+                        print_press_fire();
+                        for(i=0;i<10000;++i) {};
+                        while(!JOY_FIRE(joy_read(STANDARD_JOY))) {};
+                        init_grass();
+
+                        if(!energy)
+                        {
+                            erase_new_level();
+                        }
                         energy=MAX_ENERGY;
+                        display_energy_item();
                     }
                 }
                 
