@@ -147,11 +147,11 @@ static uint8_t item_type;
 #define NUMBER_OF_ITEMS 2
 
 
-#define BEFANA_MIN_X 14
+#define BEFANA_MIN_X 24
 #define BEFANA_MAX_X 120
 
-#define BEFANA_MIN_Y 60
-#define BEFANA_MAX_Y 214
+#define BEFANA_MIN_Y 65
+#define BEFANA_MAX_Y 209
 
 
 #define GIFT_ENERGY 20
@@ -1502,7 +1502,7 @@ void check_level_trigger()
     do \
         if(i<8) \
         { \
-            y_balloon[i]=48+i*16+(rand()&0xF); \
+            y_balloon[i]=38+i*16+(rand()&0x1F); \
         } \
         else \
         { \
@@ -1609,12 +1609,9 @@ void _handle_balloons(void)
                 else
                 {
                     SPRC[i]=BALLOON_COLORS[rand()&7];
-
-                    compute_y_balloon(i);
-                    
+                    compute_y_balloon(i);               
                 }
               
-
 			}
             if(y_balloon[i]<255)
             {
@@ -1701,7 +1698,14 @@ void _handle_balloons(void)
                     }
                     else if(i==5)
                     {
-                        SPRY[i]=y_balloon[i] +shifted3_sinValues3[counter]; // OK
+                        if(level<7)
+                        {
+                            SPRY[i]=y_balloon[i] +shifted3_sinValues3[counter]; // OK
+                        }
+                        else
+                        {
+                            SPRY[i]=y_balloon[i] +shifted3_sinValues1[counter]; // OK
+                        }
                     }
                     else if(i==6)
                     {
@@ -2327,7 +2331,7 @@ void handle_santa_trigger(void)
         santa = 1;
         santa_x = 10;
         santa_bonus = SANTA_CHARGE;
-        santa_y = 24+40+(160*(rand()&1));
+        santa_y = 24+40+(159*(rand()&1));
         music_switch(1);
 
         SPRY[SANTA_INDEX] = santa_y; 
@@ -2335,7 +2339,7 @@ void handle_santa_trigger(void)
     }
 }
 
-#define SANTA_RANGE 13
+#define SANTA_RANGE 15
 
 void handle_santa(void)
 {
