@@ -156,9 +156,8 @@ static uint8_t item_type;
 
 #define GIFT_ENERGY 20
 
-#define LEVEL_DISTANCE 224U
 
-
+uint8_t level_distance;
 
 #define FEWEST_GIFTS_THRESHOLD 3
 #define FEWER_GIFTS_THRESHOLD 7
@@ -176,7 +175,7 @@ static uint8_t item_type;
 
 
 #define COLLISION_BOX_X 15
-#define COLLISION_BOX_Y 12
+#define COLLISION_BOX_Y 14
 #define SHIELD_COLLISION_BOX_X 8
 #define SHIELD_COLLISION_BOX_Y 8
 
@@ -1459,10 +1458,26 @@ void check_level_trigger()
     // printd(((uint16_t) level),5,200,WHITE);
 
     
-    if((distance>=LEVEL_DISTANCE))
+    if((distance>=level_distance))
     {
 
         ++level;
+        if(level<5)
+        {
+            level_distance = 128U;
+        }
+        else if(level<10)
+        {
+            level_distance = 160U;
+        }
+        else if(level<15)
+        {
+            level_distance = 192U;
+        }
+        else
+        {
+            level_distance = 224U;
+        }
         energy = MAX_ENERGY;
         display_energy_item();
         exploded_balloons = 0;
@@ -1479,7 +1494,7 @@ void check_level_trigger()
         if(level<=MAX_LEVEL)
         {
             display_level();
-            // level_threshold = ((uint16_t) level)*(uint16_t) LEVEL_DISTANCE;
+            // level_threshold = ((uint16_t) level)*(uint16_t) level_distance;
             distance = 0;
             display_new_level();
         }
@@ -1488,10 +1503,11 @@ void check_level_trigger()
     {    
         erase_new_level();
         balloons_to_rest=0;
-       
+        energy=MAX_ENERGY;
+        display_energy_item();
     }
     
-    if(distance==LEVEL_DISTANCE-24)
+    if(distance==level_distance-24)
     {
 
         balloons_to_rest = 1;
@@ -1959,7 +1975,7 @@ void handle_items(void)
         if(level<=FEWEST_GIFTS_THRESHOLD)
         {
             // TODO: Simplify this
-            if(distance>LEVEL_DISTANCE/2 && (item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
+            if(distance>level_distance/2 && (item<=MAX_GIFT_THRESHOLD) && (!(rand()&3) || (no_item>MAX_NO_ITEM_THRESHOLD)))
             {
                 spawn_item();
             }
@@ -1971,7 +1987,7 @@ void handle_items(void)
         else if(level<=FEWER_GIFTS_THRESHOLD)
         {
             // TODO: Simplify this
-            if(distance>LEVEL_DISTANCE/3 && (item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
+            if(distance>level_distance/3 && (item<=MAX_GIFT_THRESHOLD) && ((rand()&1) || (no_item>MAX_NO_ITEM_THRESHOLD)))
             {
                 spawn_item();
             }
@@ -1983,7 +1999,7 @@ void handle_items(void)
         }
         else // Very high and difficult levels 8-20
         {
-            if(distance>LEVEL_DISTANCE/4 && (item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
+            if(distance>level_distance/4 && (item<=2*MAX_GIFT_THRESHOLD) && ((rand()&3)|| (no_item>MAX_NO_ITEM_THRESHOLD)))
             {
                 spawn_item();
             }
@@ -2511,7 +2527,7 @@ int main()
 		clear_stars();
 
 		distance=0;
-        // level_threshold = (INITIAL_LEVEL)*LEVEL_DISTANCE;
+        // level_threshold = (INITIAL_LEVEL)*level_distance;
         slow_loop=0;
         fast_loop=0;
         
@@ -2553,7 +2569,7 @@ int main()
         SPRM[BULLET_INDEX+NUMBER_OF_BULLETS-1]=0;
         SPRC[BULLET_INDEX+NUMBER_OF_BULLETS-1]=YELLOW;
         
-		POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON_4);
+		// POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON_4);
 		POKE(COLOR+NUMBER_OF_COLS-2,RED);        
         display_lives();
 		print("SCORE",5,0,CYAN);
@@ -2600,6 +2616,7 @@ int main()
         }
         
         energy = MAX_ENERGY;
+        display_energy_item();
         shock_level = 1;
         set_fire_speed(1);
         display_weapon_status();
@@ -2616,7 +2633,7 @@ int main()
         init_santa();
         
         
-        
+        level_distance = 128U;
         
         befana_x = SPRX[BEFANA_INDEX];
         befana_y = SPRY[BEFANA_INDEX];
@@ -2771,7 +2788,7 @@ int main()
 		}
         distance=0;
 
-        level=12;
+        level = 12; // TODO: ???
 
         music_switch(1);
 
@@ -2781,6 +2798,20 @@ int main()
         }
         SPRC[BEFANA_INDEX] = RED;
         erase_new_level();
+        
+        balloons_to_rest = 0;
+        {
+            uint8_t i;
+            
+            for(i=0;i<NUMBER_OF_BALLOONS;++i)
+            {
+                dead_balloon[i] = 0;
+                harmful_balloon[i] = 1;
+                SPRF[i]=GFX_START_INDEX + BALLOON;
+                active_balloon[i] = 1;
+                // compute_y_balloon();
+            }
+        }
         
         do
         { 
@@ -2811,7 +2842,7 @@ int main()
                         print("JOURNEY COMPLETED",17,494-80-3,CYAN);
                     }
                 }
-
+                    
                     handle_balloons();
                     if(lives)
                     {
