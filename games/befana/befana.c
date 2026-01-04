@@ -444,9 +444,16 @@ static uint16_t points = 0;
 #define HAPPYNEWYEAR_POS (SCREEN+6)
 #define MOON_OFFSET (40*2+36)
 
-#define ENERGY_ICON ('z'-'a'+1+1)
-// #define SHOCK_TILE ('z'-'a'+1+1)
+// #define ENERGY_ICON ('z'-'a'+1+1)
+#define ENERGY_ICON_4 ('9'+1)
+#define ENERGY_ICON_3 ('9'+2)
+#define ENERGY_ICON_2 ('9'+3)
+#define ENERGY_ICON_1 ('9'+4)
 
+#define MAX_ENERGY 3
+
+uint8_t energy_icon[] = {ENERGY_ICON_1, ENERGY_ICON_2, ENERGY_ICON_3, ENERGY_ICON_4};
+uint8_t energy;
 
 #if !defined(YEAR_LOW)
 	#define YEAR_LOW '4'
@@ -1432,6 +1439,13 @@ uint8_t one_sprite_collision(uint8_t i)
     return 1;    
 }
 
+
+void display_energy_item(void)
+{
+    POKE(SCREEN+NUMBER_OF_COLS-2,energy_icon[energy]);
+}
+
+
 void check_level_trigger()
 {
     // printd(level_threshold,5,160,WHITE);
@@ -1442,6 +1456,8 @@ void check_level_trigger()
     {
 
         ++level;
+        energy = MAX_ENERGY;
+        display_energy_item();
         exploded_balloons = 0;
         // shock_level = 1;
         // set_fire_speed(1);
@@ -1914,7 +1930,17 @@ void handle_items(void)
     // Re-position item
     if(!SPRX[ITEM_INDEX])
     {
-
+        if(item_type==GIFT_ITEM && SPRY[ITEM_INDEX]<255)
+        {
+            // POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON_2);
+            --energy;
+            display_energy_item();
+            if(!energy)
+            {
+                alive = 0;
+                // TODO: DISPLAY "NO ENERGY"
+            }
+        }
         if(level<=FEWEST_GIFTS_THRESHOLD)
         {
             // TODO: Simplify this
@@ -2341,13 +2367,20 @@ void handle_santa_trigger(void)
 
 #define SANTA_RANGE 15
 
+void increase_energy(void)
+{
+    if(energy<MAX_ENERGY)
+    {
+        ++energy;
+    }
+}
+
+
 void handle_santa(void)
 {
     if(santa && (!(counter&3)))
     {
-        // uint8_t befana_x;
-        // uint8_t befana_y; 
-        
+
         SPRF[SANTA_INDEX] = GFX_START_INDEX+BEFANA+4+((counter/4)%3);
         SPRX[SANTA_INDEX] = santa_x;
 
@@ -2388,6 +2421,11 @@ void handle_santa(void)
             --santa_bonus;
             increase_points(SANTA_POINTS);
             display_score();
+            if(!(counter&15))
+            {
+                increase_energy();
+                display_energy_item();
+            }
         }
     }
     
@@ -2500,7 +2538,7 @@ int main()
         SPRM[BULLET_INDEX+NUMBER_OF_BULLETS-1]=0;
         SPRC[BULLET_INDEX+NUMBER_OF_BULLETS-1]=YELLOW;
         
-		POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON);
+		POKE(SCREEN+NUMBER_OF_COLS-2,ENERGY_ICON_4);
 		POKE(COLOR+NUMBER_OF_COLS-2,RED);        
         display_lives();
 		print("SCORE",5,0,CYAN);
@@ -2546,6 +2584,7 @@ int main()
             bullet_status[i]=0;
         }
         
+        energy = MAX_ENERGY;
         shock_level = 1;
         set_fire_speed(1);
         display_weapon_status();
@@ -2676,6 +2715,7 @@ int main()
                         // display_weapon_status();
                         befana_x = 30;
                         befana_y = 130;
+                        energy=MAX_ENERGY;
                     }
                 }
                 
