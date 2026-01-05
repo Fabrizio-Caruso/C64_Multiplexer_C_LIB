@@ -12,6 +12,7 @@ https://cadaver.github.io/rants/multi.zip
 See more details in:
 https://cadaver.github.io/rants/sprite.html
 
+--------------------------------
 
 FEATURES
 - Freely moving multiplexed sprites (up to 36), i.e., generic sprite multiplexer 
@@ -24,8 +25,13 @@ FEATURES
 - Efficient horizontal movement: x-coordinate is handled efficiently by the Assembly code and stored in a single byte (2-pixel movement)
 - Support for SID tunes 
 
+--------------------------------
+
 BEFANA VS BALLOONS 2026
 
-Click here to play **Befana vs Balloons 2026**:
+You can play **Befana vs Balloons 2026** on a browser. 
+Click here to play <a href="https://nippur72.github.io/c64-emu/?joy=3&load=http://github.com/Fabrizio-Caruso/C64_Multiplexer_C_LIB/releases/download/befana2026/befana.prg"><b>Befana vs Balloons 2026</b>.
+
+The full link is:
 
 https://nippur72.github.io/c64-emu/?joy=3&load=http://github.com/Fabrizio-Caruso/C64_Multiplexer_C_LIB/releases/download/befana2026/befana.prg
