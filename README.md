@@ -24,3 +24,8 @@ FEATURES
 - Efficient horizontal movement: x-coordinate is handled efficiently by the Assembly code and stored in a single byte (2-pixel movement)
 - Support for SID tunes 
 
+BEFANA VS BALLOONS 2026
+
+Click here to play **Befana vs Balloons 2026**:
+
+https://nippur72.github.io/c64-emu/?joy=3&load=http://github.com/Fabrizio-Caruso/C64_Multiplexer_C_LIB/releases/download/befana2026/befana.prg
