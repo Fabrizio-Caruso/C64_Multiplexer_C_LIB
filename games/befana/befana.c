@@ -38,7 +38,7 @@ static uint8_t item_type;
 
 // #define TRAINER 1
 
-#define BETA_VERSION 1
+// #define BETA_VERSION 1
 
 #define INITIAL_LIVES 3
 #define MAX_LIVES 9
@@ -2298,12 +2298,21 @@ void print_press_fire(void)
     print("  PRESS FIRE TO START  ",23,1000-40+8,WHITE);
 }
 
+uint8_t year_color[] = {WHITE, LIGHT_GREY, GREY, DARK_GREY, DARK_GREY, GREY, LIGHT_GREY, WHITE};
+uint8_t author_color[] = {GREEN, LIGHT_GREEN};
+
+#define YEAR_OFFSET 1000-200+20-2
+#define AUTHOR_OFFSET 1000-240+20-7
+#define WRITTEN_BY_OFFSET AUTHOR_OFFSET-40+2
 
 void title_screen(void)
 {
     uint8_t music_counter = 0;
+    uint16_t color_counter = 0;
     distance = 0;
-
+    printd(2026,4,YEAR_OFFSET,LIGHT_GREY);
+    print(  "WRITTEN BY",10,WRITTEN_BY_OFFSET,LIGHT_GREY);
+    print("FABRIZIO CARUSO",15,AUTHOR_OFFSET,GREEN);
     do
     {
         SPRY[0]=128;
@@ -2317,6 +2326,7 @@ void title_screen(void)
         SPRC[18]=RED;
         SPRM[18]=1;
 
+
         while(MULTIPLEX_DONE)
         {
             handle_stars();
@@ -2324,14 +2334,22 @@ void title_screen(void)
             {
                 ++SPRX[0];
                 --SPRX[17];
+                // ++color_counter;
                 SPRX[18]-=2;
                 SPRF[18]=GFX_START_INDEX + GIFT + (SPRX[0]%3);
                 
                 init_letters();
-                
                 SPRF[0] = GFX_START_INDEX+BEFANA+((counter/4)&3);                
             }
-            ++counter;     
+            ++counter;
+            if(!(counter&7))
+            {
+                ++color_counter;
+                color(4, YEAR_OFFSET, year_color[(color_counter)&7]);
+                color(15, AUTHOR_OFFSET, author_color[color_counter&1]);
+
+            }
+
             if(distance<=128)
             {
                 ++distance;
@@ -2527,7 +2545,6 @@ int main()
 		clear_stars();
 
 		distance=0;
-        // level_threshold = (INITIAL_LEVEL)*level_distance;
         slow_loop=0;
         fast_loop=0;
         
@@ -2553,12 +2570,16 @@ int main()
 
 
         title_screen();
-        
+        hide_sprites();
+
         distance = 0;
+        
+        clear_screen();
+        clear_stars();
+        init_stars();
         
         init_grass();
 
-        hide_sprites();
 
         draw_the_moon();
         
@@ -2575,8 +2596,8 @@ int main()
 		print("SCORE",5,0,CYAN);
 		
 
-        POKE(SCREEN+DISTANCE_OFFSET+5,0);
-        POKE(SCREEN+DISTANCE_OFFSET+6,0);
+        // POKE(SCREEN+DISTANCE_OFFSET+5,0);
+        // POKE(SCREEN+DISTANCE_OFFSET+6,0);
 		
 		print("LV",2,LEVEL_OFFSET-2,CYAN);
 		display_level();
@@ -2637,9 +2658,10 @@ int main()
         
         befana_x = SPRX[BEFANA_INDEX];
         befana_y = SPRY[BEFANA_INDEX];
+
+
         while(lives && (level<=MAX_LEVEL)) 
         {
-
                 
             // printd(exploded_balloons,3,40,WHITE);
             if (MULTIPLEX_DONE) {
@@ -2721,11 +2743,11 @@ int main()
                 if(!alive)
                 {
                     ++befana_y;
-                    if(befana_y>110)
+                    if(befana_y>90)
                     {
                         ++befana_y;
                     }
-                    if(befana_y>180)
+                    if(befana_y>150)
                     {
                         ++befana_y;
                     }
