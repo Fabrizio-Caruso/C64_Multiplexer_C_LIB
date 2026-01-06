@@ -165,8 +165,8 @@ befana:
 	--asm-define MAXSPR=21 -D_NUMBER_OF_SPRITES_=21 \
 	--asm-define MUSIC_CODE=1 --asm-define MUSIC_SWITCH=1 \
 	--asm-define MULTICOLOR=1 \
-	-DSPRITES_AT_2800 \
-	$(GAMES_PATH)/befana/befana.c \
+	-DSPRITES_AT_2800  \
+	$(GAMES_PATH)/befana/befana.c '-Wca65,-l,-s' -m mapfile.txt \
 	$(BEFANA_UDG_ASM_FILES) \
 	$(SID_PATH)/sid_Xmas.s \
 	-o $(BUILD_PATH)/$@.prg
@@ -175,6 +175,28 @@ befana:
 	rm -rf $(GRAPHICS_PATH)/*.o 
 
 
+# -DBENCHMARK=1
+befana_enh128: 
+	$(CC65_PATH)$(MYCL65) $(MYCCFLAGS) $(MYSIDCFG_ALT) \
+	--asm-define MAXSPR=21 -D_NUMBER_OF_SPRITES_=21 \
+	--asm-define MUSIC_CODE=1 --asm-define MUSIC_SWITCH=1 \
+	--asm-define MULTICOLOR=1 \
+	--asm-define FAST_MODE=1 \
+	-DSPRITES_AT_2800  \
+	$(GAMES_PATH)/befana/befana_enh128.c  \
+	$(BEFANA_UDG_ASM_FILES) \
+	$(SID_PATH)/sid_Xmas.s \
+	-o $(BUILD_PATH)/$@.prg
+	rm -rf $(DEMOS_PATH)/generic_multiplexer/*.o
+	rm -rf $(SOURCE_PATH)/*.o
+	rm -rf $(GRAPHICS_PATH)/*.o 
+
+
+# befana_exomized: befana $(TOOLS_PATH)/generic/exomizer/exomizer$(COMPILEDEXT)
+	# $(TOOLS_PATH)/generic/exomizer/exomizer sfx basic $(BUILD_PATH)/X$(GAME_NAME)_$<.prg -o $(BUILD_PATH)/X$(GAME_NAME)_$@.prg
+
+# befana_crt: befana_exomized
+	# python $(TOOLS_PATH)/cc65/c64/prg2crt.py $(BUILD_PATH)/X$(GAME_NAME)_$<.prg  $(BUILD_PATH)/X$(GAME_NAME)_$@.crt
 
 
 # SID AT $1000, SID_SIZE: $0C00, GFX AT $1C00, GFX_SIZE: $2000
