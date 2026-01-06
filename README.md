@@ -35,3 +35,29 @@ Click here to play <a href="https://nippur72.github.io/c64-emu/?joy=3&load=http:
 The full link is:
 
 https://nippur72.github.io/c64-emu/?joy=3&load=http://github.com/Fabrizio-Caruso/C64_Multiplexer_C_LIB/releases/download/befana2026/befana.prg
+
+
+
+-------------------------------------------
+
+## LICENCE (of all the content of this repository including demos and games).
+
+This software is provided 'as-is', without any express or implied warranty.
+In no event will the authors be held liable for any damages arising from
+the use of this software.
+
+Permission is granted to anyone to use this software for non-commercial applications, 
+subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+claim that you wrote the original software. If you use this software in
+a product, an acknowledgment in the product documentation would be
+appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not
+be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+
+For example I do not authorize selling hardware, software, firmware or any other product that contains any part of Cross-Lib and/or its games (e.g., pre-loaded disks, tapes, cartridges, etc.).
+On the other hand I authorize people to load the games in the most convenient way for their personal use.
